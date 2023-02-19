@@ -1,7 +1,7 @@
 # TODO
 
 ## Getting Started
-[ ] Automate project deployment
+[X] Automate project deployment
 [ ] Physical keyboard definition
 [ ] Detect and log keypress events
 
