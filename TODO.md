@@ -3,7 +3,7 @@
 ## Getting Started
 [X] Automate project deployment
 [X] Physical keyboard definition
-[ ] Detect and log keypress events
+[X] Detect and log keypress events
 
 ## State-Event-Action
 [ ] Create State object
