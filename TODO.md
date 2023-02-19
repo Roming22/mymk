@@ -6,7 +6,7 @@
 [X] Detect and log keypress events
 
 ## State-Event-Action
-[ ] Create State object
+[X] Create State object
 [ ] Create Event object
 [ ] Links Events to State
 [ ] Key press generate an Event
