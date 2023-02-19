@@ -2,7 +2,7 @@
 
 ## Getting Started
 [X] Automate project deployment
-[ ] Physical keyboard definition
+[X] Physical keyboard definition
 [ ] Detect and log keypress events
 
 ## State-Event-Action
