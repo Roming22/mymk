@@ -12,7 +12,7 @@
 [X] Generate an Event on key press
 [X] Event is sent to State to be processed
 [X] Create Action object
-[ ] Link Action to an Event
+[X] Link Action to an Event
 [ ] Link Action to next State
 
 ## Split keyboard
