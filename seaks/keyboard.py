@@ -1,6 +1,8 @@
 from time import sleep
 import keypad
 
+from seaks.event import Event
+
 
 class Keyboard:
     def __init__(self, rows: list, cols: list) -> None:
@@ -11,13 +13,10 @@ class Keyboard:
 
     def get_events(self):
         while True:
-            # print(end=".")
-
-            if event := self._km.events.get():
-                print(
-                    event.timestamp,
-                    "Key",
-                    event.key_number,
-                    f"has been {'pressed' if event.pressed else 'released'}",
+            if base_event := self._km.events.get():
+                event = Event(
+                    base_event.timestamp,
+                    f"key{base_event.key_number}",
+                    base_event.pressed,
                 )
-                sleep(0.01)
+                print(event)

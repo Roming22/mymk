@@ -9,7 +9,7 @@
 [X] Create State object
 [X] Create Event object
 [X] Link Events to State
-[ ] Key press generate an Event
+[X] Generate an Event on key press
 [ ] Event is sent to State to be processed an Event
 [ ] Create Action object
 [ ] Link Action to an Event

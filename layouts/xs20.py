@@ -16,9 +16,7 @@ def main() -> None:
             board.D21,
         ),
     )
-    for event in keyboard.get_events():
-        print("Event: Key ", event[0], f"{'pressed' if event[1] else 'released'}")
-        sleep(2)
+    keyboard.get_events()
 
 
 if __name__ == "__main__":
