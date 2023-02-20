@@ -2,6 +2,7 @@ from time import sleep
 import keypad
 
 from seaks.event import Event
+from seaks.state import StateMachine, State
 
 
 class Keyboard:
@@ -10,13 +11,14 @@ class Keyboard:
             row_pins=rows,
             column_pins=cols,
         )
+        sm = StateMachine("keyboard")
+        sm.add_state(State("default"))
 
     def get_events(self):
         while True:
             if base_event := self._km.events.get():
-                event = Event(
-                    base_event.timestamp,
+                event = Event.notify(
                     f"key{base_event.key_number}",
                     base_event.pressed,
+                    base_event.timestamp,
                 )
-                print(event)
