@@ -11,7 +11,7 @@
 [X] Link Events to State
 [X] Generate an Event on key press
 [X] Event is sent to State to be processed
-[ ] Create Action object
+[X] Create Action object
 [ ] Link Action to an Event
 [ ] Link Action to next State
 
