@@ -18,8 +18,8 @@
 ## Layout definition
 [X] Alpha layer single key chars
 [ ] Alpha layer combo key chars
-[ ] Alpha layer Mod keys
-[ ] Alpha layer Fn keys
+[X] Alpha layer Mod keys
+[X] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
 
 ## LEDs

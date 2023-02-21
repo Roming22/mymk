@@ -29,9 +29,9 @@ class StateMachine:
         StateMachine.machines.append(self)
 
     def new_state(self, state_name) -> State:
-        state = State(state_name)
+        state = State(f"{self.name}/{state_name}")
         # print("StateMachine: Adding state", state.name)
-        self.states[state.name] = state
+        self.states[state_name] = state
         if self._active_state is None:
             self.activate_state(state)
         return state
