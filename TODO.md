@@ -13,7 +13,7 @@
 [X] Event is sent to State to be processed
 [X] Create Action object
 [X] Link Action to an Event
-[ ] Link Action to next State
+[X] Link Action to next State
 
 ## Split keyboard
 [ ] Communication between keyboard halves

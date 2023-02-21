@@ -1,13 +1,20 @@
 class State:
     def __init__(self, name) -> None:
         self.name = name
-        self.events = list()
+        self.triggers = dict()
 
-    def process_event(self, event) -> None:
-        if (event.object, event.value) in self.events:
-            print(f"{self.name} is processing ({(event.object, event.value)})")
+    def add_trigger(self, trigger, action, state):
+        self.triggers[trigger] = (action, state)
+
+    def process_event(self, event) -> State:
+        action, state = self.triggers.get(event.trigger, (None, None))
+        if action:
+            print(f"{self.name} is processing ({event.trigger})")
+            action.run()
+            return state
         else:
-            print(f"{self.name} is ignoring ({(event.object, event.value)})")
+            print(f"{self.name} is ignoring ({event.trigger})")
+            return self
 
 
 class StateMachine:
@@ -19,18 +26,22 @@ class StateMachine:
         self._active_state = None
         StateMachine.machines.append(self)
 
-    def add_state(self, state) -> None:
+    def new_state(self, state_name) -> State:
+        state = State(state_name)
         # print("StateMachine: Adding state", state.name)
         self.states[state.name] = state
         if self._active_state is None:
-            self.active_state(state.name)
+            self.activate_state(state)
+        return state
 
-    def active_state(self, state_name) -> None:
-        # print("StateMachine: Activating state", state_name)
-        self._active_state = self.states[state_name]
+    def activate_state(self, state) -> None:
+        print("# StateMachine: Activating state", state.name)
+        self._active_state = state
 
     def process_event(self, event) -> None:
-        self._active_state.process_event(event)
+        state = self._active_state.process_event(event)
+        if self._active_state != state:
+            self.activate_state(state)
 
     @classmethod
     def register_event(cls, event):
