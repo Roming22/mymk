@@ -1,10 +1,15 @@
 from time import sleep
 import keypad
 
+from adafruit_hid.keyboard import Keyboard as USB_Keyboard
+from adafruit_hid.keycode import Keycode
+import usb_hid
+
 from seaks.action import Action
 from seaks.event import Event
 from seaks.event import Trigger
 from seaks.state import StateMachine, State
+
 
 
 class Keyboard:
@@ -13,17 +18,48 @@ class Keyboard:
             row_pins=rows,
             column_pins=cols,
         )
+        self.kbd = USB_Keyboard(usb_hid.devices)
         sm = StateMachine("keyboard")
-        sm.new_state("default")
-        sm.new_state("key2")
+        sm.new_state("base")
 
-        sm.states["default"].add_trigger(Trigger("key2", True), Action(lambda: Keyboard.do_something),sm.states["key2"])
-        sm.states["key2"].add_trigger(Trigger("key1", True), Action(lambda: Keyboard.do_something),sm.states["default"])
+        oneshot = self.oneshot
+        press = self.press
+        release = self.release
 
-    @staticmethod
-    def do_something():
-        print("Do something")
-        return True
+        keys=[("LEFT_SHIFT", False), ("A", True), ("B", True), ("C", True), ("D", True), ("E", True)]
+        for switch, key_data in enumerate(keys):
+            key, is_oneshot = key_data
+            event_key = f"key{switch}"
+            if is_oneshot:
+                sm.states["base"].add_trigger(Trigger(event_key, True), Action(oneshot(key)))
+            else:
+                sm.states["base"].add_trigger(Trigger(event_key, True), Action(press(key)))
+                sm.states["base"].add_trigger(Trigger(event_key, False), Action(release(key)))
+
+    def oneshot(self, key):
+        kc = getattr(Keycode, key)
+        def func():
+            print(f"Press and release {key}")
+            self.kbd.press(kc)
+            self.kbd.release(kc)
+            return True
+        return func
+
+    def press(self, key):
+        kc = getattr(Keycode, key)
+        def func():
+            print(f"Press {key}")
+            self.kbd.press(kc)
+            return True
+        return func
+
+    def release(self, key):
+        kc = getattr(Keycode, key)
+        def func():
+            print(f"Release {key}")
+            self.kbd.release(kc)
+            return True
+        return func
 
     def get_events(self):
         while True:

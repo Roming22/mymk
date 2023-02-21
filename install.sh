@@ -142,12 +142,16 @@ get_libs() {
         rm -rf "$tmp_dir"
     fi
     lib_list=(
+        "adafruit_hid"
         "neopixel"
     )
     # Copying the libs will trigger an auto-reload
     for lib in "${lib_list[@]}"; do
         echo -n "."
-        ln -sf "$LIB_DIR/$lib.mpy" "$DRIVE_SOURCE/lib/"
+        if [ -e "$LIB_DIR/$lib.mpy" ]; then
+            lib="$lib.mpy"
+        fi
+        ln -sf "$LIB_DIR/$lib" "$DRIVE_SOURCE/lib/"
     done
     echo "OK"
 }

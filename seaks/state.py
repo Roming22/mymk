@@ -3,7 +3,9 @@ class State:
         self.name = name
         self.triggers = dict()
 
-    def add_trigger(self, trigger, action, state):
+    def add_trigger(self, trigger, action, state=None):
+        if state is None:
+            state = self
         self.triggers[trigger] = (action, state)
 
     def process_event(self, event) -> State:
@@ -35,7 +37,7 @@ class StateMachine:
         return state
 
     def activate_state(self, state) -> None:
-        print("# StateMachine: Activating state", state.name)
+        print(f"# [{self.name}] Activating state {state.name}")
         self._active_state = state
 
     def process_event(self, event) -> None:

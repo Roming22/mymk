@@ -15,14 +15,17 @@
 [X] Link Action to an Event
 [X] Link Action to next State
 
-## Split keyboard
-[ ] Communication between keyboard halves
-
-##
-[ ] Alpha layer single key chars
+## Layout definition
+[X] Alpha layer single key chars
 [ ] Alpha layer combo key chars
 [ ] Alpha layer Mod keys
 [ ] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
-[ ] Turn leds on
+
+## LEDs
+[ ] Turn LEDs on
 [ ] Change colors based on active layer
+
+## YAML config
+[ ] Move board configuration to YAML
+[ ] Move keymap configuration to YAML
