@@ -1,14 +1,14 @@
 import time
 
-from seaks.state import StateMachine
-
 
 class Event:
-    def __init__(self, timestamp, object, value) -> None:
+    _queue = []
+
+    def __init__(self, trigger, timestamp) -> None:
         if timestamp is None:
-            timestamp = time.monotonic()
+            timestamp = int(time.monotonic() * 1000)
         self.timestamp = timestamp
-        self.trigger = Trigger(object, value)
+        self.trigger = trigger
 
     def __repr__(self):
         mseconds = self.timestamp % 1000
@@ -19,10 +19,17 @@ class Event:
             f"[{hours:02d}:{minutes:02d}:{seconds:02d}.{mseconds:03d}] {self.trigger}"
         )
 
-    @staticmethod
-    def notify(object, value, timestamp=None):
-        event = Event(timestamp, object, value)
-        StateMachine.register_event(event)
+    @classmethod
+    def register(cls, trigger, timestamp=None):
+        event = Event(trigger, timestamp)
+        cls._queue.append(event)
+
+    @classmethod
+    def get_next(cls):
+        try:
+            return cls._queue.pop(0)
+        except IndexError:
+            return None
 
 
 class Trigger:
@@ -41,4 +48,4 @@ class Trigger:
         return self.__hash
 
     def fire(self):
-        Event.notify(self.object, self.value)
+        Event.register(self)

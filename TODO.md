@@ -14,13 +14,17 @@
 [X] Create Action object
 [X] Link Action to an Event
 [X] Link Action to next State
+[ ] Add Timer
+[ ] Add TapHold support
+[ ] Add combo key for 2 keys
+[ ] Add combo keys for n keys
 
 ## Layout definition
 [X] Alpha layer single key chars
-[ ] Alpha layer combo key chars
 [X] Alpha layer Mod keys
 [X] Alpha layer Fn keys
-[ ] Alpha layer lock Fn
+[X] Alpha layer lock Fn
+[ ] Alpha layer combo key chars
 
 ## LEDs
 [ ] Turn LEDs on

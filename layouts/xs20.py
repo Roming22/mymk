@@ -16,7 +16,7 @@ def main() -> None:
             board.D21,
         ),
     )
-    keyboard.get_events()
+    keyboard.go()
 
 
 if __name__ == "__main__":
