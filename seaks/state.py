@@ -15,8 +15,8 @@ class State:
         if action := self.triggers.get(event.trigger, None):
             print(f"  {self.fullname} is processing the event")
             action.run()
-        else:
-            print(f"  {self.fullname} is ignoring the event")
+        # else:
+        #     print(f"  {self.fullname} is ignoring the event")
 
 
 class StateMachine:

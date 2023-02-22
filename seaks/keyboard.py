@@ -4,6 +4,7 @@ from adafruit_hid.keyboard import Keyboard as USB_Keyboard
 
 from seaks.action import Action
 from seaks.event import Timer, Trigger
+from seaks.fps import FPS
 from seaks.state import StateMachine
 
 
@@ -91,8 +92,8 @@ class Keyboard:
             Action.state(keys, "base"),
         )
 
-        # Timer test
-        Timer(Trigger("timer.helloworld", True), 3)
+        # FPS
+        FPS.start(5)
 
     def get_events(self):
         if event := self._km.events.get():
@@ -100,6 +101,7 @@ class Keyboard:
 
     def go(self):
         while True:
+            FPS.tick()
             self.get_events()
             Timer.tick()
             StateMachine.process_events()
