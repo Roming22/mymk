@@ -3,7 +3,7 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard as USB_Keyboard
 
 from seaks.action import Action
-from seaks.event import Trigger
+from seaks.event import Timer, Trigger
 from seaks.state import StateMachine
 
 
@@ -91,6 +91,9 @@ class Keyboard:
             Action.state(keys, "base"),
         )
 
+        # Timer test
+        Timer(Trigger("timer.helloworld", True), 3)
+
     def get_events(self):
         if event := self._km.events.get():
             Trigger(f"key.{event.key_number}", event.pressed).fire()
@@ -98,4 +101,5 @@ class Keyboard:
     def go(self):
         while True:
             self.get_events()
+            Timer.tick()
             StateMachine.process_events()

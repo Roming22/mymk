@@ -49,3 +49,25 @@ class Trigger:
 
     def fire(self):
         Event.register(self)
+
+
+class Timer:
+    timers = []
+
+    def __init__(self, trigger, seconds) -> None:
+        self.trigger = trigger
+        self.end_time = time.monotonic() + seconds
+        Timer.timers.append(self)
+
+    def is_expired(self):
+        return self.end_time <= time.monotonic()
+
+    @classmethod
+    def tick(cls):
+        timers = []
+        for timer in cls.timers:
+            if timer.is_expired():
+                timer.trigger.fire()
+            else:
+                timers.append(timer)
+        cls.timers = timers

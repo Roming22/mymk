@@ -14,7 +14,7 @@
 [X] Create Action object
 [X] Link Action to an Event
 [X] Link Action to next State
-[ ] Add Timer
+[X] Add Timer
 [ ] Add TapHold support
 [ ] Add combo key for 2 keys
 [ ] Add combo keys for n keys
