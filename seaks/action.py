@@ -1,4 +1,4 @@
-from adafruit_hid.keycode import Keycode
+from seaks.buffer import Buffer
 
 
 class Action:
@@ -10,51 +10,42 @@ class Action:
         self.callback()
 
     @classmethod
-    def noop(cls):
+    def noop(cls) -> "Action":
         def func() -> bool:
             return True
 
         return cls(func)
 
     @classmethod
-    def oneshot(cls, kbd, key) -> "Action":
-        if key is None:
-            return cls.noop()
-
-        kc = getattr(Keycode, key)
-
+    def oneshot(cls, key_name) -> "Action":
         def func():
-            print(f"Press and release {key}")
-            kbd.press(kc)
-            kbd.release(kc)
+            print(f"Press and release {key_name} switch")
+            Buffer.add(key_name, True)
+            Buffer.add(key_name, False)
             return True
 
         return cls(func)
 
     @classmethod
-    def press(cls, kbd, key) -> "Action":
-        if key is None:
+    def press(cls, key_name) -> "Action":
+        if key_name is None:
             return cls.noop()
 
-        kc = getattr(Keycode, key)
-
         def func():
-            print(f"Press {key}")
-            kbd.press(kc)
+            print(f"Press {key_name} switch")
+            Buffer.add(key_name, True)
             return True
 
         return cls(func)
 
     @classmethod
-    def release(cls, kbd, key) -> "Action":
-        if key is None:
+    def release(cls, key_name) -> "Action":
+        if key_name is None:
             return cls.noop()
 
-        kc = getattr(Keycode, key)
-
         def func():
-            print(f"Release {key}")
-            kbd.release(kc)
+            print(f"Release {key_name} switch")
+            Buffer.add(key_name, False)
             return True
 
         return cls(func)

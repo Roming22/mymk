@@ -1,3 +1,4 @@
+from seaks.controller import Ticker
 from seaks.event import Event, Trigger
 
 
@@ -19,16 +20,19 @@ class State:
         #     print(f"  {self.fullname} is ignoring the event")
 
 
-class StateMachine:
-    machines = list()
-
-    def __init__(self, name: str) -> None:
+class StateMachine(Ticker):
+    def __init__(self, name: str, state_names: list[str]) -> None:
         self.name = name
         self.states = dict()
-        self._active_state = State("None", self)
-        StateMachine.machines.append(self)
+        for name in state_names:
+            self.add_state(name)
+        self._active_state = self.states[state_names[0]]
+        self.register()
 
-    def new_state(self, state_name: str) -> State:
+    def __getitem__(self, key):
+        return self.states[key]
+
+    def add_state(self, state_name: str) -> State:
         state = State(f"{state_name}", self)
         # print("StateMachine: Adding state", state.name)
         self.states[state_name] = state
@@ -40,12 +44,5 @@ class StateMachine:
         Trigger(f"{state.fullname}", True).fire()
         self._active_state = state
 
-    @classmethod
-    def process_events(cls) -> None:
-        if event := Event.get_next():
-            print(event)
-            for sm in cls.machines:
-                sm.process_event(event)
-
-    def process_event(self, event) -> None:
-        state = self._active_state.process_event(event)
+    def tick(self, event) -> None:
+        self._active_state.process_event(event)
