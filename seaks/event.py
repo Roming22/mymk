@@ -6,18 +6,17 @@ class Event:
 
     def __init__(self, trigger, timestamp) -> None:
         if timestamp is None:
-            timestamp = int(time.monotonic() * 1000)
+            timestamp = time.monotonic_ns()
         self.timestamp = timestamp
         self.trigger = trigger
 
     def __repr__(self) -> None:
-        mseconds = self.timestamp % 1000
-        seconds = (self.timestamp // 1000) % 60
-        minutes = ((self.timestamp // 1000) // 60) % 60
-        hours = (self.timestamp // 1000) // 3600
-        return (
-            f"[{hours:02d}:{minutes:02d}:{seconds:02d}.{mseconds:03d}] {self.trigger}"
-        )
+        useconds = self.timestamp % 10**9 // 1000
+        seconds = (self.timestamp // 10**9) % 60
+        minutes = ((self.timestamp // 10**9) // 60) % 60
+        hours = (self.timestamp // 10**9) // 3600 % 24
+        days = (self.timestamp // 10**9) // (3600 * 24)
+        return f"[{days:03d} days, {hours:02d}:{minutes:02d}:{seconds:02d}.{useconds:06d}] {self.trigger}"
 
     @classmethod
     def register(cls, trigger, timestamp=None) -> None:
@@ -55,15 +54,15 @@ class Timer:
 
     def __init__(self, trigger, seconds) -> None:
         self.trigger = trigger
-        self.seconds = seconds
+        self.seconds = seconds * 10**9
         Timer.timers.append(self)
         self.reset()
 
     def is_expired(self):
-        return self.end_at <= time.monotonic()
+        return self.end_at <= time.monotonic_ns()
 
     def reset(self):
-        self.end_at = time.monotonic() + self.seconds
+        self.end_at = time.monotonic_ns() + self.seconds
 
     def stop(self):
         Timer.timers.remove(self)

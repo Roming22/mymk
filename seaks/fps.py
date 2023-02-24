@@ -19,11 +19,11 @@ class FPS:
     @classmethod
     def reset(cls):
         cls.counter = 0
-        cls.time = time.monotonic() + cls.refresh_rate
+        cls.time = time.monotonic_ns() + cls.refresh_rate * 10**9
 
     @classmethod
     def tick(cls):
         cls.counter += 1
-        now = time.monotonic()
+        now = time.monotonic_ns()
         if now >= cls.time:
             cls.display()
