@@ -1,7 +1,7 @@
 from seaks.action import Action
 from seaks.controller import Controller
 from seaks.event import Trigger
-from seaks.features import Key, Layer
+from seaks.features import Chord, Key, Layer, Sequence
 from seaks.hardware.board import Board
 
 
@@ -28,6 +28,10 @@ class Keyboard:
             Trigger("switch.4", False),
             Action.state(layers, "0"),
         )
+
+        Chord(["B", "C"], "G")
+        Sequence(["C", "A"], "H")
+        Sequence(["F", "E", "D"], "I")
 
     def go(self):
         while True:

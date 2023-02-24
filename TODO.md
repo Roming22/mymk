@@ -24,7 +24,7 @@
 [ ] Alpha layer Mod keys
 [X] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
-[ ] Alpha layer combo key chars
+[X] Alpha layer combo key chars
 
 ## LEDs
 [ ] Turn LEDs on
