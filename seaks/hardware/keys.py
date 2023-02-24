@@ -9,9 +9,29 @@ def get_keycode_for(key_name: str) -> Keycode:
     return getattr(Keycode, key_name)
 
 
-def press(key_name: str) -> None:
-    _kbd.press(get_keycode_for(key_name))
+def oneshot(key_name: str):
+    kc = get_keycode_for(key_name)
+
+    def func():
+        _kbd.press(kc)
+        _kbd.release(kc)
+
+    return func
 
 
-def release(key_name: str) -> None:
-    _kbd.release(get_keycode_for(key_name))
+def press(key_name: str):
+    kc = get_keycode_for(key_name)
+
+    def func():
+        _kbd.press(kc)
+
+    return func
+
+
+def release(key_name: str):
+    kc = get_keycode_for(key_name)
+
+    def func():
+        _kbd.release(kc)
+
+    return func

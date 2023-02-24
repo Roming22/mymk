@@ -16,14 +16,14 @@
 [X] Link Action to next State
 [X] Add Timer
 [ ] Add TapHold support
-[ ] Add combo key for 2 keys
-[ ] Add combo keys for n keys
+[X] Add combo key for 2 keys
+[X] Add combo keys for n keys
 
 ## Layout definition
 [X] Alpha layer single key chars
-[X] Alpha layer Mod keys
+[ ] Alpha layer Mod keys
 [X] Alpha layer Fn keys
-[X] Alpha layer lock Fn
+[ ] Alpha layer lock Fn
 [ ] Alpha layer combo key chars
 
 ## LEDs
