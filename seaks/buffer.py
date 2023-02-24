@@ -1,37 +1,43 @@
-from seaks.hardware.keys import oneshot, press, release
 
 
 class Buffer:
     _instance: "Buffer" = None
 
+    @classmethod
+    def instanciate(cls):
+        Buffer()
+
     def __init__(self):
+        if Buffer._instance is not None:
+            raise(RuntimeError, "Buffer object cannot be instanciated more than once.")
+        Buffer._instance = self
         self.keystrokes = []
         self.updated = False
 
         self.keys = {
             # Simple key
-            "A": self.clear_after(press("A")),
-            "a": self.clear_after(release("A")),
-            # "B": self.clear_after(press("B")),
-            # "b": self.clear_after(release("B")),
             # Chords
             "_+!": self.clear_after(lambda: True),
-            # Combo
-            "B+b": self.clear_after(oneshot("B")),
-            "@+B+C": oneshot("G"),
-            "C+c": self.clear_after(oneshot("C")),
-            "@+C+B": oneshot("G"),
-            # Sequence
-            "@+C+A": self.clear_after(lambda: True),
-            # Multi
-            "D+d": self.clear_after(oneshot("D")),
-            "E+e": self.clear_after(oneshot("E")),
-            "F+f": self.clear_after(oneshot("F")),
-            "@+F+E+D": oneshot("Z"),
-            # TapHold
-            # "B+!": press("X"),
-            # "@+F+E+!": oneshot("Y"),
+            # # Combo
+            # "B+b": self.clear_after(oneshot("B")),
+            # "@+B+C": oneshot("G"),
+            # "C+c": self.clear_after(oneshot("C")),
+            # "@+C+B": oneshot("G"),
+            # # Sequence
+            # "@+C+A": self.clear_after(lambda: True),
+            # # Multi
+            # "D+d": self.clear_after(oneshot("D")),
+            # "E+e": self.clear_after(oneshot("E")),
+            # "F+f": self.clear_after(oneshot("F")),
+            # "@+F+E+D": oneshot("Z"),
+            # # TapHold
+            # # "B+!": press("X"),
+            # # "@+F+E+!": oneshot("Y"),
         }
+
+    @classmethod
+    def register_event_sequence(cls, sequence, action):
+        cls._instance.keys[sequence] = action
 
     @classmethod
     def add(cls, key_name, value):
@@ -60,10 +66,12 @@ class Buffer:
                     return
         keystrokes.append(key_name)
 
-    def clear_after(self, action):
+    @classmethod
+    def clear_after(cls, action):
+        keystrokes = cls._instance.keystrokes
         def func():
             action()
-            self.keystrokes.clear()
+            keystrokes.clear()
 
         return func
 
@@ -87,4 +95,4 @@ class Buffer:
             cls._instance.updated = False
 
 
-Buffer._instance = Buffer()
+Buffer.instanciate()
