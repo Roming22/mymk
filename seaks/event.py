@@ -50,29 +50,46 @@ class Trigger:
 
 
 class Timer:
-    timers = []
+    timers = dict()
+    running_timers = set()
 
-    def __init__(self, trigger, seconds) -> None:
+    def __init__(self, trigger, seconds, name, start=False) -> None:
+        print("Timer:", trigger, f", {seconds}s,", name)
         self.trigger = trigger
-        self.seconds = seconds * 10**9
-        Timer.timers.append(self)
-        self.reset()
+        self.seconds = seconds
+        self.name = name
+        Timer.timers[name] = self
+        if start:
+            self.start(name)
+
+    @classmethod
+    def start(cls, name):
+        timer = cls.timers[name]
+        cls.running_timers.add(timer.name)
+        timer.reset(name)
+
+    @classmethod
+    def reset(cls, name):
+        timer = cls.timers[name]
+        timer.end_at = time.monotonic_ns() + timer.seconds * 10**9
+
+    @classmethod
+    def stop(cls, name):
+        Timer.running_timers.remove(name)
 
     def is_expired(self):
-        return self.end_at <= time.monotonic_ns()
+        if self.end_at and self.end_at <= time.monotonic_ns():
+            Timer.stop(self.name)
+            return True
+        return False
 
-    def reset(self):
-        self.end_at = time.monotonic_ns() + self.seconds
-
-    def stop(self):
-        Timer.timers.remove(self)
+    @classmethod
+    def get(cls, key):
+        return cls.timers.get(key, None)
 
     @classmethod
     def tick(cls):
-        timers = []
-        for timer in cls.timers:
+        for timer_name in cls.running_timers:
+            timer = Timer.timers[timer_name]
             if timer.is_expired():
                 timer.trigger.fire()
-            else:
-                timers.append(timer)
-        cls.timers = timers

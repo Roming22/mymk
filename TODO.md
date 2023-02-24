@@ -15,7 +15,7 @@
 [X] Link Action to an Event
 [X] Link Action to next State
 [X] Add Timer
-[ ] Add TapHold support
+[X] Add TapHold support
 [X] Add combo key for 2 keys
 [X] Add combo keys for n keys
 
@@ -25,6 +25,10 @@
 [X] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
 [X] Alpha layer combo key chars
+
+## Known Bugs
+[ ] Switching layers while holding a key does not release the key when the key is released
+[ ] Chords do not release
 
 ## LEDs
 [ ] Turn LEDs on

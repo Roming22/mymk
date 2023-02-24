@@ -1,6 +1,6 @@
 from seaks.action import Action
 from seaks.buffer import Buffer
-from seaks.event import Trigger
+from seaks.event import Timer, Trigger
 from seaks.hardware.keys import press, release
 from seaks.state import State
 
@@ -11,8 +11,12 @@ class Key:
         print(f"Key: '{key_name}'")
         layer.add_trigger(Trigger(f"switch.{switch}", True), Action.press(key_name))
         layer.add_trigger(Trigger(f"switch.{switch}", False), Action.release(key_name))
+        layer.add_trigger(
+            Trigger(f"key.hold.{key_name}", True), Action.send_to_buffer("!")
+        )
         for event_sequence, action in [
             (key_name, Buffer.clear_after(press(key_name))),
             (str.lower(key_name), Buffer.clear_after(release(key_name))),
         ]:
             Buffer.register_event_sequence(event_sequence, action)
+        Timer(Trigger(f"key.hold.{key_name}", True), 0.3, f"key.{key_name}")

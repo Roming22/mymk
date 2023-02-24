@@ -1,7 +1,7 @@
 from seaks.action import Action
 from seaks.controller import Controller
 from seaks.event import Trigger
-from seaks.features import Chord, Key, Layer, Sequence
+from seaks.features import Chord, Key, Layer, Sequence, TapHold
 from seaks.hardware.board import Board
 
 
@@ -32,6 +32,7 @@ class Keyboard:
         Chord(["B", "C"], "G")
         Sequence(["C", "A"], "H")
         Sequence(["F", "E", "D"], "I")
+        TapHold("A", "J")
 
     def go(self):
         while True:

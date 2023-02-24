@@ -14,9 +14,6 @@ class Buffer:
 
         self.keys = {
             "_+!": self.clear_after(lambda: True),
-            # # TapHold
-            # # "B+!": press("X"),
-            # # "@+F+E+!": oneshot("Y"),
         }
 
     @classmethod
@@ -50,12 +47,15 @@ class Buffer:
                 if len(keystrokes) <= 1:
                     key_name = str.lower(key_name)
                 else:
-                    index = keystrokes.index(key_name)
-                    keystrokes.remove(key_name)
                     if len(keystrokes) == 1:
                         keystrokes.append("!")
                     print("Buffer:", "+".join(keystrokes))
                     return
+        if key_name == "!":
+            try:
+                keystrokes.remove("!")
+            except ValueError:
+                pass
         keystrokes.append(key_name)
 
     @classmethod
@@ -64,6 +64,7 @@ class Buffer:
 
         def func():
             action()
+            print("Buffer: clearing keystrokes after action")
             keystrokes.clear()
 
         return func
@@ -75,7 +76,15 @@ class Buffer:
         print("Buffer:", content)
         if action := self.keys.get(content, None):
             return (content, action)
+        if not self.has_possible_match():
+            print("Buffer: clear keystrokes")
+            self.keystrokes.clear()
         return (None, None)
+
+    def has_possible_match(self):
+        content = "+".join(self.keystrokes)
+        possible_matches = [k for k in self.keys.keys() if k.startswith(content)]
+        return len(possible_matches) != 0
 
     @classmethod
     def flush(cls):
