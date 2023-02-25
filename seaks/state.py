@@ -39,10 +39,14 @@ class StateMachine(Ticker):
         return state
 
     def activate_state(self, state: State) -> None:
-        print(f"    Activating {state.fullname}")
         Trigger(f"{self._active_state.fullname}", False).fire()
-        Trigger(f"{state.fullname}", True).fire()
         self._active_state = state
+        self.start()
+
+    def start(self):
+        state = self._active_state
+        print(f"    Activating {state.fullname}")
+        Trigger(f"{state.fullname}", True).fire()
 
     def tick(self, event) -> None:
         self._active_state.process_event(event)

@@ -1,5 +1,6 @@
 from seaks.buffer import Buffer
 from seaks.event import Timer
+from seaks.hardware.keys import oneshot, press, release
 
 
 class Action:
@@ -18,11 +19,19 @@ class Action:
         return cls(func)
 
     @classmethod
+    def chain(cls, *actions: list["Action"]):
+        def func() -> bool:
+            for action in actions:
+                action.run()
+            return True
+
+        return cls(func)
+
+    @classmethod
     def oneshot(cls, key_name) -> "Action":
         def func():
             print(f"Press and release {key_name} switch")
-            Buffer.add(key_name)
-            Buffer.add(str.lower(key_name))
+            oneshot(key_name)()
             return True
 
         return cls(func)
@@ -34,29 +43,16 @@ class Action:
 
         def func():
             print(f"Press {key_name} switch")
-            Buffer.add(key_name)
-            Timer.start(f"key.{key_name}")
+            press(key_name)()
             return True
 
         return cls(func)
 
     @classmethod
     def release(cls, key_name) -> "Action":
-        if key_name is None:
-            return cls.noop()
-
         def func():
             print(f"Release {key_name} switch")
-            Buffer.add(str.lower(key_name))
-            return True
-
-        return cls(func)
-
-    @classmethod
-    def send_to_buffer(cls, command: str) -> "Action":
-        def func():
-            print(f"Send '{command}' to buffer")
-            Buffer.add(command)
+            release(key_name)()
             return True
 
         return cls(func)

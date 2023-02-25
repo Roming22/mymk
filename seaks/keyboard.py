@@ -30,10 +30,12 @@ class Keyboard:
             Action.state(layers, "0"),
         )
 
-        Chord(["B", "C"], "G")
-        Sequence(["C", "A"], "H")
-        Sequence(["F", "E", "D"], "I")
-        TapHold("A", "J")
+        # Chord(["B", "C"], "G")
+        # Sequence(["C", "A"], "H")
+        # Sequence(["F", "E", "D"], "I")
+        # TapHold("A", "J")
+
+        layers.start()
 
     def go(self, fps=False):
         print("\n\n\n")

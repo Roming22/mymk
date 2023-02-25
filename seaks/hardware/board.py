@@ -15,4 +15,3 @@ class Board(Ticker):
     def tick(self):
         if event := self._keymatrix.events.get():
             Trigger(f"switch.{event.key_number}", event.pressed).fire()
-            Trigger(f"switch.any", event.pressed).fire()
