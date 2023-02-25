@@ -14,7 +14,7 @@ class State:
 
     def process_event(self, event: Event) -> None:
         if action := self.triggers.get(event.trigger, None):
-            print(f"  {self.fullname} is processing the event")
+            print(f"    {self.fullname} is processing the event")
             action.run()
         # else:
         #     print(f"  {self.fullname} is ignoring the event")

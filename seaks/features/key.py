@@ -12,7 +12,8 @@ class Key:
         layer.add_trigger(Trigger(f"switch.{switch}", True), Action.press(key_name))
         layer.add_trigger(Trigger(f"switch.{switch}", False), Action.release(key_name))
         layer.add_trigger(
-            Trigger(f"key.hold.{key_name}", True), Action.send_to_buffer("!")
+            Trigger(f"key.hold.{key_name}", True),
+            Action.send_to_buffer(f"*{key_name}*"),
         )
         for event_sequence, action in [
             (key_name, Buffer.clear_after(press(key_name))),

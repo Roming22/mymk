@@ -20,7 +20,7 @@ def permutations(items: list, n=None):
 class Sequence:
     def __init__(self, keys: list[str], key_name: str) -> None:
         key_name = str.upper(key_name)
-        print("Sequence:", keys)
+        print(f"Sequence: {keys} = ", end="")
         # Single key
         first_key_name = keys[0]
         Buffer.unregister_event_sequence(first_key_name)
@@ -29,8 +29,11 @@ class Sequence:
             Buffer.clear_after(oneshot(first_key_name)),
         )
         # Combo
-        Buffer.register_event_sequence("@+" + "+".join(keys), press(key_name))
-        Buffer.register_event_sequence("_+" + "+".join(keys[:-1]), release(key_name))
+        command_press = "@+" + "+".join(keys)
+        command_release = "_+" + "+".join(keys[:-1])
+        Buffer.register_event_sequence(command_press, press(key_name))
+        Buffer.register_event_sequence(command_release, release(key_name))
+        print(f"{[command_press, command_release]}")
 
 
 class Chord:

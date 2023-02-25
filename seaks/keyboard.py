@@ -2,6 +2,7 @@ from seaks.action import Action
 from seaks.controller import Controller
 from seaks.event import Trigger
 from seaks.features import Chord, Key, Layer, Sequence, TapHold
+from seaks.fps import FPS
 from seaks.hardware.board import Board
 
 
@@ -34,6 +35,12 @@ class Keyboard:
         Sequence(["F", "E", "D"], "I")
         TapHold("A", "J")
 
-    def go(self):
+    def go(self, fps=False):
+        print("\n\n\n")
+        fps = True
+        if fps:
+            FPS.start(30)
         while True:
+            if fps:
+                FPS.tick()
             Controller.run()

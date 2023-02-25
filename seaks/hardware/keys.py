@@ -19,6 +19,11 @@ def oneshot(key_name: str):
     return func
 
 
+def panic():
+    print("!!! PANIC !!!")
+    _kbd.send(Keycode.SPACE)
+
+
 def press(key_name: str):
     kc = get_keycode_for(key_name)
 

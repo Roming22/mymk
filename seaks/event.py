@@ -64,6 +64,7 @@ class Timer:
 
     @classmethod
     def start(cls, name):
+        print(f"    Timer: {name} starting")
         timer = cls.timers[name]
         cls.running_timers.add(timer.name)
         timer.reset(name)
@@ -89,6 +90,7 @@ class Timer:
 
     @classmethod
     def tick(cls):
+        # print("Timers ticking")
         for timer_name in cls.running_timers:
             timer = Timer.timers[timer_name]
             if timer.is_expired():

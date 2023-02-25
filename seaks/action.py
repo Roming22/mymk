@@ -21,8 +21,8 @@ class Action:
     def oneshot(cls, key_name) -> "Action":
         def func():
             print(f"Press and release {key_name} switch")
-            Buffer.add(key_name, True)
-            Buffer.add(key_name, False)
+            Buffer.add(key_name)
+            Buffer.add(str.lower(key_name))
             return True
 
         return cls(func)
@@ -34,7 +34,7 @@ class Action:
 
         def func():
             print(f"Press {key_name} switch")
-            Buffer.add(key_name, True)
+            Buffer.add(key_name)
             Timer.start(f"key.{key_name}")
             return True
 
@@ -47,16 +47,16 @@ class Action:
 
         def func():
             print(f"Release {key_name} switch")
-            Buffer.add(key_name, False)
+            Buffer.add(str.lower(key_name))
             return True
 
         return cls(func)
 
     @classmethod
-    def send_to_buffer(cls, key: str) -> "Action":
+    def send_to_buffer(cls, command: str) -> "Action":
         def func():
-            print(f"Send '{key}' to buffer")
-            Buffer.add(key, True)
+            print(f"Send '{command}' to buffer")
+            Buffer.add(command)
             return True
 
         return cls(func)

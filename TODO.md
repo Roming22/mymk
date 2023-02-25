@@ -26,7 +26,16 @@
 [ ] Alpha layer lock Fn
 [X] Alpha layer combo key chars
 
-## Known Bugs
+## Tests
+[ ] Layer0 keys
+[ ] Layer0 TapHold
+[ ] Layer0 Chord
+    [ ] Chord activates
+    [ ] Tap key repeats when first key is held
+[ ] Layer0 Sequence
+[ ] Layer1 keys
+
+## Known bugs
 [ ] Switching layers while holding a key does not release the key when the key is released
 [ ] Chords do not release
 

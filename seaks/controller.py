@@ -1,6 +1,5 @@
 from seaks.buffer import Buffer
 from seaks.event import Event, Timer
-from seaks.fps import FPS
 
 
 class Controller:
@@ -18,17 +17,14 @@ class Controller:
 
     @classmethod
     def run(cls):
-        FPS.start(5)
-        while True:
-            events = Event.get_queue()
-            FPS.tick()
-            cls.board.tick()
-            Timer.tick()
-            for event in events:
-                print(event)
-                for ticker in cls.tickers:
-                    ticker.tick(event)
-            Buffer.flush()
+        events = Event.get_queue()
+        cls.board.tick()
+        Timer.tick()
+        for event in events:
+            print(event)
+            for ticker in cls.tickers:
+                ticker.tick(event)
+        Buffer.flush()
 
 
 class Ticker:

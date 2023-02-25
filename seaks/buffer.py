@@ -1,3 +1,6 @@
+from seaks.hardware.keys import panic
+
+
 class Buffer:
     _instance: "Buffer" = None
 
@@ -9,7 +12,7 @@ class Buffer:
         if Buffer._instance is not None:
             raise RuntimeError("Buffer object cannot be instanciated more than once.")
         Buffer._instance = self
-        self.keystrokes = []
+        self.commands = []
         self.updated = False
 
         self.keys = {
@@ -29,62 +32,98 @@ class Buffer:
             pass
 
     @classmethod
-    def add(cls, key_name, value):
-        cls._instance.updated = True
-        keystrokes = cls._instance.keystrokes
-        length = len(keystrokes)
-        if value:
-            if length == 1:
-                keystrokes.insert(0, "@")
-            elif length > 1 and keystrokes[0] != "@":
-                keystrokes[0] = "@"
-        if not value and length > 0 and keystrokes[0] == "@":
-            keystrokes[0] = "_"
-        if not value:
-            if not keystrokes:
-                key_name = str.lower(key_name)
-            elif key_name in keystrokes:
-                if len(keystrokes) <= 1:
-                    key_name = str.lower(key_name)
-                else:
-                    if len(keystrokes) == 1:
-                        keystrokes.append("!")
-                    print("Buffer:", "+".join(keystrokes))
-                    return
-        if key_name == "!":
-            try:
-                keystrokes.remove("!")
-            except ValueError:
-                pass
-        keystrokes.append(key_name)
+    def add(cls, command):
+        commands = cls._instance.commands
+        commands_count = len(commands)
+
+        if str.isalpha(command):
+            if command == str.upper(command):
+                cls.add_key_press(command)
+            else:
+                cls.add_key_release(command)
+        if command.startswith("*"):
+            cls.add_timeout(command)
+        cls._instance.updated = len(commands) != commands_count
+        print(f"Buffer: {cls._instance}")
+
+    @classmethod
+    def add_key_press(cls, key_name: str) -> None:
+        print(f"    Buffer: Pressing '{key_name}'")
+        commands = cls._instance.commands
+        cmd_count = len(commands)
+        if len(commands) == 1:
+            commands.insert(0, "@")
+        elif cmd_count > 1 and commands[0] != "@":
+            commands[0] = "@"
+        commands.append(key_name)
+
+    @classmethod
+    def add_key_release(cls, command: str) -> None:
+        print(f"    Buffer: Releasing '{str.upper(command)}'")
+        commands = cls._instance.commands
+        cmd_count = len(commands)
+        if cmd_count == 0:
+            commands.append(command)
+            return
+
+        if str.upper(command) not in commands:
+            # Panic?
+            panic()
+            return
+
+        if commands[0] == "@":
+            commands[0] = "_"
+        commands.append(command)
+
+    @classmethod
+    def add_timeout(cls, command: str) -> None:
+        buffer = cls._instance
+        key = command[1]
+        commands = buffer.commands
+        if len(commands) > 0 and commands[-1] == key:
+            commands.append(command)
+            if buffer.has_possible_match():
+                print(f"    Buffer: Adding timeout")
+            else:
+                # Ignore timeout if does not concern the latest key pressed
+                commands = commands[:-1]
+        # else:
+        #     print(f"    Buffer: Ignore timeout for {key}")
+        #     print(f"        key: {key}, commands: {commands}")
 
     @classmethod
     def clear_after(cls, action):
-        keystrokes = cls._instance.keystrokes
+        commands = cls._instance.commands
 
         def func():
             action()
-            print("Buffer: clearing keystrokes after action")
-            keystrokes.clear()
+            print("    Buffer: clearing commands after action")
+            Buffer.clear_commands()
 
         return func
 
+    def __repr__(self) -> str:
+        return "+".join(self.commands)
+
     def match_to_key(self):
-        if not self.keystrokes:
+        if not self.commands:
             return (None, None)
-        content = "+".join(self.keystrokes)
-        print("Buffer:", content)
+        content = f"{self}"
         if action := self.keys.get(content, None):
             return (content, action)
         if not self.has_possible_match():
-            print("Buffer: clear keystrokes")
-            self.keystrokes.clear()
+            Buffer.clear_commands()
         return (None, None)
 
     def has_possible_match(self):
-        content = "+".join(self.keystrokes)
+        content = f"{self}"
         possible_matches = [k for k in self.keys.keys() if k.startswith(content)]
         return len(possible_matches) != 0
+
+    @classmethod
+    def clear_commands(cls):
+        print("    Buffer: clear commands\n\n\n")
+        cls._instance.commands.clear()
 
     @classmethod
     def flush(cls):
@@ -92,7 +131,7 @@ class Buffer:
         if buffer.updated:
             key, action = buffer.match_to_key()
             if key:
-                print("Match found: ", key)
+                print("    Match found: ", key)
                 action()
             cls._instance.updated = False
 

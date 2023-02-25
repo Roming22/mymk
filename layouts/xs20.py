@@ -5,6 +5,8 @@ from seaks.keyboard import Keyboard
 
 
 def main() -> None:
+    print("\n"*8)
+    print("#"*120)
     keyboard = Keyboard(
         rows=(board.D5, board.D6, board.D7, board.D9),
         cols=(
