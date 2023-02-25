@@ -14,11 +14,11 @@ class Keyboard:
 
         # Layer0
         for switch, key_name in enumerate(["A", "B", "C"]):
-            Key(switch + 1, key_name, layers["0"])
+            Key(("0", switch + 1), key_name)
 
         # Layer1
         for switch, key_name in enumerate(["D", "E", "F"]):
-            Key(switch + 1, key_name, layers["1"])
+            Key(("1", switch + 1), key_name)
 
         # Layer0/Layer1 transitions
         layers["0"].add_trigger(
@@ -30,10 +30,12 @@ class Keyboard:
             Action.state(layers, "0"),
         )
 
-        # Chord(["B", "C"], "G")
+        Chord(["B", "C"], "G")
         # Sequence(["C", "A"], "H")
         # Sequence(["F", "E", "D"], "I")
-        # TapHold("A", "J")
+
+        # Just for fun, let's allow the user to chain HOLD action together
+        TapHold(("0", 1), ["A", "J", "K"], 0.5)
 
         layers.start()
 
@@ -41,7 +43,7 @@ class Keyboard:
         print("\n\n\n")
         fps = True
         if fps:
-            FPS.start(30)
+            FPS.start(60)
         while True:
             if fps:
                 FPS.tick()

@@ -16,8 +16,8 @@
 [X] Link Action to next State
 [X] Add Timer
 [X] Add TapHold support
-[X] Add combo key for 2 keys
-[X] Add combo keys for n keys
+[ ] Add combo key for 2 keys
+[ ] Add combo keys for n keys
 
 ## Layout definition
 [X] Alpha layer single key chars

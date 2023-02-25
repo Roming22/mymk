@@ -11,9 +11,14 @@ class Controller:
         cls.board = board
 
     @classmethod
-    def register(cls, tickers: "Ticker") -> None:
+    def register(cls, ticker: "Ticker") -> None:
         print("Adding a Ticker")
-        cls.tickers.append(tickers)
+        cls.tickers.append(ticker)
+
+    @classmethod
+    def unregister(cls, ticker: "Ticker") -> None:
+        print("Removing a Ticker")
+        cls.tickers.remove(ticker)
 
     @classmethod
     def run(cls):
@@ -34,6 +39,9 @@ class Ticker:
 
     def register(self):
         Controller.register(self)
+
+    def unregister(self):
+        Controller.unregister(self)
 
     def tick(self, _: Event):
         pass
