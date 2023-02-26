@@ -1,5 +1,5 @@
 from seaks.hardware.keys import oneshot, press, release
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 
 
 def permutations(items: list, n=None):
@@ -18,7 +18,7 @@ def permutations(items: list, n=None):
 
 
 class Sequence:
-    @memory_cost("Sequence")
+    @check_memory("Sequence")
     def __init__(self, keys: list[str], key_name: str) -> None:
         key_name = str.upper(key_name)
         print(f"Sequence: {keys} = ", end="")
@@ -38,7 +38,7 @@ class Sequence:
 
 
 class Chord:
-    @memory_cost("Chord")
+    @check_memory("Chord")
     def __init__(self, keys: list[str], key_name: str) -> None:
         keys = [str.upper(k) for k in keys]
         key_name = str.upper(key_name)

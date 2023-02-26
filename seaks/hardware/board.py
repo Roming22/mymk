@@ -3,7 +3,7 @@ from collections import namedtuple
 import keypad
 
 from seaks.hardware.switch import instanciate_matrix
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 
 Board = namedtuple("Board", ["_keymatrix", "get_switch_id", "switches"])
 

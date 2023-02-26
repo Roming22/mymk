@@ -1,6 +1,6 @@
 import time
 
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 from seaks.utils.time import pretty_print
 
 
@@ -9,16 +9,16 @@ class Event:
 
     instances: dict[int, "Event"] = {}
 
-    @memory_cost("Event")
-    def __init__(self, subject: str, value: "Any", hash: int) -> None:
-        if hash in Event.instances.keys():
+    @check_memory("Event")
+    def __init__(self, subject: str, value: "Any", uid: int) -> None:
+        if id in Event.instances.keys():
             raise RuntimeError(
                 "You cannot instanciate the same object twice. Use get() instead."
             )
         self.subject = subject
         self.value = value
-        self.uid = hash
-        Event.instances[hash] = self
+        self.uid = uid
+        Event.instances[uid] = self
 
     def __eq__(self, __o: object) -> bool:
         return self.__hash__() == __o.__hash__()
@@ -34,7 +34,7 @@ class Event:
 
     @classmethod
     def get(cls, subject: str, value: "Any") -> "Event":
-        uid = hash(f"{subject}: {value}")
+        uid = cls.hash(f"{subject}: {value}")
         try:
             return cls.instances[uid]
         except KeyError:
@@ -51,13 +51,19 @@ class Event:
         except IndexError:
             pass
 
+    @staticmethod
+    def hash(string: str) -> int:
+        bits = "".join([f"{bin(ord(c))}"[2:] for c in string])
+        value = int(bits, 2) % 10**9
+        return value
+
 
 class Timer:
     instances: dict[str, "Timer"] = {}
 
     running = set()
 
-    @memory_cost("Timer")
+    @check_memory("Timer")
     def __init__(self, event: Event, seconds: float, name: str) -> None:
         if name in Timer.instances.keys():
             raise RuntimeError(
@@ -76,18 +82,18 @@ class Timer:
     @classmethod
     def start(cls, name):
         print(f"    Timer: {name} starting")
-        timer = cls.timers[name]
-        cls.running_timers.add(timer.name)
+        timer = cls.instances[name]
+        cls.running.add(timer.name)
         timer.reset(name)
 
     @classmethod
     def reset(cls, name):
-        timer = cls.timers[name]
+        timer = cls.instances[name]
         timer.end_at = time.monotonic_ns() + timer.seconds * 10**9
 
     @classmethod
     def stop(cls, name):
-        Timer.running_timers.remove(name)
+        Timer.running.remove(name)
 
     def is_expired(self):
         if self.end_at and self.end_at <= time.monotonic_ns():

@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from seaks.hardware.board import Board as HardwareBoard
 from seaks.logic.state import StateMachine
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 
 Switch = namedtuple("Switch", ["name", "switch_id", "status", "key"])
 
@@ -13,7 +13,7 @@ def create(name: str, switch_id: str) -> Switch:
     return Switch(name, switch_id, status, key)
 
 
-@memory_cost("vSwitchMatrix")
+@check_memory("vSwitchMatrix")
 def instanciate_matrix(name: str, board: HardwareBoard) -> list["Switch"]:
     switches: list["Switch"] = []
     for switch in board.switches:

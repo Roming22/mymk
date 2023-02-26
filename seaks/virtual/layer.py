@@ -4,7 +4,7 @@ from seaks.hardware.board import Board
 from seaks.logic.action import Action
 from seaks.logic.event import Event
 from seaks.logic.state import State
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 from seaks.virtual.switch import instanciate_matrix as instanciate_switch_matrix
 
 Layer = namedtuple("Layer", ["name", "state", "switches"])
@@ -12,7 +12,7 @@ Layer = namedtuple("Layer", ["name", "state", "switches"])
 instances: dict[str, Layer] = {}
 
 
-@memory_cost("vLayer")
+@check_memory("vLayer")
 def create(hardware_board: Board, name, state: State) -> Layer:
     if name in instances.keys():
         raise KeyError(f"A layer with the name '{name}' already exists.")
@@ -21,10 +21,10 @@ def create(hardware_board: Board, name, state: State) -> Layer:
     for switch in switches:
 
         def wrap_event(switch_name, value):
-            event = Event.get(switch_name, value)
+            Event.get(switch_name, value)
 
             def func():
-                event.fire()
+                Event.get(switch_name, value).fire()
                 return True
 
             return Action(func)

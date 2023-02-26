@@ -49,7 +49,7 @@ class Keyboard:
         # Chord(["A", "B", "C"], "J")
 
         # Just for fun, let's allow the user to chain HOLD action together
-        # TapHold(("0", 1), ["A", "K", "L"], 0.5)
+        TapHold(("board.alpha1", "01"), ["A", "K", "L"], 0.5)
 
         print("\n\nMemory used: ", memory.get_usage() - mem_used, "\n\n")
 

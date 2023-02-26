@@ -1,11 +1,11 @@
 from seaks.logic.action import Action
 from seaks.logic.controller import Ticker
 from seaks.logic.event import Event
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 
 
 class State:
-    @memory_cost("State")
+    @check_memory("State")
     def __init__(self, name: str, machine: "StateMachine") -> None:
         self.name = name
         self.machine = machine
@@ -30,14 +30,16 @@ class State:
 
 class StateMachine(Ticker):
     machines: dict[str, "StateMachine"] = dict()
+    count = 0
 
-    @memory_cost("StateMachine")
+    @check_memory("StateMachine")
     def __init__(
         self,
         name: str,
         state_names: list[str],
     ) -> None:
-        print(f"StateMachine {name}: {state_names}")
+        StateMachine.count += 1
+        print(f"[{StateMachine.count}] StateMachine {name}: {state_names}")
         StateMachine.machines[name] = self
         self.name = name
         self.states: dict[str, State] = dict()

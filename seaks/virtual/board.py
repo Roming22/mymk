@@ -4,7 +4,7 @@ from seaks.hardware.board import Board as HardwareBoard
 from seaks.logic.controller import Controller, Ticker
 from seaks.logic.event import Event
 from seaks.logic.state import StateMachine
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 from seaks.virtual.layer import create as create_layer
 
 Board = namedtuple(
@@ -15,7 +15,7 @@ Board = namedtuple(
 instances: dict[str, Board] = {}
 
 
-@memory_cost("vBoard")
+@check_memory("vBoard")
 def create(hardware_board: HardwareBoard, name: str, layer_names: list[str]) -> Board:
     if name in instances.keys():
         raise KeyError(f"A layer with the name '{name}' already exists.")

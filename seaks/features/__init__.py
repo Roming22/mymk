@@ -1,3 +1,4 @@
 from seaks.features.combo import Chord, Sequence
-from seaks.features.key import Key
-from seaks.features.taphold import TapHold
+from seaks.features.key import create as Key
+from seaks.features.key import get as get_key
+from seaks.features.taphold import create as TapHold

@@ -1,10 +1,10 @@
 from seaks.hardware.keys import oneshot, press, release
 from seaks.logic.event import Event
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import check_memory
 
 
 class Action:
-    @memory_cost("Action")
+    @check_memory("Action")
     def __init__(self, callback) -> None:
         self.callback = callback
 
@@ -67,11 +67,11 @@ class Action:
         return Action(func)
 
     @classmethod
-    def trigger(cls, object: str, value: "Any"):
-        event = Event.get(object, value)
+    def trigger(cls, subject: str, value: "Any"):
+        Event.get(subject, value)
 
         def func():
-            event.fire()
+            Event.get(subject, value).fire()
             return True
 
         return Action(func)
