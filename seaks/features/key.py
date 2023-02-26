@@ -2,6 +2,7 @@ from seaks.hardware.board import Board
 from seaks.logic.action import Action
 from seaks.logic.event import Timer, Trigger
 from seaks.logic.state import StateMachine
+from seaks.utils.memory import memory_cost
 
 # Aliases to improve code readability
 chain = Action.chain
@@ -22,6 +23,7 @@ def start_delay(timer_name: str) -> Action:
 class Key:
     definitions = {}
 
+    @memory_cost("Key")
     def __init__(self, input: tuple[str, str], key_name: str) -> None:
         layer_name, switch_id = input
         Key.definitions[layer_name] = Key.definitions.get(layer_name, {})

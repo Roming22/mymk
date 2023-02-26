@@ -1,9 +1,11 @@
 import keypad
 
 from seaks.hardware.switch import Switch
+from seaks.utils.memory import memory_cost
 
 
 class Board:
+    @memory_cost("Board")
     def __init__(self, row_pins: list, col_pins: list) -> None:
         self._keymatrix = keypad.KeyMatrix(
             row_pins=row_pins,

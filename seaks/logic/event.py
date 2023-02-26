@@ -1,9 +1,12 @@
 import time
 
+from seaks.utils.memory import memory_cost
+
 
 class Event:
     _queue = []
 
+    @memory_cost("Event")
     def __init__(self, trigger, timestamp) -> None:
         if timestamp is None:
             timestamp = time.monotonic_ns()
@@ -31,6 +34,7 @@ class Event:
 
 
 class Trigger:
+    @memory_cost("Trigger")
     def __init__(self, object, value) -> None:
         self.object = object
         self.value = value
@@ -53,6 +57,7 @@ class Timer:
     timers = dict()
     running_timers = set()
 
+    @memory_cost("Timer")
     def __init__(self, trigger, seconds, name, start=False) -> None:
         print("Timer:", trigger, f", {seconds}s,", name)
         self.trigger = trigger

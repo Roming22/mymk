@@ -1,8 +1,10 @@
 from seaks.hardware.keys import oneshot, press, release
 from seaks.logic.event import Trigger
+from seaks.utils.memory import memory_cost
 
 
 class Action:
+    @memory_cost("Action")
     def __init__(self, callback) -> None:
         self.callback = callback
 

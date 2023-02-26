@@ -5,9 +5,13 @@ from seaks.logic.state import State
 from seaks.virtual.switch import Switch
 
 
+from seaks.utils.memory import memory_cost
+
+
 class Layer:
     instances: dict[str, "Layer"] = {}
 
+    @memory_cost("vLayer")
     def __init__(self, physical_board: Board, name, state: State) -> None:
         if name in Layer.instances.keys():
             raise KeyError(f"A layer with the name '{name}' already exists.")

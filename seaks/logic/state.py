@@ -2,8 +2,11 @@ from seaks.logic.action import Action
 from seaks.logic.controller import Ticker
 from seaks.logic.event import Event, Trigger
 
+from seaks.utils.memory import memory_cost
+
 
 class State:
+    @memory_cost("State")
     def __init__(self, name: str, machine: "StateMachine") -> None:
         self.name = name
         self.machine = machine
@@ -29,6 +32,7 @@ class State:
 class StateMachine(Ticker):
     machines: dict[str, "StateMachine"] = dict()
 
+    @memory_cost("StateMachine")
     def __init__(
         self,
         name: str,

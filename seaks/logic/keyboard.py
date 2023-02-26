@@ -5,12 +5,18 @@ from seaks.logic.controller import Controller
 from seaks.logic.event import Trigger
 from seaks.logic.fps import FPS
 from seaks.virtual.board import Board
+import seaks.utils.memory as memory
+from seaks.utils.memory import memory_cost
 
 
 class Keyboard:
+    @memory_cost("Keyboard")
     def __init__(self, row_pins: list, col_pins: list) -> None:
-        physical_board = PhysicalBoard(row_pins[0:1], col_pins)
+        print("\n\nMemory: ", memory.get_free())
+        physical_board = PhysicalBoard(row_pins, col_pins)
+        print("\n\nMemory: ", memory.get_free())
         board = Board(physical_board, "board", ["alpha1", "alpha2"])
+        print("\n\nMemory: ", memory.get_free())
         self.board = board
 
         # Layer0/Layer1 transitions
@@ -30,14 +36,17 @@ class Keyboard:
                 Trigger("board.alpha2", True),
             ),
         )
+        print("\n\nMemory: ", memory.get_free())
 
         # Alpha1
         for switch, key_name in enumerate(["A", "B", "C"]):
             Key(("board.alpha1", physical_board.get_switch_id(switch + 1)), key_name)
+        print("\n\nMemory: ", memory.get_free())
 
         # Alpha2
         for switch, key_name in enumerate(["D", "E", "F"]):
             Key(("board.alpha2", physical_board.get_switch_id(switch + 1)), key_name)
+        print("\n\nMemory: ", memory.get_free())
 
         # Sequence(["C", "A"], "G")
         # Sequence(["F", "E", "D"], "H")

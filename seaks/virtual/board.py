@@ -4,10 +4,17 @@ from seaks.logic.event import Event, Trigger
 from seaks.logic.state import StateMachine
 from seaks.virtual.layer import Layer
 
+from seaks.utils.memory import memory_cost
+
+from collections import namedtuple
+
+LightBoard = namedtuple("LightBoard", "name phy_board machine layers default_layers")
+
 
 class Board(Ticker):
     instances: dict[str, "Board"] = {}
 
+    @memory_cost("vBoard")
     def __init__(
         self, physical_board: PhysicalBoard, name: str, layer_names: list[str]
     ) -> None:

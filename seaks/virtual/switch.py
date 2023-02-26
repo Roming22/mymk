@@ -2,8 +2,11 @@ from seaks.hardware.board import Board as PhysicalBoard
 from seaks.hardware.switch import Switch as PhysicalSwitch
 from seaks.logic.state import StateMachine
 
+from seaks.utils.memory import memory_cost
+
 
 class Switch:
+    @memory_cost("vSwitch")
     def __init__(self, name: str, switch_id: str) -> None:
         self.name = name
         self.switch_id = switch_id

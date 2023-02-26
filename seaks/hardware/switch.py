@@ -1,6 +1,10 @@
+from seaks.utils.memory import memory_cost
+
+
 class Switch:
     matrix: dict[str, list["Switch"]] = {}
 
+    @memory_cost("Switch")
     def __init__(self, name: str, id: str) -> None:
         self.name = f"switch.{id}"
         self.id = id

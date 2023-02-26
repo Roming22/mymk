@@ -8,9 +8,11 @@ from seaks.features.key import (
     start_delay,
 )
 from seaks.logic.event import Timer, Trigger
+from seaks.utils.memory import memory_cost
 
 
 class TapHold:
+    @memory_cost("TapHold")
     def __init__(
         self, input: tuple[str, int], key_names: list[str], delay: float = 0.3
     ) -> None:
