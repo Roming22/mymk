@@ -1,17 +1,18 @@
 import keypad
 
-from seaks.controller import Controller, Ticker
-from seaks.event import Trigger
+from seaks.hardware.switch import Switch
 
 
-class Board(Ticker):
-    def __init__(self, rows: list, cols: list) -> None:
+class Board:
+    def __init__(self, row_pins: list, col_pins: list) -> None:
         self._keymatrix = keypad.KeyMatrix(
-            row_pins=rows,
-            column_pins=cols,
+            row_pins=row_pins,
+            column_pins=col_pins,
         )
-        Controller.set_board(self)
+        self.switch_id_width = len(f"{len(row_pins) * len(col_pins)}")
+        self.switches = Switch.instanciate_matrix(
+            "board", len(row_pins), len(col_pins), self.get_switch_id
+        )
 
-    def tick(self):
-        if event := self._keymatrix.events.get():
-            Trigger(f"switch.{event.key_number}", event.pressed).fire()
+    def get_switch_id(self, id: int) -> str:
+        return "{id:0{width}d}".format(id=id, width=self.switch_id_width)

@@ -1,6 +1,5 @@
-from seaks.buffer import Buffer
-from seaks.event import Timer
 from seaks.hardware.keys import oneshot, press, release
+from seaks.logic.event import Trigger
 
 
 class Action:
@@ -19,7 +18,7 @@ class Action:
         return cls(func)
 
     @classmethod
-    def chain(cls, *actions: list["Action"]):
+    def chain(cls, *actions: "Action") -> "Action":
         def func() -> bool:
             for action in actions:
                 action.run()
@@ -28,7 +27,7 @@ class Action:
         return cls(func)
 
     @classmethod
-    def oneshot(cls, key_name) -> "Action":
+    def oneshot(cls, key_name: str) -> "Action":
         def func():
             print(f"Press and release {key_name} switch")
             oneshot(key_name)()
@@ -37,7 +36,7 @@ class Action:
         return cls(func)
 
     @classmethod
-    def press(cls, key_name) -> "Action":
+    def press(cls, key_name: str) -> "Action":
         if key_name is None:
             return cls.noop()
 
@@ -49,7 +48,7 @@ class Action:
         return cls(func)
 
     @classmethod
-    def release(cls, key_name) -> "Action":
+    def release(cls, key_name: str) -> "Action":
         def func():
             print(f"Release {key_name} switch")
             release(key_name)()
@@ -58,9 +57,17 @@ class Action:
         return cls(func)
 
     @classmethod
-    def state(cls, statemachine, state_name) -> "Action":
+    def state(cls, statemachine: "StateMachine", state_name: str) -> "Action":
         def func():
             statemachine.activate_state(statemachine.states[state_name])
+            return True
+
+        return Action(func)
+
+    @classmethod
+    def trigger(cls, object: str, value):
+        def func():
+            Trigger(object, value).fire()
             return True
 
         return Action(func)

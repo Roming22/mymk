@@ -1,4 +1,3 @@
-from seaks.event import Timer, Trigger
 from seaks.features.key import (
     Key,
     chain,
@@ -8,11 +7,12 @@ from seaks.features.key import (
     set_state,
     start_delay,
 )
+from seaks.logic.event import Timer, Trigger
 
 
 class TapHold:
     def __init__(
-        self, input: list[str], key_names: list[str], delay: float = 0.3
+        self, input: tuple[str, int], key_names: list[str], delay: float = 0.3
     ) -> None:
         layer, switch = input
         key_names = [str.upper(name) for name in key_names]

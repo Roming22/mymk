@@ -1,6 +1,7 @@
-from seaks.action import Action
-from seaks.event import Timer, Trigger
-from seaks.state import State, StateMachine
+from seaks.hardware.board import Board
+from seaks.logic.action import Action
+from seaks.logic.event import Timer, Trigger
+from seaks.logic.state import StateMachine
 
 # Aliases to improve code readability
 chain = Action.chain
@@ -21,23 +22,23 @@ def start_delay(timer_name: str) -> Action:
 class Key:
     definitions = {}
 
-    def __init__(self, input: tuple[str], key_name: str) -> None:
+    def __init__(self, input: tuple[str, str], key_name: str) -> None:
         layer_name, switch_id = input
         Key.definitions[layer_name] = Key.definitions.get(layer_name, {})
         Key.definitions[layer_name][switch_id] = self
         key_name = str.upper(key_name)
-        full_key_name = f"layer.{layer_name}.key{switch_id:03d}.{key_name}"
+        full_key_name = f"{layer_name}.key.{switch_id}.{key_name}"
         self.name = full_key_name
 
         print(f"\nKey: '{full_key_name}'")
 
-        enter_layer = Trigger(f"layer.{layer_name}", True)
-        exit_layer = Trigger(f"layer.{layer_name}", False)
-        press_key = Trigger(f"switch.{switch_id}", True)
+        enter_layer = Trigger(f"{layer_name}", True)
+        exit_layer = Trigger(f"{layer_name}", False)
+        press_key = Trigger(f"{layer_name}.switch.{switch_id}", True)
         release_key = Trigger(f"switch.{switch_id}", False)
 
         status = StateMachine(
-            f"layer.{layer_name}.status.{key_name}",
+            f"{layer_name}.status.{key_name}",
             ["asleep", "listening", "active", "zombie"],
         )
         key = StateMachine(f"{full_key_name}", ["asleep", "released", "pressed"])
@@ -70,7 +71,7 @@ class Key:
         )
 
     @classmethod
-    def get(cls, input: tuple[str], key_name: str = "") -> "Key":
+    def get(cls, input: tuple[str, str], key_name: str = "") -> "Key":
         layer_name, switch_id = input
         try:
             return cls.definitions[layer_name][switch_id]
@@ -78,6 +79,3 @@ class Key:
             if key_name:
                 return cls((layer_name, switch_id), key_name)
             raise ex
-
-
-#

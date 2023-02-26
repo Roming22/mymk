@@ -1,13 +1,12 @@
-from seaks.buffer import Buffer
-from seaks.event import Event, Timer
+from seaks.logic.event import Event, Timer
 
 
 class Controller:
     board = None
-    tickers = []
+    tickers: list["Ticker"] = []
 
     @classmethod
-    def set_board(cls, board):
+    def set_board(cls, board) -> None:
         cls.board = board
 
     @classmethod
@@ -21,15 +20,15 @@ class Controller:
         cls.tickers.remove(ticker)
 
     @classmethod
-    def run(cls):
+    def run(cls) -> None:
         events = Event.get_queue()
-        cls.board.tick()
+        if cls.board is not None:
+            cls.board.tick()
         Timer.tick()
         for event in events:
             print(event)
             for ticker in cls.tickers:
                 ticker.tick(event)
-        Buffer.flush()
 
 
 class Ticker:
@@ -37,11 +36,11 @@ class Ticker:
     Tickers generate events at each tick
     """
 
-    def register(self):
+    def register(self) -> None:
         Controller.register(self)
 
-    def unregister(self):
+    def unregister(self) -> None:
         Controller.unregister(self)
 
-    def tick(self, _: Event):
+    def tick(self, _: Event = None) -> None:
         pass

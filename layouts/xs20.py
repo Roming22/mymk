@@ -1,15 +1,15 @@
 import board
 
 from time import sleep
-from seaks.keyboard import Keyboard
+from seaks.logic.keyboard import Keyboard
 
 
 def main() -> None:
-    print("\n"*8)
-    print("#"*120)
+    print("\n" * 8)
+    print("#" * 120)
     keyboard = Keyboard(
-        rows=(board.D5, board.D6, board.D7, board.D9),
-        cols=(
+        row_pins=(board.D5, board.D6, board.D7, board.D9),
+        col_pins=(
             board.D27,
             board.D26,
             board.D22,
