@@ -68,8 +68,10 @@ class Action:
 
     @classmethod
     def trigger(cls, object: str, value: "Any"):
+        event = Event.get(object, value)
+
         def func():
-            Event.get(object, value).fire()
+            event.fire()
             return True
 
         return Action(func)

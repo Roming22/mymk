@@ -1,22 +1,21 @@
-from seaks.hardware.board import Board as PhysicalBoard
-from seaks.hardware.switch import Switch as PhysicalSwitch
+from collections import namedtuple
+
+from seaks.hardware.board import Board as HardwareBoard
 from seaks.logic.state import StateMachine
 from seaks.utils.memory import memory_cost
 
+Switch = namedtuple("Switch", ["name", "switch_id", "status", "key"])
 
-class Switch:
-    @memory_cost("vSwitch")
-    def __init__(self, name: str, switch_id: str) -> None:
-        self.name = name
-        self.switch_id = switch_id
-        self.status = StateMachine(
-            f"{name}.status", ["asleep", "listening", "active", "zombie"]
-        )
-        self.key = StateMachine(f"{name}.key", ["asleep", "released", "pressed"])
 
-    @classmethod
-    def instanciate(cls, name: str, board: PhysicalBoard) -> list["Switch"]:
-        switches: list["Switch"] = []
-        for switch in board.switches:
-            switches.append(cls(f"{name}.{switch.name}", switch.id))
-        return switches
+def create(name: str, switch_id: str) -> Switch:
+    status = StateMachine(f"{name}.status", ["asleep", "listening", "active", "zombie"])
+    key = StateMachine(f"{name}.key", ["asleep", "released", "pressed"])
+    return Switch(name, switch_id, status, key)
+
+
+@memory_cost("vSwitchMatrix")
+def instanciate_matrix(name: str, board: HardwareBoard) -> list["Switch"]:
+    switches: list["Switch"] = []
+    for switch in board.switches:
+        switches.append(create(f"{name}.{switch.name}", switch.id))
+    return switches

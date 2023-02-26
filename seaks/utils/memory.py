@@ -20,10 +20,11 @@ def memory_cost(name):
         def wrapper(*args, **kwargs):
             gc.collect()
             free_mem = gc.mem_free()
-            func(*args, **kwargs)
+            result = func(*args, **kwargs)
             gc.collect()
             mem_used = free_mem - gc.mem_free()
             print(f"{name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%).")
+            return result
 
         return wrapper
 

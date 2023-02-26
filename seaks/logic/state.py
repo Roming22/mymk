@@ -20,9 +20,9 @@ class State:
 
     def process_event(self, event: Event) -> None:
         if action := self.triggers.get(event, None):
-            # print(
-            #     f"    {self.fullname} has an action for ({event.object}, {event.value})"
-            # )
+            print(
+                f"    {self.fullname} has an action for ({event.subject}, {event.value})"
+            )
             action.run()
         # else:
         #     print(f"  {self.fullname} is ignoring the event")
