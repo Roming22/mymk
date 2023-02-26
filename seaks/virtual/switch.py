@@ -1,7 +1,6 @@
 from seaks.hardware.board import Board as PhysicalBoard
 from seaks.hardware.switch import Switch as PhysicalSwitch
 from seaks.logic.state import StateMachine
-
 from seaks.utils.memory import memory_cost
 
 

@@ -1,71 +1,77 @@
 import time
 
 from seaks.utils.memory import memory_cost
+from seaks.utils.time import pretty_print
 
 
 class Event:
     _queue = []
 
+    instances: dict[int, "Event"] = {}
+
     @memory_cost("Event")
-    def __init__(self, trigger, timestamp) -> None:
-        if timestamp is None:
-            timestamp = time.monotonic_ns()
-        self.timestamp = timestamp
-        self.trigger = trigger
-
-    def __repr__(self) -> None:
-        useconds = self.timestamp % 10**9 // 1000
-        seconds = (self.timestamp // 10**9) % 60
-        minutes = ((self.timestamp // 10**9) // 60) % 60
-        hours = (self.timestamp // 10**9) // 3600 % 24
-        days = (self.timestamp // 10**9) // (3600 * 24)
-        return f"[{days:03d} days, {hours:02d}:{minutes:02d}:{seconds:02d}.{useconds:06d}] {self.trigger}"
-
-    @classmethod
-    def register(cls, trigger, timestamp=None) -> None:
-        event = Event(trigger, timestamp)
-        cls._queue.append(event)
-
-    @classmethod
-    def get_queue(cls) -> list["Event"]:
-        queue = cls._queue
-        cls._queue = []
-        return queue
-
-
-class Trigger:
-    @memory_cost("Trigger")
-    def __init__(self, object, value) -> None:
-        self.object = object
+    def __init__(self, subject: str, value: "Any", hash: int) -> None:
+        if hash in Event.instances.keys():
+            raise RuntimeError(
+                "You cannot instanciate the same object twice. Use get() instead."
+            )
+        self.subject = subject
         self.value = value
-        self.__hash = hash(f"{self}")
-
-    def __repr__(self) -> None:
-        return f"{self.object}: {self.value}"
+        self.uid = hash
+        Event.instances[hash] = self
 
     def __eq__(self, __o: object) -> bool:
         return self.__hash__() == __o.__hash__()
 
     def __hash__(self) -> int:
-        return self.__hash
+        return self.uid
+
+    def __repr__(self) -> str:
+        return f"{self.subject}: {self.value}"
 
     def fire(self) -> None:
-        Event.register(self)
+        Event._queue.append((time.monotonic_ns(), self))
+
+    @classmethod
+    def get(cls, subject: str, value: "Any") -> "Event":
+        uid = hash(f"{subject}: {value}")
+        try:
+            return cls.instances[uid]
+        except KeyError:
+            event = cls(subject, value, uid)
+            return event
+
+    @classmethod
+    def get_next(cls) -> "Event":
+        try:
+            while data := cls._queue.pop(0):
+                timestamp, event = data
+                print(f"[{pretty_print(timestamp)}] {event}")
+                yield event
+        except IndexError:
+            pass
 
 
 class Timer:
-    timers = dict()
-    running_timers = set()
+    instances: dict[str, "Timer"] = {}
+
+    running = set()
 
     @memory_cost("Timer")
-    def __init__(self, trigger, seconds, name, start=False) -> None:
-        print("Timer:", trigger, f", {seconds}s,", name)
-        self.trigger = trigger
+    def __init__(self, event: Event, seconds: float, name: str) -> None:
+        if name in Timer.instances.keys():
+            raise RuntimeError(
+                "You cannot instanciate the same object twice. Use get() instead."
+            )
+        print("Timer:", event, f", {seconds}s,", name)
+        self.event = event
         self.seconds = seconds
         self.name = name
-        Timer.timers[name] = self
-        if start:
-            self.start(name)
+        Timer.instances[name] = self
+
+    @classmethod
+    def get(cls, name: str) -> "Event":
+        return cls.instances[name]
 
     @classmethod
     def start(cls, name):
@@ -90,13 +96,9 @@ class Timer:
         return False
 
     @classmethod
-    def get(cls, key):
-        return cls.timers.get(key, None)
-
-    @classmethod
     def tick(cls):
         # print("Timers ticking")
-        for timer_name in cls.running_timers:
-            timer = Timer.timers[timer_name]
+        for timer_name in cls.running:
+            timer = Timer.instances[timer_name]
             if timer.is_expired():
-                timer.trigger.fire()
+                timer.event.fire()

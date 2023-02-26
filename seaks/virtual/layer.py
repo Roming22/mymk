@@ -1,11 +1,9 @@
 from seaks.hardware.board import Board
 from seaks.logic.action import Action
-from seaks.logic.event import Trigger
+from seaks.logic.event import Event
 from seaks.logic.state import State
-from seaks.virtual.switch import Switch
-
-
 from seaks.utils.memory import memory_cost
+from seaks.virtual.switch import Switch
 
 
 class Layer:
@@ -21,18 +19,18 @@ class Layer:
         self.switches = switches
         for switch in switches:
 
-            def wrap_event(switch_name, event):
+            def wrap_event(switch_name, value):
                 def func():
-                    Trigger(switch_name, event).fire()
+                    Event.get(switch_name, value).fire()
                     return True
 
                 return Action(func)
 
             state.add_trigger(
-                Trigger(f"switch.{switch.switch_id}", True),
+                Event.get(f"switch.{switch.switch_id}", True),
                 wrap_event(switch.name, True),
             )
             state.add_trigger(
-                Trigger(f"switch.{switch.switch_id}", False),
+                Event.get(f"switch.{switch.switch_id}", False),
                 wrap_event(switch.name, False),
             )

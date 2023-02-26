@@ -1,5 +1,5 @@
 from seaks.hardware.keys import oneshot, press, release
-from seaks.logic.event import Trigger
+from seaks.logic.event import Event
 from seaks.utils.memory import memory_cost
 
 
@@ -67,9 +67,9 @@ class Action:
         return Action(func)
 
     @classmethod
-    def trigger(cls, object: str, value):
+    def trigger(cls, object: str, value: "Any"):
         def func():
-            Trigger(object, value).fire()
+            Event.get(object, value).fire()
             return True
 
         return Action(func)

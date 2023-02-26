@@ -7,7 +7,7 @@ from seaks.features.key import (
     set_state,
     start_delay,
 )
-from seaks.logic.event import Timer, Trigger
+from seaks.logic.event import Event, Timer
 from seaks.utils.memory import memory_cost
 
 
@@ -24,12 +24,12 @@ class TapHold:
 
         # Timer to control the hold delay
         timer_name = f"{key.name}.tap_delay"
-        Timer(Trigger(timer_name, True), delay, timer_name, False)
+        Timer(Event.get(timer_name, True), delay, timer_name, False)
 
         # Aliases
-        delay_timeout = Trigger(timer_name, True)
-        press_key = Trigger(f"switch.{switch}", True)
-        release_key = Trigger(f"switch.{switch}", False)
+        delay_timeout = Event.get(timer_name, True)
+        press_key = Event.get(f"switch.{switch}", True)
+        release_key = Event.get(f"switch.{switch}", False)
         reset_delay = start_delay(timer_name)
 
         # Modify the StateMachine to enable TapHold

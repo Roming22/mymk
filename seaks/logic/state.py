@@ -1,7 +1,6 @@
 from seaks.logic.action import Action
 from seaks.logic.controller import Ticker
-from seaks.logic.event import Event, Trigger
-
+from seaks.logic.event import Event
 from seaks.utils.memory import memory_cost
 
 
@@ -11,18 +10,18 @@ class State:
         self.name = name
         self.machine = machine
         self.fullname = f"{self.machine.name}.{self.name}"
-        self.triggers: dict[Trigger, Action] = dict()
+        self.triggers: dict[Event, Action] = dict()
 
-    def add_trigger(self, trigger: Trigger, action):
+    def add_trigger(self, event: Event, action: Action):
         print(
-            f"    Adding ({trigger.object},{trigger.value}) to {self.fullname} triggers."
+            f"    Adding ({event.subject},{event.value}) to {self.fullname} triggers."
         )
-        self.triggers[trigger] = action
+        self.triggers[event] = action
 
     def process_event(self, event: Event) -> None:
-        if action := self.triggers.get(event.trigger, None):
+        if action := self.triggers.get(event, None):
             # print(
-            #     f"    {self.fullname} has an action for ({event.trigger.object}, {event.trigger.value})"
+            #     f"    {self.fullname} has an action for ({event.object}, {event.value})"
             # )
             action.run()
         # else:

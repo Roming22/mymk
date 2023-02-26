@@ -21,12 +21,10 @@ class Controller:
 
     @classmethod
     def run(cls) -> None:
-        events = Event.get_queue()
         if cls.board is not None:
             cls.board.tick()
         Timer.tick()
-        for event in events:
-            print(event)
+        for event in Event.get_next():
             for ticker in cls.tickers:
                 ticker.tick(event)
 

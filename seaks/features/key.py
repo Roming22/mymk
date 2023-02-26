@@ -1,6 +1,5 @@
-from seaks.hardware.board import Board
 from seaks.logic.action import Action
-from seaks.logic.event import Timer, Trigger
+from seaks.logic.event import Event, Timer
 from seaks.logic.state import StateMachine
 from seaks.utils.memory import memory_cost
 
@@ -34,10 +33,10 @@ class Key:
 
         print(f"\nKey: '{full_key_name}'")
 
-        enter_layer = Trigger(f"{layer_name}", True)
-        exit_layer = Trigger(f"{layer_name}", False)
-        press_key = Trigger(f"{layer_name}.switch.{switch_id}", True)
-        release_key = Trigger(f"switch.{switch_id}", False)
+        enter_layer = Event.get(f"{layer_name}", True)
+        exit_layer = Event.get(f"{layer_name}", False)
+        press_key = Event.get(f"{layer_name}.switch.{switch_id}", True)
+        release_key = Event.get(f"switch.{switch_id}", False)
 
         status = StateMachine(
             f"{layer_name}.status.{key_name}",

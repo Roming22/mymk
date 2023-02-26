@@ -1,12 +1,11 @@
+from collections import namedtuple
+
 from seaks.hardware.board import Board as PhysicalBoard
 from seaks.logic.controller import Controller, Ticker
-from seaks.logic.event import Event, Trigger
+from seaks.logic.event import Event
 from seaks.logic.state import StateMachine
-from seaks.virtual.layer import Layer
-
 from seaks.utils.memory import memory_cost
-
-from collections import namedtuple
+from seaks.virtual.layer import Layer
 
 LightBoard = namedtuple("LightBoard", "name phy_board machine layers default_layers")
 
@@ -33,10 +32,10 @@ class Board(Ticker):
         self.default_layer = layer_names[0]
 
     def start(self):
-        Trigger(f"{self.name}.{self.default_layer}", True).fire()
+        Event.get(f"{self.name}.{self.default_layer}", True).fire()
         self.machine.start()
 
     def tick(self, _: Event = None) -> None:
         if event := self.physical_board._keymatrix.events.get():
             switch_id = self.physical_board.get_switch_id(event.key_number)
-            Trigger(f"switch.{switch_id}", event.pressed).fire()
+            Event.get(f"switch.{switch_id}", event.pressed).fire()
