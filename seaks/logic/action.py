@@ -1,4 +1,4 @@
-# from seaks.hardware.keys import oneshot, press, release
+from seaks.hardware.keys import oneshot, press, release
 from seaks.logic.buffer import Buffer
 from seaks.logic.event import Event
 from seaks.utils.memory import check_memory
@@ -34,8 +34,6 @@ class Action:
         def func():
             print(f"Press and release {key_name} switch")
             # oneshot(key_name)()
-            Buffer.register(f"{key_name}")
-            Buffer.register(f"!{key_name}")
             return True
 
         return cls(func)
@@ -47,8 +45,7 @@ class Action:
 
         def func():
             print(f"Press {key_name} switch")
-            # press(key_name)()
-            Buffer.register(f"{key_name}")
+            press(key_name)
             return True
 
         return cls(func)
@@ -57,9 +54,15 @@ class Action:
     def release(cls, key_name: str) -> "Action":
         def func():
             print(f"Release {key_name} switch")
-            # release(key_name)()
-            Buffer.register(f"!{key_name}")
+            release(key_name)
             return True
+
+        return cls(func)
+
+    @classmethod
+    def claim(cls, event_id):
+        def func():
+            Buffer.claim(event_id)
 
         return cls(func)
 

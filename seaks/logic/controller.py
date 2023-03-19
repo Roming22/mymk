@@ -29,7 +29,6 @@ class Controller:
         # print(end=".")
         if cls.state != Buffer.instance.data:
             for ticker in cls.tickers:
-                print(type(ticker))
                 ticker.tick()
             cls.state = Buffer.instance.data
 

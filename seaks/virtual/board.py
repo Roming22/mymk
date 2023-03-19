@@ -1,5 +1,6 @@
 from collections import namedtuple
 
+from seaks.features.key import KeyTicker
 from seaks.hardware.board import Board as HardwareBoard
 from seaks.logic.buffer import Buffer
 from seaks.logic.controller import Controller
@@ -21,9 +22,10 @@ def create(hardware_board: HardwareBoard, name: str, layer_names: list[str]) -> 
     active_layers = [layer_names[0]]
 
     def start():
+        KeyTicker()
         Buffer.instance.register(f"{name}.{active_layers[0]}")
 
-    def tick(_: Event = None) -> None:
+    def tick() -> None:
         if event := hardware_board._keymatrix.events.get():
             switch_id = hardware_board.get_switch_id(event.key_number)
             if event.pressed:
