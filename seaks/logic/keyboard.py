@@ -10,7 +10,6 @@ from seaks.logic.state import StateMachine
 from seaks.utils.memory import memory_cost
 from seaks.virtual.board import create as create_board
 
-
 # Aliases to improve code readability
 chain = Action.chain
 oneshot = Action.oneshot

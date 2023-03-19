@@ -1,6 +1,6 @@
 # from seaks.hardware.keys import oneshot, press, release
-from seaks.logic.event import Event
 from seaks.logic.buffer import Buffer
+from seaks.logic.event import Event
 from seaks.utils.memory import check_memory
 
 

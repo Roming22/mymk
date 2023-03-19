@@ -64,6 +64,3 @@ class StateMachine(Ticker):
     def start(self):
         state = self._active_state
         print(f"    Activating {state.fullname}")
-
-    def tick(self, event: Event = None) -> None:
-        self._active_state.process_event(event)

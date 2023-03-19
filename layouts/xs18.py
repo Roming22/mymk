@@ -1,8 +1,10 @@
+from time import sleep
+
 import board
 
-from time import sleep
-from seaks.logic.keyboard import Keyboard
 import seaks.utils.memory as memory
+from seaks.features import Key
+from seaks.logic.keyboard import Keyboard
 
 
 def main() -> None:
@@ -20,7 +22,7 @@ def main() -> None:
         layers=["alpha", "symbols"],
     )
     print("\n\nMemory used for keyboard: ", memory.get_usage() - mem_used, "\n\n")
-    
+
     # # Layer0/Layer1 transitions
     # board.machine["alpha1"].add_trigger(
     #     Event.get("board.alpha1.switch.04", True),
@@ -40,8 +42,12 @@ def main() -> None:
     # )
 
     # # Alpha1
-    for switch, key_name in enumerate(["A", "B", "C"]):
-        Key(("board.alpha1", hardware_board.get_switch_id(switch + 1)), key_name)
+    for switch, keycode in enumerate(["A", "B", "C"]):
+        Key(
+            "board.alpha",
+            keyboard.board.hardware_board.get_switch_id(switch + 1),
+            keycode,
+        )
 
     # # Alpha2
     # for switch, key_name in enumerate(["D", "E", "F"]):
@@ -55,7 +61,7 @@ def main() -> None:
 
     # # Just for fun, let's allow the user to chain HOLD action together
     # TapHold(("board.alpha1", "01"), ["A", "K", "L"], 0.5)
-    
+
     keyboard.go()
 
 

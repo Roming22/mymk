@@ -1,18 +1,13 @@
+import re
 from collections import namedtuple
 
+from seaks.hardware.keys import press, release
 from seaks.logic.action import Action
-from seaks.logic.event import Event, Timer
-from seaks.logic.state import StateMachine
+from seaks.logic.buffer import Buffer
+from seaks.logic.controller import Controller
 from seaks.utils.memory import check_memory
 
-# Aliases to improve code readability
-chain = Action.chain
-oneshot = Action.oneshot
-press = Action.press
-release = Action.release
-set_state = Action.state
-
-Key = namedtuple("Key", ["name", "key", "status"])
+Key = namedtuple("Key", ["uid", "keycode", "tick"])
 
 
 def start_delay(timer_name: str) -> Action:
@@ -23,63 +18,46 @@ def start_delay(timer_name: str) -> Action:
     return Action(func)
 
 
-instances: dict[str, dict[str, Key]] = {}
+instances: dict[str, Key] = {}
 
 
 @check_memory("Key")
-def create(input: tuple[str, str]) -> Key:
-    layer_name, switch_id = input
-    key_name = str.upper(key_name)
-    full_key_name = f"{layer_name}.switch.{switch_id}"
+def set(layer_uid: str, switch_uid: str, keycode=str) -> Key:
+    switch_uid = f"switch.{switch_uid}"
+    key_uid = f"{layer_uid}.{switch_uid}"
+    print(f"\nKey: '{key_uid}'")
+    pressed = re.compile(f"^(.*/)?{key_uid}(/.*)?")
+    released = re.compile(f"^(.*/)?!{switch_uid}(/.*)?")
 
-    print(f"\nKey: '{full_key_name}'")
+    def tick() -> None:
+        print(
+            key_uid,
+            "checking",
+            f"^(.*/)?{key_uid}(/.*)?",
+            "and",
+            f"^(.*/)?!{switch_uid}(/.*)?",
+        )
+        if pressed.search(Buffer.instance.data):
+            Buffer.claim(key_uid)
+            press(keycode)
+        elif released.search(Buffer.instance.data):
+            Buffer.claim(f"!{switch_uid}")
+            release(keycode)
 
-    enter_layer = Event.get(f"{layer_name}", True)
-    exit_layer = Event.get(f"{layer_name}", False)
-    press_key = Event.get(f"{layer_name}.switch.{switch_id}", True)
-    release_key = Event.get(f"switch.{switch_id}", False)
-
-    # TODO: Share the machine at the board level
-    status = StateMachine(
-        f"{layer_name}.status.{key_name}",
-        ["asleep", "listening", "active", "zombie"],
-    )
-    key = StateMachine(f"{full_key_name}", ["asleep", "released", "pressed"])
-
-    # Setup the status state machine
-    status["asleep"].add_trigger(enter_layer, set_state(status, "listening"))
-    status["listening"].add_trigger(exit_layer, set_state(status, "asleep"))
-    status["listening"].add_trigger(press_key, set_state(status, "active"))
-    status["active"].add_trigger(release_key, set_state(status, "listening"))
-    status["active"].add_trigger(exit_layer, set_state(status, "zombie"))
-    status["zombie"].add_trigger(
-        release_key,
-        chain(set_state(status, "asleep"), set_state(key, "asleep"), release(key_name)),
-    )
-
-    # Setup the key state machine
-    key["asleep"].add_trigger(enter_layer, set_state(key, "released"))
-    key["released"].add_trigger(exit_layer, set_state(key, "asleep"))
-    key["released"].add_trigger(
-        press_key, chain(set_state(key, "pressed"), press(key_name))
-    )
-    key["pressed"].add_trigger(
-        release_key, chain(set_state(key, "released"), release(key_name))
-    )
-    new_key = Key(full_key_name, key, status)
-    instances[layer_name] = instances.get(layer_name, {})
-    instances[layer_name][switch_id] = new_key
-    return new_key
-
-
-def get(input: tuple[str, str]) -> Key:
-    layer_name, switch_id = input
     try:
-        return instances[layer_name][switch_id]
-    except KeyError as ex:
-        print(f"Keys: {instances.keys()}")
-        print(f"Key not found: {input}")
-        for l, sw in instances.items():
-            print([(l, s) for s in sw])
+        get(key_uid)
+        instances.pop(key_uid)
+    except KeyError:
+        pass
+    new_key = Key(key_uid, keycode, tick)
+    instances[key_uid] = new_key
+    Controller.register(new_key)
+    print("New key", key_uid)
 
-        return create((layer_name, switch_id))
+
+def get(key_uid: str) -> Key:
+    try:
+        return instances[key_uid]
+    except KeyError as ex:
+        # print(f"Keys: {instances.keys()}")
+        print(f"Key not found: {key_uid}")

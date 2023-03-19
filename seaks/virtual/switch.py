@@ -1,7 +1,7 @@
 from collections import namedtuple
 
-from seaks.logic.action import Action
 from seaks.hardware.board import Board as HardwareBoard
+from seaks.logic.action import Action
 from seaks.logic.event import Event, Timer
 from seaks.logic.state import StateMachine
 from seaks.utils.memory import check_memory
@@ -17,7 +17,7 @@ Switch = namedtuple("Switch", ["name", "switch_id", "status", "key"])
 
 
 def create(layer_name: str, switch_id: str) -> Switch:
-    name=f"{layer_name}.switch.{switch_id}"
+    name = f"{layer_name}.switch.{switch_id}"
     status = StateMachine(f"{name}.status", ["asleep", "listening", "active", "zombie"])
     key = StateMachine(f"{name}.key", ["asleep", "released", "pressed"])
 

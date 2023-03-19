@@ -9,14 +9,10 @@ def get_keycode_for(key_name: str) -> Keycode:
     return getattr(Keycode, key_name)
 
 
-def oneshot(key_name: str):
+def oneshot(key_name: str) -> None:
     kc = get_keycode_for(key_name)
-
-    def func():
-        _kbd.press(kc)
-        _kbd.release(kc)
-
-    return func
+    _kbd.press(kc)
+    _kbd.release(kc)
 
 
 def panic():
@@ -24,19 +20,11 @@ def panic():
     _kbd.send(Keycode.MEH)
 
 
-def press(key_name: str):
+def press(key_name: str) -> None:
     kc = get_keycode_for(key_name)
-
-    def func():
-        _kbd.press(kc)
-
-    return func
+    _kbd.press(kc)
 
 
-def release(key_name: str):
+def release(key_name: str) -> None:
     kc = get_keycode_for(key_name)
-
-    def func():
-        _kbd.release(kc)
-
-    return func
+    _kbd.release(kc)

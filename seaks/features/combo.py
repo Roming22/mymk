@@ -1,10 +1,11 @@
-from seaks.features.key import get as get_key
-from seaks.utils.memory import check_memory
-from seaks.logic.event import Event, Timer
-from seaks.features.key import oneshot, press, release, set_state, start_delay
 from seaks.features.key import chain
+from seaks.features.key import get as get_key
+from seaks.features.key import oneshot, press, release, set_state, start_delay
 from seaks.logic.action import Action
+from seaks.logic.event import Event, Timer
+from seaks.utils.memory import check_memory
 from seaks.utils.toolbox import permutations
+
 
 # Creates function to transform/revert any key to/from a TapHold
 def make_comb_func(
