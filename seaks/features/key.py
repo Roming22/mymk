@@ -8,15 +8,6 @@ from seaks.utils.memory import check_memory
 
 Key = namedtuple("Key", ["uid", "keycode", "combos", "tapholds", "patterns"])
 
-
-def start_delay(timer_name: str) -> Action:
-    def func():
-        Timer.start(timer_name)
-        return True
-
-    return Action(func)
-
-
 instances: dict[str, Key] = {}
 regex_cache: dict(str, re) = {}
 
@@ -27,9 +18,6 @@ def set(layer_uid: str, switch_uid: str, keycode=str) -> Key:
     key_uid = f"{layer_uid}.{switch_uid}"
     patterns = dict()
     print(f"\nKey: '{key_uid}'")
-    pressed = re.compile(f"^(.*/)?{key_uid}(/.*)?")
-    released = re.compile(f"^(.*/)?!{switch_uid}(/.*)?")
-
     try:
         get(key_uid)
         instances.pop(key_uid)
@@ -52,35 +40,78 @@ def simple_key_patterns(key):
     event_pressed = key.uid
     event_released = f"!{switch_uid}"
 
-    cache_regex(event_pressed)
-    cache_regex(event_released)
-
     patterns = {}
-    patterns[event_pressed] = Action.chain(
-        Action.press(key.keycode), Action.claim(event_pressed)
+    add_pattern(
+        patterns,
+        event_pressed,
+        [Action.press(key.keycode), Action.claim(event_pressed)],
     )
-    patterns[event_released] = Action.chain(
-        Action.release(key.keycode), Action.claim(event_released)
+    add_pattern(
+        patterns,
+        event_released,
+        [Action.release(key.keycode), Action.claim(event_released)],
     )
     return patterns
 
 
-def cache_regex(event_id):
-    regex = f"^(.*/)?{event_id}(/.*)?"
+def combo_patterns(key):
+    switch_uid = ".".join(key.uid.split(".")[-2:])
+    event_pressed = key.uid
+    event_released = f"!{switch_uid}"
+    patterns = dict()
+
+    # Oneshot
+    add_pattern(
+        patterns,
+        [event_pressed, event_released],
+        [
+            Action.oneshot(key.keycode),
+            Action.claim(event_pressed),
+            Action.claim(event_released),
+        ],
+    )
+
+    for combo in key.combos:
+        print("Combo:", combo)
+
+    # Combo not activated
+
+    # Combo activated
+    return patterns
+
+
+def add_pattern(patterns: dict, event_ids: list, action: Action) -> None:
+    if not isinstance(event_ids, list):
+        event_ids = [event_ids]
+    regex_uid = cache_regex(*event_ids)
+    if isinstance(action, list):
+        action = Action.chain(*action)
+    patterns[regex_uid] = action
+
+
+def cache_regex(*event_ids) -> str:
+    regex_uid = "(/.*)?/".join(event_ids)
+    regex = f"^(.*/)?{regex_uid}(/.*)?$"
     try:
-        regex_cache[event_id]
+        regex_cache[regex_uid]
     except KeyError:
-        regex_cache[event_id] = re.compile(regex)
+        regex_cache[regex_uid] = re.compile(regex)
+    return regex_uid
 
 
 class KeyTicker(Ticker):
     def __init__(self) -> None:
         print("Initializing keys")
         for key in instances.values():
-            if not key.combos and not key.tapholds:
-                key.patterns.update(simple_key_patterns(key))
+            if key.combos and key.tapholds:
+                raise NotImplementedError("Combos and TapHolds are not implemented")
+            elif key.combos:
+                key.patterns.update(combo_patterns(key))
+            elif key.tapholds:
+                raise NotImplementedError("TapHolds are not implemented")
             else:
-                raise NotImplemented("Combos and TapHolds are not implemented")
+                key.patterns.update(simple_key_patterns(key))
+
         self.register()
 
     def tick(self) -> None:

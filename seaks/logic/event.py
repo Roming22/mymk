@@ -1,5 +1,6 @@
 import time
 
+from seaks.logic.buffer import Buffer
 from seaks.utils.memory import check_memory
 from seaks.utils.time import pretty_print
 from seaks.utils.toolbox import hash
@@ -59,19 +60,18 @@ class Timer:
     running = set()
 
     @check_memory("Timer")
-    def __init__(self, event: Event, seconds: float, name: str) -> None:
+    def __init__(self, name: str, seconds: float) -> None:
         if name in Timer.instances.keys():
             raise RuntimeError(
                 "You cannot instanciate the same object twice. Use get() instead."
             )
-        print("Timer:", event, f", {seconds}s,", name)
-        self.event = event
+        print("Timer:", name, f", {seconds}s,", name)
         self.seconds = seconds
         self.name = name
         Timer.instances[name] = self
 
     @classmethod
-    def get(cls, name: str) -> "Event":
+    def get(cls, name: str) -> "Timer":
         return cls.instances[name]
 
     @classmethod
@@ -102,4 +102,4 @@ class Timer:
         for timer_name in cls.running:
             timer = Timer.instances[timer_name]
             if timer.is_expired():
-                timer.event.fire()
+                Buffer.register(timer_name)

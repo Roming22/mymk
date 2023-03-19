@@ -1,6 +1,6 @@
 from seaks.hardware.keys import oneshot, press, release
 from seaks.logic.buffer import Buffer
-from seaks.logic.event import Event
+from seaks.logic.event import Event, Timer
 from seaks.utils.memory import check_memory
 
 
@@ -33,7 +33,7 @@ class Action:
     def oneshot(cls, key_name: str) -> "Action":
         def func():
             print(f"Press and release {key_name} switch")
-            # oneshot(key_name)()
+            oneshot(key_name)
             return True
 
         return cls(func)
@@ -60,11 +60,32 @@ class Action:
         return cls(func)
 
     @classmethod
-    def claim(cls, event_id):
+    def claim(cls, event_id) -> "Action":
         def func():
             Buffer.claim(event_id)
 
         return cls(func)
+
+    def start_delay(cls, timer_name: str) -> "Action":
+        def func():
+            Timer.start(timer_name)
+            return True
+
+        return Action(func)
+
+    def stop_delay(cls, timer_name: str) -> "Action":
+        def func():
+            Timer.stop(timer_name)
+            return True
+
+        return Action(func)
+
+    def reset_delay(cls, timer_name: str) -> "Action":
+        def func():
+            Timer.reset(timer_name)
+            return True
+
+        return Action(func)
 
     @classmethod
     def state(cls, statemachine: "StateMachine", state_name: str) -> "Action":

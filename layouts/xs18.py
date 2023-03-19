@@ -3,7 +3,7 @@ from time import sleep
 import board
 
 import seaks.utils.memory as memory
-from seaks.features import Key
+from seaks.features import Key, Sequence
 from seaks.logic.keyboard import Keyboard
 
 
@@ -54,7 +54,7 @@ def main() -> None:
     #     Key(("board.alpha2", hardware_board.get_switch_id(switch + 1)), key_name)
 
     # # C,A = G
-    # Sequence([("board.alpha1", "03"), ("board.alpha1", "01")], "G", 0.3)
+    Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 0.3)
     # # Sequence(["F", "E", "D"], "H")
     # # Chord(["B", "C"], "I")
     # # Chord(["A", "B", "C"], "J")

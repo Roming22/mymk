@@ -15,7 +15,7 @@ class Buffer:
 
     def update_data(self) -> None:
         self.data = "/".join(self.content)
-        print(self.data)
+        print("\nBuffer:", self.data)
 
     @classmethod
     def register(cls, event_id: str) -> None:

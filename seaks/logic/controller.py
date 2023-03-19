@@ -28,6 +28,7 @@ class Controller:
         Timer.tick()
         # print(end=".")
         if cls.state != Buffer.instance.data:
+            print("#" * 120)
             for ticker in cls.tickers:
                 ticker.tick()
             cls.state = Buffer.instance.data
