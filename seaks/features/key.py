@@ -66,17 +66,49 @@ def combo_patterns(key):
         [event_pressed, event_released],
         [
             Action.oneshot(key.keycode),
-            Action.claim(event_pressed),
-            Action.claim(event_released),
-        ],
+            Action.claim(event_pressed, event_released),
+        ]
+        + [Action.stop_timer(c.name) for c in key.combos],
     )
 
     for combo in key.combos:
         print("Combo:", combo)
 
-    # Combo not activated
+        # Acticate combo timer
+        add_pattern(
+            patterns,
+            event_pressed,
+            Action.start_timer(combo.name),
+        )
 
-    # Combo activated
+        # Combo not activated...
+        ## Press
+        add_pattern(patterns, [event_pressed, combo.name], Action.press(key.keycode))
+        ## Release
+        add_pattern(
+            patterns,
+            [event_pressed, combo.name, event_released],
+            [
+                Action.release(key.keycode),
+                Action.claim(event_pressed, combo.name, event_released),
+            ],
+        )
+
+        # Combo activated
+        ## Press
+        # add_pattern(
+        #     patterns,
+        #     [],
+        #     [Action.press(combo.keycode)]
+        # )
+        # Combo activated
+        ## Release
+        # add_pattern(
+        #     patterns,
+        #     [],
+        #     [Action.release(combo.keycode)]
+        # )
+
     return patterns
 
 

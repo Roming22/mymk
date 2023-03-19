@@ -60,32 +60,41 @@ class Action:
         return cls(func)
 
     @classmethod
-    def claim(cls, event_id) -> "Action":
+    def claim(cls, *event_ids) -> "Action":
+        if isinstance(event_ids, str):
+            event_ids = [event_ids]
+
         def func():
-            Buffer.claim(event_id)
+            for event_id in event_ids:
+                print("Climing", event_id)
+                Buffer.claim(event_id)
 
         return cls(func)
 
-    def start_delay(cls, timer_name: str) -> "Action":
+    @classmethod
+    def start_timer(cls, timer_name: str, force=False) -> "Action":
         def func():
-            Timer.start(timer_name)
+            if timer_name not in Buffer.instance.content or force:
+                Timer.start(timer_name)
             return True
 
-        return Action(func)
+        return cls(func)
 
-    def stop_delay(cls, timer_name: str) -> "Action":
+    @classmethod
+    def stop_timer(cls, timer_name: str) -> "Action":
         def func():
             Timer.stop(timer_name)
             return True
 
-        return Action(func)
+        return cls(func)
 
-    def reset_delay(cls, timer_name: str) -> "Action":
+    @classmethod
+    def reset_timer(cls, timer_name: str) -> "Action":
         def func():
             Timer.reset(timer_name)
             return True
 
-        return Action(func)
+        return cls(func)
 
     @classmethod
     def state(cls, statemachine: "StateMachine", state_name: str) -> "Action":
@@ -93,7 +102,7 @@ class Action:
             statemachine.activate_state(statemachine.states[state_name])
             return True
 
-        return Action(func)
+        return cls(func)
 
     @classmethod
     def trigger(cls, subject: str, value: "Any"):
@@ -103,4 +112,4 @@ class Action:
             Event.get(subject, value).fire()
             return True
 
-        return Action(func)
+        return cls(func)

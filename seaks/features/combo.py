@@ -6,20 +6,20 @@ from seaks.utils.toolbox import permutations
 
 class Sequence:
     @check_memory("Sequence")
-    def __init__(
-        self, keys: list[tuple[str, str]], key_name: str, delay: float
-    ) -> None:
-        key_name = str.upper(key_name)
-        print("Setup", key_name)
+    def __init__(self, keys: list[tuple[str, str]], keycode: str, delay: float) -> None:
+        keycode = str.upper(keycode)
+        print("Setup", keycode)
 
-        combo_name = ".".join([f"{layer}.switch.{switch}" for layer, switch in keys])
+        combo_name = (
+            ".".join([f"{layer}.switch.{switch}" for layer, switch in keys])
+            + ".timer.combo"
+        )
         self.name = combo_name
-        self.key_name = key_name
+        self.keycode = keycode
         print(f"Sequence: {combo_name}")
 
         # Timer to control the hold delay
-        timer_name = f"{combo_name}.combo_delay"
-        self.timer = Timer(timer_name, delay)
+        self.timer = Timer(combo_name, delay)
 
         # Add to first key
         first_key_uid = f"{keys[0][0]}.switch.{keys[0][1]}"

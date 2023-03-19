@@ -54,7 +54,7 @@ def main() -> None:
     #     Key(("board.alpha2", hardware_board.get_switch_id(switch + 1)), key_name)
 
     # # C,A = G
-    Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 0.3)
+    Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)
     # # Sequence(["F", "E", "D"], "H")
     # # Chord(["B", "C"], "I")
     # # Chord(["A", "B", "C"], "J")
