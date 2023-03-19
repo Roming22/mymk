@@ -21,7 +21,7 @@ def oneshot(key_name: str):
 
 def panic():
     print("!!! PANIC !!!")
-    _kbd.send(Keycode.SPACE)
+    _kbd.send(Keycode.MEH)
 
 
 def press(key_name: str):

@@ -51,10 +51,12 @@ init() {
     CIRCUITPYTHON_VERSION="8.0.0"
     board="sparkfun_pro_micro_rp2040"
     CIRCUITPYTHON_URL="https://downloads.circuitpython.org/bin/$board/en_US/adafruit-circuitpython-$board-en_US-$CIRCUITPYTHON_VERSION.uf2"
-    CIRCUITPYTHON_LIB_VERSION="adafruit-circuitpython-bundle-$(echo "$CIRCUITPYTHON_VERSION" | cut -d. -f1).x-mpy-$(date +"%Y%m%d")"
+    DATE=$(curl -w "%{url_effective}" -I -L -o /dev/null -s -S "https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest" | sed 's:.*/::')
+    CIRCUITPYTHON_LIB_VERSION="adafruit-circuitpython-bundle-$(echo "$CIRCUITPYTHON_VERSION" | cut -d. -f1).x-mpy-$DATE"
     CIRCUITPYTHON_LIB_URL="https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/$(echo "$CIRCUITPYTHON_LIB_VERSION" | cut -d- -f6)/$CIRCUITPYTHON_LIB_VERSION.zip"
     DRIVE_SOURCE="$PROJECT_DIR/drive"
     mkdir -p "$DRIVE_SOURCE/lib"
+    SYNCED_DRIVES=()
 }
 
 get_drive() {
@@ -165,6 +167,7 @@ sync_drive() {
         rsync --archive --copy-links --delete "$DRIVE_SOURCE/" "$DRIVE"
         sync
         echo "OK"
+        tput bel
     fi
 }
 

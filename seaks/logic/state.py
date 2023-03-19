@@ -48,7 +48,7 @@ class StateMachine(Ticker):
         self._active_state = self.states[state_names[0]]
         self.register()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> State:
         return self.states[key]
 
     def add_state(self, state_name: str) -> State:

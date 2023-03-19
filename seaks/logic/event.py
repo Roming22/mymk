@@ -2,6 +2,7 @@ import time
 
 from seaks.utils.memory import check_memory
 from seaks.utils.time import pretty_print
+from seaks.utils.toolbox import hash
 
 
 class Event:
@@ -34,7 +35,7 @@ class Event:
 
     @classmethod
     def get(cls, subject: str, value: "Any") -> "Event":
-        uid = cls.hash(f"{subject}: {value}")
+        uid = hash(f"{subject}: {value}")
         try:
             return cls.instances[uid]
         except KeyError:
@@ -50,12 +51,6 @@ class Event:
                 yield event
         except IndexError:
             pass
-
-    @staticmethod
-    def hash(string: str) -> int:
-        bits = "".join([f"{bin(ord(c))}"[2:] for c in string])
-        value = int(bits, 2) % 10**9
-        return value
 
 
 class Timer:

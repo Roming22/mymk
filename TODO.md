@@ -25,6 +25,7 @@
 [X] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
 [ ] Alpha layer combo key chars
+[ ] Caps Word
 
 ## Tests
 [ ] Layer0 keys
@@ -34,7 +35,8 @@
     [ ] Tap key repeats when first key is held
 [ ] Layer0 Sequence
 [ ] Layer1 keys
-[ ] Switching layer when pressing a key keeps the key pressed until the the key is released.
+    [ ] Layer1 is ignored if key1 is released before key2 is released.
+    [ ] Switching layer while pressing a (mod?) key keeps the key pressed until the the key is released.
 
 ## Known bugs
 [ ] Switching layers while holding a key does not release the key when the key is released

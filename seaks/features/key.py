@@ -27,10 +27,10 @@ instances: dict[str, dict[str, Key]] = {}
 
 
 @check_memory("Key")
-def create(input: tuple[str, str], key_name: str) -> Key:
+def create(input: tuple[str, str]) -> Key:
     layer_name, switch_id = input
     key_name = str.upper(key_name)
-    full_key_name = f"{layer_name}.key.{switch_id}.{key_name}"
+    full_key_name = f"{layer_name}.switch.{switch_id}"
 
     print(f"\nKey: '{full_key_name}'")
 
@@ -72,15 +72,14 @@ def create(input: tuple[str, str], key_name: str) -> Key:
     return new_key
 
 
-def get(input: tuple[str, str], key_name: str = "") -> Key:
+def get(input: tuple[str, str]) -> Key:
     layer_name, switch_id = input
     try:
         return instances[layer_name][switch_id]
     except KeyError as ex:
-        if key_name:
-            print(f"Key not found: {input}")
-            for l, sw in instances.items():
-                print([(l, s) for s in sw])
+        print(f"Keys: {instances.keys()}")
+        print(f"Key not found: {input}")
+        for l, sw in instances.items():
+            print([(l, s) for s in sw])
 
-            return create((layer_name, switch_id), key_name)
-        raise ex
+        return create((layer_name, switch_id))

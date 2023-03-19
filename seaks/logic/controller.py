@@ -31,7 +31,7 @@ class Controller:
 
 class Ticker:
     """
-    Tickers generate events at each tick
+    Tickers generate and/or process events at each tick
     """
 
     def register(self) -> None:

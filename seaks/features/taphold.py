@@ -45,13 +45,15 @@ def create(input: tuple[str, str], key_names: list[str], delay: float = 0.3) -> 
             delay_timeout, chain(set_state(key, new_state), reset_delay)
         )
         current_state, current_key_name = new_state, key_name
+    key_name = key_names[-1]
     new_state = "pressed"
+    print("Setup", key_name)
     key[current_state].add_trigger(
         release_key, chain(set_state(key, "released"), oneshot(current_key_name))
     )
     key[current_state].add_trigger(
-        delay_timeout, chain(set_state(key, "pressed"), press(key_names[-1]))
+        delay_timeout, chain(set_state(key, "pressed"), press(key_name))
     )
     key["pressed"].add_trigger(
-        release_key, chain(set_state(key, "released"), release(key_names[-1]))
+        release_key, chain(set_state(key, "released"), release(key_name))
     )
