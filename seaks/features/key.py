@@ -118,7 +118,11 @@ def add_pattern(patterns: dict, event_ids: list, action: Action) -> None:
     regex_uid = cache_regex(*event_ids)
     if isinstance(action, list):
         action = Action.chain(*action)
-    patterns[regex_uid] = action
+
+    complexity = len(event_ids)
+    if complexity not in patterns.keys():
+        patterns[complexity] = dict()
+    patterns[complexity][regex_uid] = action
 
 
 def cache_regex(*event_ids) -> str:
@@ -150,6 +154,7 @@ class KeyTicker(Ticker):
         for uid, key in instances.items():
             patterns = key.patterns
             print(uid, "checking", patterns.keys())
-            for pattern, action in patterns.items():
-                if regex_cache[pattern].search(Buffer.instance.data):
-                    action.run()
+            for complexity in sorted(patterns.keys(), reverse=True):
+                for pattern, action in patterns[complexity].items():
+                    if regex_cache[pattern].search(Buffer.instance.data):
+                        action.run()
