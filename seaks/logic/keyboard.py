@@ -27,8 +27,20 @@ class Keyboard:
             definition["hardware"]["pins"]["cols"],
         )
         board = create_board(hardware_board, "board", definition["layout"]["layers"])
+        switch_count = (
+            len(definition["hardware"]["pins"]["cols"])
+            * len(definition["hardware"]["pins"]["rows"])
+            * 2 ** int(definition["hardware"]["split"])
+        )
+        for layer_name in definition["layout"]["layers"]:
+            key_count = len(definition["layers"][layer_name])
+            if key_count != switch_count:
+                raise RuntimeError(
+                    f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
+                )
+
         self.board = board
-        print("\n\nMemory used: ", memory.get_usage() - mem_used, "\n\n")
+        print("\n\nMemory used for Keyboard: ", memory.get_usage() - mem_used, "\n\n")
 
     def go(self, fps=False):
         fps = True

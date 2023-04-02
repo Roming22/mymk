@@ -26,18 +26,37 @@ def main() -> None:
                 "pin": None,
                 "count": 0,
             },
+            "split": True,
         },
         "layout": {
             "layers": ("alpha", "symbols"),
         },
         "layers": {
-            "alpha": None,
-            "symbols": None,
+            "alpha": [
+                # fmt: off
+    "ESC",  "D",    "C",    "L",
+    "NO",   "T",    "A",    "E",
+            "NO",   "SPACE",    "LGUI", "NO",
+
+                "R",    "S",    "H",    "ENTER",
+                "I",    "O",    "N",    "NO",
+    "NO",   "RGUI",     "MEH",  "NO",
+                # fmt: on
+            ],
+            "symbols": [
+                # fmt: off
+    "ESC",  "GRAVE",    "BACKSLASH",    "UNDERSCORE",
+    "NO",   "HASH",     "DOLLAR",       "EXCLAIM",
+            "NO",       "SPACE",        "LGUI",         "NO",
+
+            "MINUS",    "SLASH",    "EQUAL",    "ENTER",
+            "DOT",      "COMMA",    "QUOTE",    "NO",
+    "NO",   "RGUI",     "MEH",       "NO",
+                # fmt: on
+            ],
         },
     }
-    mem_used = memory.get_usage()
     keyboard = Keyboard(definition)
-    print("\n\nMemory used for keyboard: ", memory.get_usage() - mem_used, "\n\n")
 
     # # Layer0/Layer1 transitions
     # board.machine["alpha1"].add_trigger(
