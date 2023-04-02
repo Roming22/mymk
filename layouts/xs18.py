@@ -10,17 +10,33 @@ from seaks.logic.keyboard import Keyboard
 def main() -> None:
     print("\n" * 8)
     print("#" * 120)
+
+    definition = {
+        "hardware": {
+            "pins": {
+                "cols": (
+                    board.D26,
+                    board.D22,
+                    board.D20,
+                    board.D23,
+                ),
+                "rows": (board.D6, board.D7, board.D9),
+            },
+            "leds": {
+                "pin": None,
+                "count": 0,
+            },
+        },
+        "layout": {
+            "layers": ("alpha", "symbols"),
+        },
+        "layers": {
+            "alpha": None,
+            "symbols": None,
+        },
+    }
     mem_used = memory.get_usage()
-    keyboard = Keyboard(
-        row_pins=(board.D6, board.D7, board.D9),
-        col_pins=(
-            board.D26,
-            board.D22,
-            board.D20,
-            board.D23,
-        ),
-        layers=["alpha", "symbols"],
-    )
+    keyboard = Keyboard(definition)
     print("\n\nMemory used for keyboard: ", memory.get_usage() - mem_used, "\n\n")
 
     # # Layer0/Layer1 transitions
@@ -42,19 +58,19 @@ def main() -> None:
     # )
 
     # # Alpha1
-    for switch, keycode in enumerate(["A", "B", "C"]):
-        Key(
-            "board.alpha",
-            keyboard.board.hardware_board.get_switch_id(switch + 1),
-            keycode,
-        )
+    # for switch, keycode in enumerate(["A", "B", "C"]):
+    #     Key(
+    #         "board.alpha",
+    #         keyboard.board.hardware_board.get_switch_id(switch + 1),
+    #         keycode,
+    #     )
 
     # # Alpha2
     # for switch, key_name in enumerate(["D", "E", "F"]):
     #     Key(("board.alpha2", hardware_board.get_switch_id(switch + 1)), key_name)
 
     # # C,A = G
-    Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)
+    # Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)
     # # Sequence(["F", "E", "D"], "H")
     # # Chord(["B", "C"], "I")
     # # Chord(["A", "B", "C"], "J")

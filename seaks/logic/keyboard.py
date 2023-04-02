@@ -20,10 +20,13 @@ set_state = Action.state
 
 class Keyboard:
     @memory_cost("Keyboard")
-    def __init__(self, row_pins: list, col_pins: list, layers: list[str]) -> None:
+    def __init__(self, definition: dict) -> None:
         mem_used = memory.get_usage()
-        hardware_board = create_hardware_board(row_pins, col_pins)
-        board = create_board(hardware_board, "board", layers)
+        hardware_board = create_hardware_board(
+            definition["hardware"]["pins"]["rows"],
+            definition["hardware"]["pins"]["cols"],
+        )
+        board = create_board(hardware_board, "board", definition["layout"]["layers"])
         self.board = board
         print("\n\nMemory used: ", memory.get_usage() - mem_used, "\n\n")
 
