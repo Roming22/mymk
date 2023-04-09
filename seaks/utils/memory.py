@@ -1,4 +1,5 @@
 import gc
+from math import ceil
 
 
 def free_memory(name):
@@ -43,7 +44,9 @@ def memory_cost(name):
             # print("Garbage collect !4!")
             gc.collect()
             mem_used = free_mem - gc.mem_free()
-            print(f"{name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%).")
+            print(
+                f"[Memory] {name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%). Total memory used: {ceil(100*gc.mem_alloc()/total_mem)}%"
+            )
             return result
 
         return wrapper

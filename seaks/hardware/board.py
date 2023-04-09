@@ -8,6 +8,7 @@ from seaks.utils.memory import check_memory
 Board = namedtuple("Board", ["_keymatrix", "get_switch_id", "switches"])
 
 
+@check_memory("hardware.Board")
 def create(row_pins: list, col_pins: list) -> Board:
     keymatrix = keypad.KeyMatrix(
         row_pins=row_pins,

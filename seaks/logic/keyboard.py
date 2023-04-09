@@ -1,12 +1,8 @@
-from collections import namedtuple
-
-import seaks.utils.memory as memory
+from seaks.features.layer import Layer
 from seaks.hardware.board import create as create_hardware_board
 from seaks.logic.action import Action
 from seaks.logic.controller import Controller
-from seaks.logic.event import Event
 from seaks.logic.fps import FPS
-from seaks.logic.state import StateMachine
 from seaks.utils.memory import memory_cost
 from seaks.virtual.board import create as create_board
 
@@ -21,26 +17,33 @@ set_state = Action.state
 class Keyboard:
     @memory_cost("Keyboard")
     def __init__(self, definition: dict) -> None:
-        mem_used = memory.get_usage()
         hardware_board = create_hardware_board(
             definition["hardware"]["pins"]["rows"],
             definition["hardware"]["pins"]["cols"],
         )
-        board = create_board(hardware_board, "board", definition["layout"]["layers"])
+        try:
+            board = create_board(
+                hardware_board, "board", list(definition["layout"]["layers"].keys())[0]
+            )
+        except IndexError:
+            raise RuntimeError("'layout.layers' must have at least one layer defined.")
+
         switch_count = (
             len(definition["hardware"]["pins"]["cols"])
             * len(definition["hardware"]["pins"]["rows"])
             * 2 ** int(definition["hardware"]["split"])
         )
-        for layer_name in definition["layout"]["layers"]:
-            key_count = len(definition["layers"][layer_name])
+        for layer_name, layer_definition in definition["layout"]["layers"].items():
+            Layer(layer_name, layer_definition)
+
+            key_definitions = layer_definition["keys"]
+            key_count = len(key_definitions)
             if key_count != switch_count:
                 raise RuntimeError(
                     f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
                 )
 
         self.board = board
-        print("\n\nMemory used for Keyboard: ", memory.get_usage() - mem_used, "\n\n")
 
     def go(self, fps=False):
         fps = True

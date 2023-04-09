@@ -1,9 +1,7 @@
-from time import sleep
+from collections import OrderedDict
 
 import board
 
-import seaks.utils.memory as memory
-from seaks.features import Key, Sequence
 from seaks.logic.keyboard import Keyboard
 
 
@@ -28,33 +26,33 @@ def main() -> None:
             },
             "split": True,
         },
-        "layout": {
-            "layers": ("alpha", "symbols"),
-        },
-        "layers": {
-            "alpha": [
-                # fmt: off
+        "layout": {"layers": OrderedDict()},
+    }
+    definition["layout"]["layers"]["alpha"] = {
+        "keys": [
+            # fmt: off
     "ESC",  "D",    "C",    "L",
     "NO",   "T",    "A",    "E",
             "NO",   "SPACE",    "LGUI", "NO",
 
-                "R",    "S",    "H",    "ENTER",
-                "I",    "O",    "N",    "NO",
-    "NO",   "RGUI",     "MEH",  "NO",
-                # fmt: on
-            ],
-            "symbols": [
-                # fmt: off
-    "ESC",  "GRAVE",    "BACKSLASH",    "UNDERSCORE",
-    "NO",   "HASH",     "DOLLAR",       "EXCLAIM",
-            "NO",       "SPACE",        "LGUI",         "NO",
+            "R",    "S",    "H",    "ENTER",
+            "I",    "O",    "N",    "NO",
+    "NO",   "RGUI", "MEH",  "NO",
+            # fmt: on
+        ]
+    }
+    definition["layout"]["layers"]["symbols"] = {
+        "keys": [
+            # fmt: off
+    None,   "GRAVE",    "BACKSLASH",    "UNDERSCORE",
+    None,   "HASH",     "DOLLAR",       "EXCLAIM",
+            None,       None,           None,           None,
 
-            "MINUS",    "SLASH",    "EQUAL",    "ENTER",
-            "DOT",      "COMMA",    "QUOTE",    "NO",
-    "NO",   "RGUI",     "MEH",       "NO",
-                # fmt: on
-            ],
-        },
+            "MINUS",    "SLASH",    "EQUAL",    None,
+            "DOT",      "COMMA",    "QUOTE",    None,
+    None,   None,       None,       None,
+            # fmt: on
+        ],
     }
     keyboard = Keyboard(definition)
 
