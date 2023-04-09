@@ -32,7 +32,7 @@ def set(layer_uid: str, switch_uid: str, keycode: str) -> Key:
         if keycode == "NO" or keycode is None or get_keycodes_for(keycode):
             simple_key(key_uid, keycode)
             return
-    except KeyError:
+    except AttributeError:
         pass
     raise RuntimeError(f"Unimplement keycode: '{keycode}'")
 
