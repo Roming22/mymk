@@ -31,6 +31,9 @@ class Action:
 
     @classmethod
     def oneshot(cls, key_name: str) -> "Action":
+        if key_name == "NO" or key_name is None:
+            return cls.noop()
+
         def func():
             print(f"Press and release {key_name} switch")
             oneshot(key_name)
@@ -40,7 +43,7 @@ class Action:
 
     @classmethod
     def press(cls, key_name: str) -> "Action":
-        if key_name is None:
+        if key_name == "NO" or key_name is None:
             return cls.noop()
 
         def func():
@@ -52,6 +55,9 @@ class Action:
 
     @classmethod
     def release(cls, key_name: str) -> "Action":
+        if key_name == "NO" or key_name is None:
+            return cls.noop()
+
         def func():
             print(f"Release {key_name} switch")
             release(key_name)
@@ -66,7 +72,7 @@ class Action:
 
         def func():
             for event_id in event_ids:
-                print("Climing", event_id)
+                print("Claim", event_id)
                 Buffer.claim(event_id)
 
         return cls(func)

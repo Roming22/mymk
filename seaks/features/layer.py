@@ -1,3 +1,4 @@
+from seaks.features.key import set as Key
 from seaks.utils.memory import memory_cost
 
 
@@ -51,7 +52,6 @@ class ActiveLayer:
     def get_layer_for(cls, switch_id: int) -> str:
         """Get the layer"""
         current_layer = cls.LAYERS[-1]
-        print(switch_id, len(current_layer.keys_to_layer))
         return current_layer.keys_to_layer[switch_id]
 
 
@@ -61,17 +61,22 @@ class Layer:
     LAYERS = {}
 
     @memory_cost("Layer")
-    def __init__(self, layer_name: str, layer_definition) -> None:
+    def __init__(self, board, layer_name: str, layer_definition) -> None:
         print(layer_name, end=":")
         self.LAYERS[layer_name] = self
+        self.uid = f"{board.name}.{layer_name}"
         self.id = layer_name
         self.keys_to_layer = []
-        for keycode in layer_definition["keys"]:
+        for switch_id, keycode in enumerate(layer_definition["keys"]):
             if keycode is None:
                 self.keys_to_layer.append(None)
-                continue
-            self.keys_to_layer.append(layer_name)
-            # TODO: Instanciate the keys
+            else:
+                self.keys_to_layer.append(layer_name)
+            Key(
+                self.uid,
+                board.hardware_board.get_switch_id(switch_id),
+                keycode,
+            )
             print(f" {keycode}", end=",")
         print()
 

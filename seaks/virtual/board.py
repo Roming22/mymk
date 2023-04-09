@@ -23,6 +23,7 @@ def create(hardware_board: HardwareBoard, name: str, default_layer_name: str) ->
 
     def tick() -> None:
         if event := hardware_board._keymatrix.events.get():
+            print(f"\n{'#' * 120}")
             switch_id = hardware_board.get_switch_id(event.key_number)
             if event.pressed:
                 prefix = f"{name}.{ActiveLayer.get_layer_for(int(switch_id))}."

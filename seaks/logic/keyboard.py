@@ -16,14 +16,16 @@ set_state = Action.state
 
 class Keyboard:
     @memory_cost("Keyboard")
-    def __init__(self, definition: dict) -> None:
+    def __init__(self, definition: dict, board_uid="board") -> None:
         hardware_board = create_hardware_board(
             definition["hardware"]["pins"]["rows"],
             definition["hardware"]["pins"]["cols"],
         )
         try:
             board = create_board(
-                hardware_board, "board", list(definition["layout"]["layers"].keys())[0]
+                hardware_board,
+                board_uid,
+                list(definition["layout"]["layers"].keys())[0],
             )
         except IndexError:
             raise RuntimeError("'layout.layers' must have at least one layer defined.")
@@ -34,7 +36,7 @@ class Keyboard:
             * 2 ** int(definition["hardware"]["split"])
         )
         for layer_name, layer_definition in definition["layout"]["layers"].items():
-            Layer(layer_name, layer_definition)
+            Layer(board, layer_name, layer_definition)
 
             key_definitions = layer_definition["keys"]
             key_count = len(key_definitions)
