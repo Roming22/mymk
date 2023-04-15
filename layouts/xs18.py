@@ -33,7 +33,7 @@ def main() -> None:
             # fmt: off
     "ESC",              "D",    "C",        "L",
     "LY_MO(symbols)",   "T",    "A",        "E",
-                        "NO",   "SPACE",    "LGUI", "LY_TO(symbols)",
+                        "NO",   "SPACE",    "LGUI", "LY_TG(symbols)",
 
             "R",    "S",    "H",    "ENTER",
             "I",    "O",    "N",    "NO",
@@ -46,7 +46,7 @@ def main() -> None:
             # fmt: off
 None,   "GRAVE",            "BACKSLASH",    "UNDERSCORE",
     None,   "HASH",         "DOLLAR",       "EXCLAIM",
-            "LY_MO(alpha)", None,           None,           "LY_TO(alpha)",
+            "LY_MO(alpha)", None,           None,           None,
 
             "MINUS",    "SLASH",    "EQUAL",    None,
             "DOT",      "COMMA",    "QUOTE",    None,
@@ -56,35 +56,6 @@ None,   "GRAVE",            "BACKSLASH",    "UNDERSCORE",
     }
     keyboard = Keyboard(definition)
 
-    # # Layer0/Layer1 transitions
-    # board.machine["alpha1"].add_trigger(
-    #     Event.get("board.alpha1.switch.04", True),
-    #     Action.chain(
-    #         Action.state(board.machine, "alpha2"),
-    #         Action.trigger("board.alpha1", False),
-    #         Action.trigger("board.alpha2", True),
-    #     ),
-    # )
-    # board.machine["alpha2"].add_trigger(
-    #     Event.get("board.alpha2.switch.04", False),
-    #     Action.chain(
-    #         Action.state(board.machine, "alpha1"),
-    #         Action.trigger("board.alpha2", False),
-    #         Action.trigger("board.alpha1", True),
-    #     ),
-    # )
-
-    # # Alpha1
-    # for switch, keycode in enumerate(["A", "B", "C"]):
-    #     Key(
-    #         "board.alpha",
-    #         keyboard.board.hardware_board.get_switch_id(switch + 1),
-    #         keycode,
-    #     )
-
-    # # Alpha2
-    # for switch, key_name in enumerate(["D", "E", "F"]):
-    #     Key(("board.alpha2", hardware_board.get_switch_id(switch + 1)), key_name)
 
     # # C,A = G
     # Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)

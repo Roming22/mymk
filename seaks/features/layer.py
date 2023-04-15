@@ -113,6 +113,7 @@ class Layer:
         return active_layer.deactivate
 
 
+@memory_cost("LY_TO")
 def layer_to(key_uid: str, layer_name: list[str]) -> None:
     switch_uid = ".".join(key_uid.split(".")[-2:])
     press_event_uid = key_uid
@@ -135,6 +136,7 @@ def layer_to(key_uid: str, layer_name: list[str]) -> None:
     press_patterns[1][press_event_uid] = press_action
 
 
+@memory_cost("LY_MO")
 def layer_momentary(key_uid: str, layer_name: list[str]) -> None:
     switch_uid = ".".join(key_uid.split(".")[-2:])
     press_event_uid = key_uid
@@ -161,5 +163,46 @@ def layer_momentary(key_uid: str, layer_name: list[str]) -> None:
     press_patterns[1][press_event_uid] = press_action
 
 
-func_mapping["LY_TO"] = layer_to
+@memory_cost("LY_TG")
+def layer_toggle(key_uid: str, layer_name: str) -> None:
+    switch_uid = ".".join(key_uid.split(".")[-2:])
+    press_event_uid = key_uid
+    release_event_uid = f"!{key_uid}"
+    release_event_id = f"!{switch_uid}"
+
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
+    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+
+    release_action = Action.chain(
+        Action(lambda: release_patterns.pop(release_event_uid)),
+        Action.claim(release_event_id),
+    )
+
+    def make_toggle():
+        deactivate = None
+
+        def toggle():
+            nonlocal deactivate
+            if deactivate:
+                print("Toggle OFF")
+                deactivate()
+                deactivate = None
+            else:
+                print("Toggle ON")
+                deactivate = Layer.activate_layer(layer_name)
+
+        return toggle
+
+    toggle = make_toggle()
+    press_action = Action.chain(
+        Action(lambda: release_patterns.update({release_event_uid: release_action})),
+        Action(toggle),
+        Action.claim(press_event_uid),
+    )
+
+    press_patterns[1][press_event_uid] = press_action
+
+
 func_mapping["LY_MO"] = layer_momentary
+func_mapping["LY_TG"] = layer_toggle
+func_mapping["LY_TO"] = layer_to

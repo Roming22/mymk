@@ -5,7 +5,7 @@ from seaks.hardware.keys import get_keycodes_for
 from seaks.logic.action import Action
 from seaks.logic.buffer import Buffer
 from seaks.logic.controller import Ticker
-from seaks.utils.memory import check_memory
+from seaks.utils.memory import memory_cost
 
 Key = namedtuple(
     "Key",
@@ -23,26 +23,24 @@ press_patterns: dict[str, dict] = {1: {}}
 release_patterns: dict[str, Action] = {}
 
 
-@check_memory("Key")
-def set(layer_uid: str, switch_uid: str, keycode: str) -> Key:
+def set(layer_uid: str, switch_uid: str, keycode: str) -> None:
     switch_uid = f"switch.{switch_uid}"
     key_uid = f"{layer_uid}.{switch_uid}"
     print(f"\nKey: '{key_uid}'")
 
     try:
-        if keycode == "NO" or keycode is None or get_keycodes_for(keycode):
-            simple_key(key_uid, keycode)
-            return
+        if keycode in ["NO", None] or get_keycodes_for(keycode):
+            func = simple_key
+            args = [keycode]
     except AttributeError:
-        pass
-    if "(" in keycode and keycode.endswith(")"):
-        func, args = parse_keycode(keycode)
-        func(key_uid, args)
-        return
-
-    raise RuntimeError(f"Keycode not implemented: '{keycode}'")
+        if "(" in keycode and keycode.endswith(")"):
+            func, args = parse_keycode(keycode)
+        else:
+            raise RuntimeError(f"Keycode not implemented: '{keycode}'")
+    func(key_uid, *args)
 
 
+@memory_cost("Key")
 def simple_key(key_uid: str, keycode: str) -> None:
     switch_uid = ".".join(key_uid.split(".")[-2:])
     press_event_uid = key_uid
