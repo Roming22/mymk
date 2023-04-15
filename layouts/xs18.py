@@ -31,9 +31,9 @@ def main() -> None:
     definition["layout"]["layers"]["alpha"] = {
         "keys": [
             # fmt: off
-    "ESC",  "D",    "C",        "L",
-    "NO",   "T",    "A",        "E",
-            "NO",   "SPACE",    "LGUI", "LY_TO(symbols)",
+    "ESC",              "D",    "C",        "L",
+    "LY_MO(symbols)",   "T",    "A",        "E",
+                        "NO",   "SPACE",    "LGUI", "LY_TO(symbols)",
 
             "R",    "S",    "H",    "ENTER",
             "I",    "O",    "N",    "NO",
@@ -44,9 +44,9 @@ def main() -> None:
     definition["layout"]["layers"]["symbols"] = {
         "keys": [
             # fmt: off
-    None,   "GRAVE",    "BACKSLASH",    "UNDERSCORE",
-    None,   "HASH",     "DOLLAR",       "EXCLAIM",
-            None,       None,           None,           "LY_TO(alpha)",
+None,   "GRAVE",            "BACKSLASH",    "UNDERSCORE",
+    None,   "HASH",         "DOLLAR",       "EXCLAIM",
+            "LY_MO(alpha)", None,           None,           "LY_TO(alpha)",
 
             "MINUS",    "SLASH",    "EQUAL",    None,
             "DOT",      "COMMA",    "QUOTE",    None,

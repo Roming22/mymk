@@ -135,4 +135,31 @@ def layer_to(key_uid: str, layer_name: list[str]) -> None:
     press_patterns[1][press_event_uid] = press_action
 
 
+def layer_momentary(key_uid: str, layer_name: list[str]) -> None:
+    switch_uid = ".".join(key_uid.split(".")[-2:])
+    press_event_uid = key_uid
+    release_event_uid = f"!{key_uid}"
+    release_event_id = f"!{switch_uid}"
+
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
+    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+
+    def activate():
+        deactivate = Layer.activate_layer(layer_name[0])
+        release_action = Action.chain(
+            Action(lambda: release_patterns.pop(release_event_uid)),
+            Action(deactivate),
+            Action.claim(release_event_id),
+        )
+        release_patterns.update({release_event_uid: release_action})
+
+    press_action = Action.chain(
+        Action(activate),
+        Action.claim(press_event_uid),
+    )
+
+    press_patterns[1][press_event_uid] = press_action
+
+
 func_mapping["LY_TO"] = layer_to
+func_mapping["LY_MO"] = layer_momentary
