@@ -1,4 +1,13 @@
+import re
+
+from seaks.features.key import (
+    func_mapping,
+    press_patterns,
+    regex_cache,
+    release_patterns,
+)
 from seaks.features.key import set as Key
+from seaks.logic.action import Action
 from seaks.utils.memory import memory_cost
 
 
@@ -34,6 +43,14 @@ class ActiveLayer:
                         f"Layer '{self.id}' cannot have a transparent key."
                     )
                 self.keys_to_layer[index] = current_layer.keys_to_layer[index]
+
+    @classmethod
+    def collapse(cls) -> None:
+        layers = [cls.LAYERS[0]]
+        if cls.LAYERS[-1].id != layers[0].id:
+            layers.append(cls.LAYERS[-1])
+        print(f"Collapsing layers: {[l.uid for l in layers]}")
+        cls.LAYERS = layers
 
     def deactivate(self):
         """Remove layer from the list of active layers"""
@@ -88,3 +105,34 @@ class Layer:
     def activate_layer(cls, layer_name: str):
         active_layer = ActiveLayer(cls.LAYERS[layer_name])
         return active_layer.deactivate
+
+    @classmethod
+    def to(cls, layer_name: str):
+        active_layer = ActiveLayer(cls.LAYERS[layer_name])
+        ActiveLayer.collapse()
+        return active_layer.deactivate
+
+
+def layer_to(key_uid: str, layer_name: list[str]) -> None:
+    switch_uid = ".".join(key_uid.split(".")[-2:])
+    press_event_uid = key_uid
+    release_event_uid = f"!{key_uid}"
+    release_event_id = f"!{switch_uid}"
+
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
+    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+
+    release_action = Action.chain(
+        Action(lambda: release_patterns.pop(release_event_uid)),
+        Action.claim(release_event_id),
+    )
+    press_action = Action.chain(
+        Action(lambda: release_patterns.update({release_event_uid: release_action})),
+        Action(lambda: Layer.to(layer_name[0])),
+        Action.claim(press_event_uid),
+    )
+
+    press_patterns[1][press_event_uid] = press_action
+
+
+func_mapping["LY_TO"] = layer_to

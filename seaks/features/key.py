@@ -16,6 +16,7 @@ Key = namedtuple(
     ],
 )
 
+func_mapping = {}
 regex_cache: dict(str, re) = {}
 
 press_patterns: dict[str, dict] = {1: {}}
@@ -34,10 +35,15 @@ def set(layer_uid: str, switch_uid: str, keycode: str) -> Key:
             return
     except AttributeError:
         pass
-    raise RuntimeError(f"Unimplement keycode: '{keycode}'")
+    if "(" in keycode and keycode.endswith(")"):
+        func, args = parse_keycode(keycode)
+        func(key_uid, args)
+        return
+
+    raise RuntimeError(f"Keycode not implemented: '{keycode}'")
 
 
-def simple_key(key_uid: str, keycode: str):
+def simple_key(key_uid: str, keycode: str) -> None:
     switch_uid = ".".join(key_uid.split(".")[-2:])
     press_event_uid = key_uid
     release_event_uid = f"!{key_uid}"
@@ -58,6 +64,45 @@ def simple_key(key_uid: str, keycode: str):
     )
 
     press_patterns[1][press_event_uid] = press_action
+
+
+def parse_keycode(keycode: str) -> tuple[str, list[str]]:
+    left_parenthesis = keycode.index("(")
+    func_name = keycode[:left_parenthesis]
+    args_str = keycode[left_parenthesis + 1 : -1]
+
+    # Initialize an empty list to store the output
+    output_list: list[str] = []
+    # Initialize a variable to keep track of the current substring
+    current_substring: str = ""
+    # Initialize a variable to keep track of the number of open parentheses
+    open_parentheses: int = 0
+
+    # Loop through each character in the input string
+    for char in args_str:
+        # If the current character is an open parenthesis, increment the count
+        if char == "(":
+            open_parentheses += 1
+        # If the current character is a close parenthesis, decrement the count
+        elif char == ")":
+            open_parentheses -= 1
+
+        # If the current character is a comma and there are no open parentheses,
+        # append the current substring to the output list and reset it to an empty string
+        elif char == "," and open_parentheses == 0:
+            output_list.append(current_substring)
+            current_substring = ""
+        else:
+            current_substring += char
+
+    # Append the last substring to the output list
+    output_list.append(current_substring)
+
+    try:
+        func = func_mapping[func_name]
+    except KeyError:
+        raise RuntimeError("Keycode not implemented:", func_name)
+    return (func, output_list)
 
 
 # def get(key_uid: str) -> Key:
