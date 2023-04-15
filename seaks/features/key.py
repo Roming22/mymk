@@ -87,14 +87,14 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
 
         # If the current character is a comma and there are no open parentheses,
         # append the current substring to the output list and reset it to an empty string
-        elif char == "," and open_parentheses == 0:
-            output_list.append(current_substring)
+        if char == "," and open_parentheses == 0:
+            output_list.append(current_substring.strip())
             current_substring = ""
         else:
             current_substring += char
 
     # Append the last substring to the output list
-    output_list.append(current_substring)
+    output_list.append(current_substring.strip())
 
     try:
         func = func_mapping[func_name]
