@@ -1,121 +1,82 @@
-from seaks.hardware.keys import oneshot, press, release
+# from typing import Callable
+
+from seaks.hardware.keys import oneshot as key_oneshot
+from seaks.hardware.keys import press as key_press
+from seaks.hardware.keys import release as key_release
 from seaks.logic.buffer import Buffer
 from seaks.logic.event import Event, Timer
-from seaks.utils.memory import check_memory
+from seaks.utils.memory import memory_cost
 
 
-class Action:
-    @check_memory("Action")
-    def __init__(self, callback) -> None:
-        self.callback = callback
+noop = lambda: None
 
-    def run(self) -> None:
-        # print("Running action")
-        self.callback()
 
-    @classmethod
-    def noop(cls) -> "Action":
-        def func() -> bool:
-            return True
+@memory_cost("action.chain")
+def chain(*actions) -> "Callable":
+    func = lambda: [action() for action in actions]
+    return func
 
-        return cls(func)
 
-    @classmethod
-    def chain(cls, *actions: "Action") -> "Action":
-        def func() -> bool:
-            for action in actions:
-                action.run()
-            return True
+@memory_cost("action.oneshot")
+def oneshot(key_name: str) -> "Callable":
+    if key_name == "NO" or key_name is None:
+        return noop
 
-        return cls(func)
+    func = lambda: key_oneshot(key_name)
+    return func
 
-    @classmethod
-    def oneshot(cls, key_name: str) -> "Action":
-        if key_name == "NO" or key_name is None:
-            return cls.noop()
 
-        def func():
-            print(f"Press and release {key_name} switch")
-            oneshot(key_name)
-            return True
+@memory_cost("action.press")
+def press(key_name: str) -> "Callable":
+    if key_name == "NO" or key_name is None:
+        return noop
 
-        return cls(func)
+    func = lambda: key_press(key_name)
+    return func
 
-    @classmethod
-    def press(cls, key_name: str) -> "Action":
-        if key_name == "NO" or key_name is None:
-            return cls.noop()
 
-        def func():
-            print(f"Press {key_name} switch")
-            press(key_name)
-            return True
+@memory_cost("action.release")
+def release(key_name: str) -> "Callable":
+    if key_name == "NO" or key_name is None:
+        return noop
 
-        return cls(func)
+    func = lambda: key_release(key_name)
+    return func
 
-    @classmethod
-    def release(cls, key_name: str) -> "Action":
-        if key_name == "NO" or key_name is None:
-            return cls.noop()
 
-        def func():
-            print(f"Release {key_name} switch")
-            release(key_name)
-            return True
+@memory_cost("action.claim")
+def claim(*event_ids) -> "Callable":
+    if isinstance(event_ids, str):
+        event_ids = [event_ids]
 
-        return cls(func)
+    func = lambda: [Buffer.claim(event_id) for event_id in event_ids]
+    return func
 
-    @classmethod
-    def claim(cls, *event_ids) -> "Action":
-        if isinstance(event_ids, str):
-            event_ids = [event_ids]
 
-        def func():
-            for event_id in event_ids:
-                print("Claim", event_id)
-                Buffer.claim(event_id)
+@memory_cost("action.start_timer")
+def start_timer(timer_name: str, force=False) -> "Callable":
+    def func():
+        if timer_name not in Buffer.instance.content or force:
+            Timer.start(timer_name)
+        return True
 
-        return cls(func)
+    return func
 
-    @classmethod
-    def start_timer(cls, timer_name: str, force=False) -> "Action":
-        def func():
-            if timer_name not in Buffer.instance.content or force:
-                Timer.start(timer_name)
-            return True
 
-        return cls(func)
+@memory_cost("action.stop_timer")
+def stop_timer(timer_name: str) -> "Callable":
+    func = lambda: Timer.stop(timer_name)
+    return func
 
-    @classmethod
-    def stop_timer(cls, timer_name: str) -> "Action":
-        def func():
-            Timer.stop(timer_name)
-            return True
 
-        return cls(func)
+@memory_cost("action.reset_timer")
+def reset_timer(timer_name: str) -> "Callable":
+    func = lambda: Timer.reset(timer_name)
+    return func
 
-    @classmethod
-    def reset_timer(cls, timer_name: str) -> "Action":
-        def func():
-            Timer.reset(timer_name)
-            return True
 
-        return cls(func)
-
-    @classmethod
-    def state(cls, statemachine: "StateMachine", state_name: str) -> "Action":
-        def func():
-            statemachine.activate_state(statemachine.states[state_name])
-            return True
-
-        return cls(func)
-
-    @classmethod
-    def trigger(cls, subject: str, value: "Any"):
-        Event.get(subject, value)
-
-        def func():
-            Event.get(subject, value).fire()
-            return True
-
-        return cls(func)
+@memory_cost("action.trigger")
+def trigger(subject: str, value: str) -> "Callable":
+    Event.get(subject, value)
+    func = lambda: Event.get(subject, value).fire()
+    return func

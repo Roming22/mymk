@@ -1,26 +1,19 @@
 import re
-from collections import namedtuple
 
+import seaks.logic.action as action
 from seaks.hardware.keys import get_keycodes_for
-from seaks.logic.action import Action
 from seaks.logic.buffer import Buffer
 from seaks.logic.controller import Ticker
 from seaks.utils.memory import memory_cost
 
-Key = namedtuple(
-    "Key",
-    [
-        "uid",
-        "keycode",
-        "patterns",
-    ],
-)
+# from typing import Callable
+
 
 func_mapping = {}
 regex_cache: dict(str, re) = {}
 
 press_patterns: dict[str, dict] = {1: {}}
-release_patterns: dict[str, Action] = {}
+release_patterns: dict[str, "Callable"] = {}
 
 
 def set(layer_uid: str, switch_uid: str, keycode: str) -> None:
@@ -50,15 +43,15 @@ def simple_key(key_uid: str, keycode: str) -> None:
     regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
     regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
 
-    release_action = Action.chain(
-        Action(lambda: release_patterns.pop(release_event_uid)),
-        Action.release(keycode),
-        Action.claim(release_event_id),
+    release_action = action.chain(
+        lambda: release_patterns.pop(release_event_uid),
+        action.release(keycode),
+        action.claim(release_event_id),
     )
-    press_action = Action.chain(
-        Action(lambda: release_patterns.update({release_event_uid: release_action})),
-        Action.press(keycode),
-        Action.claim(press_event_uid),
+    press_action = action.chain(
+        lambda: release_patterns.update({release_event_uid: release_action}),
+        action.press(keycode),
+        action.claim(press_event_uid),
     )
 
     press_patterns[1][press_event_uid] = press_action
@@ -126,10 +119,10 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
 #         patterns,
 #         [event_pressed, event_released],
 #         [
-#             Action.oneshot(key.keycode),
-#             Action.claim(event_pressed, event_released),
+#             action.oneshot(key.keycode),
+#             action.claim(event_pressed, event_released),
 #         ]
-#         + [Action.stop_timer(c.name) for c in key.combos],
+#         + [action.stop_timer(c.name) for c in key.combos],
 #     )
 
 #     for combo in key.combos:
@@ -140,19 +133,19 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
 #         add_pattern(
 #             patterns,
 #             event_pressed,
-#             Action.start_timer(timer),
+#             action.start_timer(timer),
 #         )
 
 #         # Combo not activated...
 #         ## Press
-#         add_pattern(patterns, [event_pressed, timer], Action.press(key.keycode))
+#         add_pattern(patterns, [event_pressed, timer], action.press(key.keycode))
 #         ## Release
 #         add_pattern(
 #             patterns,
 #             [event_pressed, timer, event_released],
 #             [
-#                 Action.release(key.keycode),
-#                 Action.claim(event_pressed, timer, event_released),
+#                 action.release(key.keycode),
+#                 action.claim(event_pressed, timer, event_released),
 #             ],
 #         )
 
@@ -161,25 +154,25 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
 #         add_pattern(
 #             patterns,
 #             combo.key_uids,
-#             [Action.oneshot(combo.keycode), Action.stop_timer(timer)],
+#             [action.oneshot(combo.keycode), action.stop_timer(timer)],
 #         )
 #         # Combo activated
 #         ## Release
 #         # add_pattern(
 #         #     patterns,
 #         #     [],
-#         #     [Action.release(combo.keycode)]
+#         #     [action.release(combo.keycode)]
 #         # )
 
 #     return patterns
 
 
-# def add_pattern(patterns: dict, event_ids: list, action: Action) -> None:
+# def add_pattern(patterns: dict, event_ids: list, action: action) -> None:
 #     if not isinstance(event_ids, list):
 #         event_ids = [event_ids]
 #     regex_uid = cache_regex(*event_ids)
 #     if isinstance(action, list):
-#         action = Action.chain(*action)
+#         action = action.chain(*action)
 
 #     complexity = len(event_ids)
 #     if complexity not in patterns.keys():
@@ -219,7 +212,7 @@ class KeyTicker(Ticker):
             patterns = press_patterns[complexity]
             for regex_uid, action in patterns.items():
                 if regex_cache[regex_uid].search(Buffer.instance.data):
-                    action.run()
+                    action()
         for regex_uid, action in release_patterns.items():
             if regex_cache[regex_uid].search(Buffer.instance.data):
-                action.run()
+                action()

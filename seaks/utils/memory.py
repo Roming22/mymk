@@ -1,12 +1,14 @@
 import gc
 from math import ceil
 
+profile = True
+# profile = False
+
 
 def free_memory(name):
     def inner(func):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
-            # print("Garbage collect !")
             gc.collect()
             print(f"\n\nMemory after instanciation of {name}: ", get_usage(True))
 
@@ -22,7 +24,6 @@ def check_memory(name):
         def wrapper(*args, **kwargs):
             used_mem = gc.mem_alloc()
             if used_mem / total_mem >= 0.8:
-                # print("Garbage collect !!")
                 gc.collect()
             result = func(*args, **kwargs)
             return result
@@ -37,16 +38,16 @@ def memory_cost(name):
 
     def inner(func):
         def wrapper(*args, **kwargs):
-            # print("Garbage collect !!!")
-            gc.collect()
-            free_mem = gc.mem_free()
+            if profile:
+                gc.collect()
+                free_mem = gc.mem_free()
             result = func(*args, **kwargs)
-            # print("Garbage collect !4!")
-            gc.collect()
-            mem_used = free_mem - gc.mem_free()
-            print(
-                f"[Memory] {name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%). Total memory used: {ceil(100*gc.mem_alloc()/total_mem)}%"
-            )
+            if profile:
+                gc.collect()
+                mem_used = free_mem - gc.mem_free()
+                print(
+                    f"[Memory] {name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%). Total memory used: {ceil(100*gc.mem_alloc()/total_mem)}%"
+                )
             return result
 
         return wrapper
@@ -55,7 +56,6 @@ def memory_cost(name):
 
 
 def get_usage(full=False):
-    # print("Garbage collect !5!")
     gc.collect()
     F = gc.mem_free()
     A = gc.mem_alloc()

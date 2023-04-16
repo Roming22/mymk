@@ -30,6 +30,7 @@ def get_keycodes_for(keycode: str) -> list[Keycode]:
 
 
 def oneshot(key_name: str) -> None:
+    print(f"Oneshot {key_name}")
     keycodes = get_keycodes_for(key_name)
     for kc in keycodes:
         _kbd.press(kc)
@@ -43,12 +44,14 @@ def panic():
 
 
 def press(key_name: str) -> None:
+    print(f"Press {key_name}")
     keycodes = get_keycodes_for(key_name)
     for kc in keycodes:
         _kbd.press(kc)
 
 
 def release(key_name: str) -> None:
+    print(f"Release {key_name}")
     keycodes = get_keycodes_for(key_name)
     for kc in keycodes:
         _kbd.release(kc)

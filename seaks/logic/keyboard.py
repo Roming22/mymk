@@ -1,17 +1,9 @@
 from seaks.features.layer import Layer
 from seaks.hardware.board import create as create_hardware_board
-from seaks.logic.action import Action
 from seaks.logic.controller import Controller
 from seaks.logic.fps import FPS
-from seaks.utils.memory import memory_cost
+from seaks.utils.memory import get_usage, memory_cost, profile
 from seaks.virtual.board import create as create_board
-
-# Aliases to improve code readability
-chain = Action.chain
-oneshot = Action.oneshot
-press = Action.press
-release = Action.release
-set_state = Action.state
 
 
 class Keyboard:
@@ -46,6 +38,9 @@ class Keyboard:
                 )
 
         self.board = board
+
+        if not profile:
+            print(get_usage(True))
 
     def go(self, fps=False):
         fps = True
