@@ -13,7 +13,7 @@ func_mapping = {}
 regex_cache: dict(str, re) = {}
 
 press_patterns: dict[str, dict] = {1: {}}
-release_patterns: dict[str, "Callable"] = {}
+active_patterns: dict[str, "Callable"] = {}
 
 
 def set(layer_uid: str, switch_uid: str, keycode: str) -> None:
@@ -40,16 +40,18 @@ def simple_key(key_uid: str, keycode: str) -> None:
     release_event_uid = f"!{key_uid}"
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
-    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
+    regex_cache[release_event_uid] = re.compile(
+        f"^(.*/)?{release_event_id}(/.*)?$"
+    ).search
 
     release_action = action.chain(
-        lambda: release_patterns.pop(release_event_uid),
+        lambda: active_patterns.pop(release_event_uid),
         action.release(keycode),
         action.claim(release_event_id),
     )
     press_action = action.chain(
-        lambda: release_patterns.update({release_event_uid: release_action}),
+        lambda: active_patterns.update({release_event_uid: release_action}),
         action.press(keycode),
         action.claim(press_event_uid),
     )
@@ -208,11 +210,11 @@ class KeyTicker(Ticker):
         self.register()
 
     def tick(self) -> None:
+        for regex_uid, action in active_patterns.items():
+            if regex_cache[regex_uid](Buffer.instance.data):
+                action()
         for complexity in reversed(list(press_patterns.keys())):
             patterns = press_patterns[complexity]
             for regex_uid, action in patterns.items():
-                if regex_cache[regex_uid].search(Buffer.instance.data):
+                if regex_cache[regex_uid](Buffer.instance.data):
                     action()
-        for regex_uid, action in release_patterns.items():
-            if regex_cache[regex_uid].search(Buffer.instance.data):
-                action()

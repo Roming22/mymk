@@ -4,9 +4,8 @@ from seaks.hardware.keys import oneshot as key_oneshot
 from seaks.hardware.keys import press as key_press
 from seaks.hardware.keys import release as key_release
 from seaks.logic.buffer import Buffer
-from seaks.logic.event import Event, Timer
+from seaks.logic.event import Timer
 from seaks.utils.memory import memory_cost
-
 
 noop = lambda: None
 
@@ -72,11 +71,4 @@ def stop_timer(timer_name: str) -> "Callable":
 @memory_cost("action.reset_timer")
 def reset_timer(timer_name: str) -> "Callable":
     func = lambda: Timer.reset(timer_name)
-    return func
-
-
-@memory_cost("action.trigger")
-def trigger(subject: str, value: str) -> "Callable":
-    Event.get(subject, value)
-    func = lambda: Event.get(subject, value).fire()
     return func

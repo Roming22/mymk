@@ -2,10 +2,10 @@ import re
 
 import seaks.logic.action as action
 from seaks.features.key import (
+    active_patterns,
     func_mapping,
     press_patterns,
     regex_cache,
-    release_patterns,
 )
 from seaks.features.key import set as Key
 from seaks.utils.memory import memory_cost
@@ -119,15 +119,17 @@ def layer_to(key_uid: str, layer_name: list[str]) -> None:
     release_event_uid = f"!{key_uid}"
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
-    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
+    regex_cache[release_event_uid] = re.compile(
+        f"^(.*/)?{release_event_id}(/.*)?$"
+    ).search
 
     release_action = action.chain(
-        lambda: release_patterns.pop(release_event_uid),
+        lambda: active_patterns.pop(release_event_uid),
         action.claim(release_event_id),
     )
     press_action = action.chain(
-        lambda: release_patterns.update({release_event_uid: release_action}),
+        lambda: active_patterns.update({release_event_uid: release_action}),
         lambda: Layer.to(layer_name[0]),
         action.claim(press_event_uid),
     )
@@ -142,17 +144,19 @@ def layer_momentary(key_uid: str, layer_name: list[str]) -> None:
     release_event_uid = f"!{key_uid}"
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
-    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
+    regex_cache[release_event_uid] = re.compile(
+        f"^(.*/)?{release_event_id}(/.*)?$"
+    ).search
 
     def activate():
         deactivate = Layer.activate_layer(layer_name[0])
         release_action = action.chain(
-            lambda: release_patterns.pop(release_event_uid),
+            lambda: active_patterns.pop(release_event_uid),
             deactivate,
             action.claim(release_event_id),
         )
-        release_patterns.update({release_event_uid: release_action})
+        active_patterns.update({release_event_uid: release_action})
 
     press_action = action.chain(
         activate,
@@ -169,11 +173,13 @@ def layer_toggle(key_uid: str, layer_name: str) -> None:
     release_event_uid = f"!{key_uid}"
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$")
-    regex_cache[release_event_uid] = re.compile(f"^(.*/)?{release_event_id}(/.*)?$")
+    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
+    regex_cache[release_event_uid] = re.compile(
+        f"^(.*/)?{release_event_id}(/.*)?$"
+    ).search
 
     release_action = action.chain(
-        lambda: release_patterns.pop(release_event_uid),
+        lambda: active_patterns.pop(release_event_uid),
         action.claim(release_event_id),
     )
 
@@ -194,7 +200,7 @@ def layer_toggle(key_uid: str, layer_name: str) -> None:
 
     toggle = make_toggle()
     press_action = action.chain(
-        lambda: release_patterns.update({release_event_uid: release_action}),
+        lambda: active_patterns.update({release_event_uid: release_action}),
         toggle,
         action.claim(press_event_uid),
     )

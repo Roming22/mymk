@@ -1,57 +1,7 @@
 import time
 
 from seaks.logic.buffer import Buffer
-from seaks.utils.memory import check_memory
-from seaks.utils.time import pretty_print
-from seaks.utils.toolbox import hash
-
-
-class Event:
-    _queue = []
-
-    instances: dict[int, "Event"] = {}
-
-    @check_memory("Event")
-    def __init__(self, subject: str, value: "Any", uid: int) -> None:
-        if id in Event.instances.keys():
-            raise RuntimeError(
-                "You cannot instanciate the same object twice. Use get() instead."
-            )
-        self.subject = subject
-        self.value = value
-        self.uid = uid
-        Event.instances[uid] = self
-
-    def __eq__(self, __o: object) -> bool:
-        return self.__hash__() == __o.__hash__()
-
-    def __hash__(self) -> int:
-        return self.uid
-
-    def __repr__(self) -> str:
-        return f"{self.subject}: {self.value}"
-
-    def fire(self) -> None:
-        Event._queue.append((time.monotonic_ns(), self))
-
-    @classmethod
-    def get(cls, subject: str, value: "Any") -> "Event":
-        uid = hash(f"{subject}: {value}")
-        try:
-            return cls.instances[uid]
-        except KeyError:
-            event = cls(subject, value, uid)
-            return event
-
-    @classmethod
-    def get_next(cls) -> "Event":
-        try:
-            while data := cls._queue.pop(0):
-                timestamp, event = data
-                print(f"[{pretty_print(timestamp)}] {event}")
-                yield event
-        except IndexError:
-            pass
+from seaks.utils.memory import memory_cost
 
 
 class Timer:
@@ -59,7 +9,7 @@ class Timer:
 
     running = set()
 
-    @check_memory("Timer")
+    @memory_cost("Timer")
     def __init__(self, name: str, seconds: float) -> None:
         if name in Timer.instances.keys():
             raise RuntimeError(
@@ -76,9 +26,9 @@ class Timer:
 
     @classmethod
     def start(cls, name):
-        print(f"    Timer: {name} starting")
+        # print(f"    Timer: {name} starting")
         timer = cls.instances[name]
-        cls.running.add(timer.name)
+        cls.running.add(name)
         timer.reset(name)
 
     @classmethod
@@ -88,6 +38,7 @@ class Timer:
 
     @classmethod
     def stop(cls, name):
+        # print(f"    Timer: {name} stopping")
         Timer.running.remove(name)
 
     def is_expired(self):

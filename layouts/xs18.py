@@ -31,20 +31,20 @@ def main() -> None:
     definition["layout"]["layers"]["alpha"] = {
         "keys": [
             # fmt: off
-    "ESC",              "D",    "C",        "L",
-    "LY_MO(symbols)",   "T",    "A",        "E",
-                        "NO",   "SPACE",    "LGUI", "LY_TG(symbols)",
+    "ESC",              "TH_HD(D, LSFT)",   "TH_HD(C, LALT)",   "TH_HD(L, LCTL)",
+    "LY_MO(symbols)",   "T",                "A",                "E",
+                        "NO",               "SPACE",            "LGUI",             "LY_TG(symbols)",
 
-            "R",    "S",    "H",    "ENTER",
-            "I",    "O",    "N",    "NO",
-    "NO",   "RGUI", "MEH",  "NO",
+            "TH_HD(R, RSFT)",   "TH_HD(S, RALT)",   "TH_HD(H, RSFT)",   "ENTER",
+            "I",                "O",                "N",                "NO",
+    "NO",   "RGUI",             "MEH",              "NO",
             # fmt: on
         ]
     }
     definition["layout"]["layers"]["symbols"] = {
         "keys": [
             # fmt: off
-None,   "GRAVE",            "BACKSLASH",    "UNDERSCORE",
+    None,   "GRAVE",        "BACKSLASH",    "UNDERSCORE",
     None,   "HASH",         "DOLLAR",       "EXCLAIM",
             "LY_MO(alpha)", None,           None,           None,
 
@@ -55,7 +55,6 @@ None,   "GRAVE",            "BACKSLASH",    "UNDERSCORE",
         ],
     }
     keyboard = Keyboard(definition)
-
 
     # # C,A = G
     # Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)
