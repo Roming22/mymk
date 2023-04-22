@@ -65,35 +65,35 @@ def _tap_hold(
     on_press_tap, on_release_tap = get_actions_for(keycode_tap)
     tap_action = action.chain(
         debug("t before"),
+        action.claim(release_event_id),
         action.stop_timer(hold_event_uid),
         on_press_tap,
         on_release_tap,
         clean_active_patterns,
-        action.claim(release_event_id),
     )
 
     # Hold
     on_press_hold, on_release_hold = get_actions_for(keycode_hold)
     hold_release_action = action.chain(
         debug("h r before"),
+        action.claim(release_event_id),
         on_release_hold,
         clean_active_patterns,
-        action.claim(release_event_id),
     )
     hold_action = action.chain(
         debug("h before"),
+        action.claim(hold_event_uid),
         on_press_hold,
         lambda: active_patterns.update({release_event_uid: hold_release_action}),
         lambda: active_patterns.pop(interrupt_event_uid),
-        action.claim(hold_event_uid),
         debug("h after"),
     )
 
     # Interrupt
     if on_interrupt == "tap":
         interrupt_release_action = action.chain(
-            clean_active_patterns,
             action.claim(release_event_id),
+            clean_active_patterns,
         )
         interrupt_action = action.chain(
             debug("it before"),
@@ -118,8 +118,8 @@ def _tap_hold(
         )
     else:
         interrupt_release_action = action.chain(
-            clean_active_patterns,
             action.claim(release_event_id),
+            clean_active_patterns,
         )
         interrupt_action = action.chain(
             debug("i0 before"),
@@ -132,11 +132,11 @@ def _tap_hold(
 
     # Activate switch
     press_action = action.chain(
+        action.claim(press_event_uid),
         lambda: active_patterns.update({release_event_uid: tap_action}),
         lambda: active_patterns.update({hold_event_uid: hold_action}),
         lambda: active_patterns.update({interrupt_event_uid: interrupt_action}),
         action.start_timer(hold_event_uid, True),
-        action.claim(press_event_uid),
     )
 
     press_patterns[1][press_event_uid] = press_action

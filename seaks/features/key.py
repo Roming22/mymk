@@ -69,14 +69,14 @@ def set_key(key_uid, on_press, on_release):
     regex_cache[release_event_uid] = re.compile(f"^{release_event_id}$").search
 
     release_action = action.chain(
+        action.claim(release_event_id),
         lambda: active_patterns.pop(release_event_uid),
         on_release,
-        action.claim(release_event_id),
     )
     press_action = action.chain(
+        action.claim(press_event_uid),
         lambda: active_patterns.update({release_event_uid: release_action}),
         on_press,
-        action.claim(press_event_uid),
     )
 
     press_patterns[1][press_event_uid] = press_action
