@@ -31,9 +31,9 @@ def main() -> None:
     definition["layout"]["layers"]["alpha"] = {
         "keys": [
             # fmt: off
-    "ESC",              "TH_HD(D, LSFT)",   "TH_HD(C, LALT)",   "TH_HD(L, LCTL)",
-    "LY_MO(symbols)",   "T",                "A",                "E",
-                        "NO",               "SPACE",            "LGUI",             "LY_TG(symbols)",
+    "ESC",              "TH_HD(D, LSFT)",           "TH_HD(C, LALT)",   "TH_HD(L, LCTL)",
+    "LY_MO(symbols)",   "TH_HD(T, LY_MO(symbols))", "A",                "E",
+                        "NO",                       "SPACE",            "LGUI",             "LY_TG(symbols)",
 
             "TH_HD(R, RSFT)",   "TH_HD(S, RALT)",   "TH_HD(H, RSFT)",   "ENTER",
             "I",                "O",                "N",                "NO",

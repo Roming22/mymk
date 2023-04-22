@@ -8,7 +8,7 @@ from seaks.utils.memory import memory_cost
 
 # from typing import Callable
 
-
+action_func = {}
 func_mapping = {}
 regex_cache: dict(str, re) = {}
 
@@ -27,10 +27,31 @@ def set(layer_uid: str, switch_uid: str, keycode: str) -> None:
             args = [keycode]
     except AttributeError:
         if "(" in keycode and keycode.endswith(")"):
-            func, args = parse_keycode(keycode)
+            func_name, args = parse_keycode(keycode)
+            try:
+                func = func_mapping[func_name]
+            except KeyError:
+                raise RuntimeError("Keycode not implemented:", func_name)
         else:
             raise RuntimeError(f"Keycode not implemented: '{keycode}'")
     func(key_uid, *args)
+
+
+def get_actions_for(keycode: str):
+    try:
+        if keycode in ["NO", None] or get_keycodes_for(keycode):
+            func = get_keycode_actions
+            args = [keycode]
+    except AttributeError:
+        if "(" in keycode and keycode.endswith(")"):
+            func_name, args = parse_keycode(keycode)
+            try:
+                func = action_func[func_name]
+            except KeyError:
+                raise RuntimeError("Keycode not implemented:", func_name)
+        else:
+            raise RuntimeError(f"Keycode not implemented: '{keycode}'")
+    return func(*args)
 
 
 @memory_cost("Key")
@@ -99,11 +120,8 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
     # Append the last substring to the output list
     output_list.append(current_substring.strip())
 
-    try:
-        func = func_mapping[func_name]
-    except KeyError:
-        raise RuntimeError("Keycode not implemented:", func_name)
-    return (func, output_list)
+    return (func_name, output_list)
+
 
 # def combo_patterns(key):
 #     switch_uid = ".".join(key.uid.split(".")[-2:])

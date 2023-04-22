@@ -4,6 +4,7 @@ import seaks.logic.action as action
 from seaks.features.key import (
     active_patterns,
     func_mapping,
+    get_actions_for,
     press_patterns,
     regex_cache,
 )
@@ -61,24 +62,27 @@ def _tap_hold(
     ]
 
     # Tap
+    on_press_tap, on_release_tap = get_actions_for(keycode_tap)
     tap_action = action.chain(
         debug("t before"),
         action.stop_timer(hold_event_uid),
-        action.oneshot(keycode_tap),
+        on_press_tap,
+        on_release_tap,
         clean_active_patterns,
         action.claim(release_event_id),
     )
 
     # Hold
+    on_press_hold, on_release_hold = get_actions_for(keycode_hold)
     hold_release_action = action.chain(
         debug("h r before"),
-        action.release(keycode_hold),
+        on_release_hold,
         clean_active_patterns,
         action.claim(release_event_id),
     )
     hold_action = action.chain(
         debug("h before"),
-        action.press(keycode_hold),
+        on_press_hold,
         lambda: active_patterns.update({release_event_uid: hold_release_action}),
         lambda: active_patterns.pop(interrupt_event_uid),
         action.claim(hold_event_uid),
@@ -95,7 +99,8 @@ def _tap_hold(
             debug("it before"),
             lambda: active_patterns.pop(interrupt_event_uid),
             action.stop_timer(hold_event_uid),
-            action.oneshot(keycode_tap),
+            on_press_tap,
+            on_release_tap,
             lambda: active_patterns.update(
                 {release_event_uid: interrupt_release_action}
             ),
@@ -106,7 +111,7 @@ def _tap_hold(
             debug("ih before"),
             lambda: active_patterns.pop(interrupt_event_uid),
             action.stop_timer(hold_event_uid),
-            action.press(keycode_hold),
+            on_press_hold,
             lambda: active_patterns.update(
                 {release_event_uid: interrupt_release_action}
             ),

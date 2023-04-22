@@ -1,4 +1,4 @@
-from seaks.features.key import func_mapping
+from seaks.features.key import action_func, func_mapping
 from seaks.features.key import set as Key
 from seaks.features.key import set_key
 from seaks.utils.memory import memory_cost
@@ -160,3 +160,7 @@ def get_to_action(layer_name: str):
 func_mapping["LY_MO"] = layer_momentary
 func_mapping["LY_TG"] = layer_toggle
 func_mapping["LY_TO"] = layer_to
+
+action_func["LY_MO"] = get_momentary_action
+action_func["LY_TG"] = get_toggle_action
+action_func["LY_TO"] = get_to_action
