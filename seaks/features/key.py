@@ -35,28 +35,36 @@ def set(layer_uid: str, switch_uid: str, keycode: str) -> None:
 
 @memory_cost("Key")
 def simple_key(key_uid: str, keycode: str) -> None:
+    set_key(key_uid, *get_keycode_actions(keycode))
+
+
+def set_key(key_uid, on_press, on_release):
     switch_uid = ".".join(key_uid.split(".")[-2:])
     press_event_uid = key_uid
     release_event_uid = f"!{key_uid}"
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
-    regex_cache[release_event_uid] = re.compile(
-        f"^(.*/)?{release_event_id}(/.*)?$"
-    ).search
+    regex_cache[press_event_uid] = re.compile(f"^{press_event_uid}$").search
+    regex_cache[release_event_uid] = re.compile(f"^{release_event_id}$").search
 
     release_action = action.chain(
         lambda: active_patterns.pop(release_event_uid),
-        action.release(keycode),
+        on_release,
         action.claim(release_event_id),
     )
     press_action = action.chain(
         lambda: active_patterns.update({release_event_uid: release_action}),
-        action.press(keycode),
+        on_press,
         action.claim(press_event_uid),
     )
 
     press_patterns[1][press_event_uid] = press_action
+
+
+def get_keycode_actions(keycode: str):
+    on_press = action.press(keycode)
+    on_release = action.release(keycode)
+    return (on_press, on_release)
 
 
 def parse_keycode(keycode: str) -> tuple[str, list[str]]:
@@ -96,19 +104,6 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
     except KeyError:
         raise RuntimeError("Keycode not implemented:", func_name)
     return (func, output_list)
-
-
-# def get(key_uid: str) -> Key:
-#     try:
-#         return instances[key_uid]
-#     except KeyError as ex:
-#         print(f"Key not found: {key_uid}")
-
-
-# def simple_key_patterns(key):
-#     switch_uid = ".".join(key.uid.split(".")[-2:])
-#     event_pressed = key.uid
-#     event_released = f"!{switch_uid}"
 
 # def combo_patterns(key):
 #     switch_uid = ".".join(key.uid.split(".")[-2:])
@@ -180,16 +175,6 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
 #     if complexity not in patterns.keys():
 #         patterns[complexity] = dict()
 #     patterns[complexity][regex_uid] = action
-
-
-# def cache_regex(*event_ids) -> str:
-#     regex_uid = "(/.*)?/".join(event_ids)
-#     regex = f"^(.*/)?{regex_uid}(/.*)?$"
-#     try:
-#         regex_cache[regex_uid]
-#     except KeyError:
-#         regex_cache[regex_uid] = re.compile(regex)
-#     return regex_uid
 
 
 class KeyTicker(Ticker):

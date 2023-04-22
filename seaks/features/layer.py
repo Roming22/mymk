@@ -1,13 +1,6 @@
-import re
-
-import seaks.logic.action as action
-from seaks.features.key import (
-    active_patterns,
-    func_mapping,
-    press_patterns,
-    regex_cache,
-)
+from seaks.features.key import func_mapping
 from seaks.features.key import set as Key
+from seaks.features.key import set_key
 from seaks.utils.memory import memory_cost
 
 
@@ -113,77 +106,23 @@ class Layer:
 
 
 @memory_cost("LY_TO")
-def layer_to(key_uid: str, layer_name: list[str]) -> None:
-    switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_uid = key_uid
-    release_event_uid = f"!{key_uid}"
-    release_event_id = f"!{switch_uid}"
-
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
-    regex_cache[release_event_uid] = re.compile(
-        f"^(.*/)?{release_event_id}(/.*)?$"
-    ).search
-
-    release_action = action.chain(
-        lambda: active_patterns.pop(release_event_uid),
-        action.claim(release_event_id),
-    )
-    press_action = action.chain(
-        lambda: active_patterns.update({release_event_uid: release_action}),
-        lambda: Layer.to(layer_name[0]),
-        action.claim(press_event_uid),
-    )
-
-    press_patterns[1][press_event_uid] = press_action
+def layer_to(key_uid: str, layer_name: str) -> None:
+    print("GNRX", layer_name)
+    set_key(key_uid, *get_to_action(layer_name))
 
 
 @memory_cost("LY_MO")
-def layer_momentary(key_uid: str, layer_name: list[str]) -> None:
-    switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_uid = key_uid
-    release_event_uid = f"!{key_uid}"
-    release_event_id = f"!{switch_uid}"
-
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
-    regex_cache[release_event_uid] = re.compile(
-        f"^(.*/)?{release_event_id}(/.*)?$"
-    ).search
-
-    def activate():
-        deactivate = Layer.activate_layer(layer_name[0])
-        release_action = action.chain(
-            lambda: active_patterns.pop(release_event_uid),
-            deactivate,
-            action.claim(release_event_id),
-        )
-        active_patterns.update({release_event_uid: release_action})
-
-    press_action = action.chain(
-        activate,
-        action.claim(press_event_uid),
-    )
-
-    press_patterns[1][press_event_uid] = press_action
+def layer_momentary(key_uid: str, layer_name: str) -> None:
+    set_key(key_uid, *get_momentary_action(layer_name))
 
 
 @memory_cost("LY_TG")
 def layer_toggle(key_uid: str, layer_name: str) -> None:
-    switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_uid = key_uid
-    release_event_uid = f"!{key_uid}"
-    release_event_id = f"!{switch_uid}"
+    set_key(key_uid, *get_toggle_action(layer_name))
 
-    regex_cache[press_event_uid] = re.compile(f"^(.*/)?{press_event_uid}(/.*)?$").search
-    regex_cache[release_event_uid] = re.compile(
-        f"^(.*/)?{release_event_id}(/.*)?$"
-    ).search
 
-    release_action = action.chain(
-        lambda: active_patterns.pop(release_event_uid),
-        action.claim(release_event_id),
-    )
-
-    def make_toggle():
+def make_toggle(layer_name: str):
+    def make_func():
         deactivate = None
 
         def toggle():
@@ -198,14 +137,24 @@ def layer_toggle(key_uid: str, layer_name: str) -> None:
 
         return toggle
 
-    toggle = make_toggle()
-    press_action = action.chain(
-        lambda: active_patterns.update({release_event_uid: release_action}),
-        toggle,
-        action.claim(press_event_uid),
-    )
+    return make_func()
 
-    press_patterns[1][press_event_uid] = press_action
+
+def get_momentary_action(layer_name: str):
+    toggle = make_toggle(layer_name)
+    return (toggle, toggle)
+
+
+def get_toggle_action(layer_name: str):
+    on_release = lambda: True
+    on_press = make_toggle(layer_name)
+    return (on_press, on_release)
+
+
+def get_to_action(layer_name: str):
+    on_release = lambda: True
+    on_press = lambda: Layer.to(layer_name)
+    return (on_press, on_release)
 
 
 func_mapping["LY_MO"] = layer_momentary
