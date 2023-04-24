@@ -1,9 +1,8 @@
 import re
 
 import seaks.logic.action as action
+import seaks.logic.event_handler as EventHandler
 from seaks.hardware.keys import get_keycodes_for
-from seaks.logic.buffer import Buffer
-from seaks.logic.controller import Ticker
 from seaks.utils.memory import memory_cost
 
 # from typing import Callable
@@ -59,27 +58,17 @@ def simple_key(key_uid: str, keycode: str) -> None:
     set_key(key_uid, *get_keycode_actions(keycode))
 
 
-def set_key(key_uid, on_press, on_release):
+def set_key(key_uid, on_press_action, on_release_action):
     switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_uid = key_uid
-    release_event_uid = f"!{key_uid}"
+    press_event_id = key_uid
     release_event_id = f"!{switch_uid}"
 
-    regex_cache[press_event_uid] = re.compile(f"^{press_event_uid}$").search
-    regex_cache[release_event_uid] = re.compile(f"^{release_event_id}$").search
-
-    release_action = action.chain(
-        action.claim(release_event_id),
-        lambda: active_patterns.pop(release_event_uid),
-        on_release,
+    EventHandler.key_to_action[press_event_id] = action.chain(
+        EventHandler.followup_actions_for(
+            key_uid, {release_event_id: on_release_action}
+        ),
+        on_press_action,
     )
-    press_action = action.chain(
-        action.claim(press_event_uid),
-        lambda: active_patterns.update({release_event_uid: release_action}),
-        on_press,
-    )
-
-    press_patterns[1][press_event_uid] = press_action
 
 
 def get_keycode_actions(keycode: str):
@@ -121,103 +110,3 @@ def parse_keycode(keycode: str) -> tuple[str, list[str]]:
     output_list.append(current_substring.strip())
 
     return (func_name, output_list)
-
-
-# def combo_patterns(key):
-#     switch_uid = ".".join(key.uid.split(".")[-2:])
-#     event_pressed = key.uid
-#     event_released = f"!{switch_uid}"
-#     patterns = dict()
-
-#     # Oneshot
-#     add_pattern(
-#         patterns,
-#         [event_pressed, event_released],
-#         [
-#             action.oneshot(key.keycode),
-#             action.claim(event_pressed, event_released),
-#         ]
-#         + [action.stop_timer(c.name) for c in key.combos],
-#     )
-
-#     for combo in key.combos:
-#         print("Combo:", combo)
-#         timer = combo.name
-
-#         # Acticate combo timer
-#         add_pattern(
-#             patterns,
-#             event_pressed,
-#             action.start_timer(timer),
-#         )
-
-#         # Combo not activated...
-#         ## Press
-#         add_pattern(patterns, [event_pressed, timer], action.press(key.keycode))
-#         ## Release
-#         add_pattern(
-#             patterns,
-#             [event_pressed, timer, event_released],
-#             [
-#                 action.release(key.keycode),
-#                 action.claim(event_pressed, timer, event_released),
-#             ],
-#         )
-
-#         # Combo activated
-#         ## Press
-#         add_pattern(
-#             patterns,
-#             combo.key_uids,
-#             [action.oneshot(combo.keycode), action.stop_timer(timer)],
-#         )
-#         # Combo activated
-#         ## Release
-#         # add_pattern(
-#         #     patterns,
-#         #     [],
-#         #     [action.release(combo.keycode)]
-#         # )
-
-#     return patterns
-
-
-# def add_pattern(patterns: dict, event_ids: list, action: action) -> None:
-#     if not isinstance(event_ids, list):
-#         event_ids = [event_ids]
-#     regex_uid = cache_regex(*event_ids)
-#     if isinstance(action, list):
-#         action = action.chain(*action)
-
-#     complexity = len(event_ids)
-#     if complexity not in patterns.keys():
-#         patterns[complexity] = dict()
-#     patterns[complexity][regex_uid] = action
-
-
-class KeyTicker(Ticker):
-    def __init__(self) -> None:
-        print("Initializing keys")
-        # for key in instances.values():
-        #     if key.combos and key.tapholds:
-        #         raise NotImplementedError("Combos and TapHolds are not implemented")
-        #     elif key.combos:
-        #         key.patterns.update(combo_patterns(key))
-        #     elif key.tapholds:
-        #         raise NotImplementedError("TapHolds are not implemented")
-        #     else:
-        #         key.patterns.update(simple_key_patterns(key))
-        # Memory can be released
-        # key.combos.clear()
-        # key.tapholds.clear()
-        self.register()
-
-    def tick(self) -> None:
-        for regex_uid, action in active_patterns.items():
-            if regex_cache[regex_uid](Buffer.instance.data):
-                action()
-        for complexity in reversed(list(press_patterns.keys())):
-            patterns = press_patterns[complexity]
-            for regex_uid, action in patterns.items():
-                if regex_cache[regex_uid](Buffer.instance.data):
-                    action()

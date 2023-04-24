@@ -1,7 +1,6 @@
 from seaks.features.key import action_func, func_mapping
 from seaks.features.key import set as Key
 from seaks.features.key import set_key
-from seaks.logic.buffer import Buffer
 from seaks.utils.memory import memory_cost
 
 
@@ -16,8 +15,6 @@ class ActiveLayer:
         self.freeze()
         self.LAYERS.append(self)
         print(f"Activating Layer '{self.uid}'. Layers: {[l.uid for l in self.LAYERS]}")
-        if len(self.LAYERS) > 1:
-            self.refresh_buffer(self.LAYERS[-2].id)
 
     def freeze(self) -> None:
         """Freeze transparent keys
@@ -60,20 +57,12 @@ class ActiveLayer:
         # layer is now activated.
         if is_top_layer:
             print(f"Fallbacking to Layer '{self.LAYERS[-1].uid}'")
-            self.refresh_buffer(self.id)
 
     @classmethod
     def get_layer_for(cls, switch_id: int) -> str:
         """Get the layer"""
         current_layer = cls.LAYERS[-1]
         return current_layer.keys_to_layer[switch_id]
-
-    @classmethod
-    def refresh_buffer(cls, layer_name) -> None:
-        for index, event in enumerate(Buffer.instance.content):
-            new_event = event.replace(layer_name, cls.LAYERS[-1].id)
-            Buffer.instance.content[index] = new_event
-        Buffer.instance.update_data()
 
 
 class Layer:

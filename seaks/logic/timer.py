@@ -1,6 +1,6 @@
 import time
 
-from seaks.logic.buffer import Buffer
+import seaks.logic.event_handler as EventHandler
 from seaks.utils.memory import memory_cost
 
 
@@ -53,4 +53,4 @@ class Timer:
         for timer_name in cls.running:
             timer = Timer.instances[timer_name]
             if timer.is_expired():
-                Buffer.register(timer_name)
+                EventHandler.handle_event(timer_name)

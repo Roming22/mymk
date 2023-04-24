@@ -3,8 +3,7 @@
 from seaks.hardware.keys import oneshot as key_oneshot
 from seaks.hardware.keys import press as key_press
 from seaks.hardware.keys import release as key_release
-from seaks.logic.buffer import Buffer
-from seaks.logic.event import Timer
+from seaks.logic.timer import Timer
 from seaks.utils.memory import memory_cost
 
 noop = lambda: None
@@ -43,22 +42,9 @@ def release(key_name: str) -> "Callable":
     return func
 
 
-@memory_cost("action.claim")
-def claim(*event_ids) -> "Callable":
-    if isinstance(event_ids, str):
-        event_ids = [event_ids]
-
-    func = lambda: [Buffer.claim(event_id) for event_id in event_ids]
-    return func
-
-
 @memory_cost("action.start_timer")
 def start_timer(timer_name: str, force=False) -> "Callable":
-    def func():
-        if timer_name not in Buffer.instance.content or force:
-            Timer.start(timer_name)
-        return True
-
+    func = lambda: Timer.start(timer_name)
     return func
 
 

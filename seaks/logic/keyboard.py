@@ -1,9 +1,9 @@
+import seaks.virtual.board as Board
 from seaks.features.layer import Layer
 from seaks.hardware.board import create as create_hardware_board
-from seaks.logic.controller import Controller
 from seaks.logic.fps import FPS
+from seaks.logic.timer import Timer
 from seaks.utils.memory import get_usage, memory_cost, profile
-from seaks.virtual.board import create as create_board
 
 
 class Keyboard:
@@ -14,7 +14,7 @@ class Keyboard:
             definition["hardware"]["pins"]["cols"],
         )
         try:
-            board = create_board(
+            board = Board.create(
                 hardware_board,
                 board_uid,
                 list(definition["layout"]["layers"].keys())[0],
@@ -51,4 +51,5 @@ class Keyboard:
         while True:
             if fps:
                 FPS.tick()
-            Controller.run()
+            Timer.tick()
+            Board.tick()

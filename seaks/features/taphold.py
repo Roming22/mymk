@@ -1,16 +1,7 @@
-import re
-
 import seaks.logic.action as action
-from seaks.features.key import (
-    active_patterns,
-    func_mapping,
-    get_actions_for,
-    press_patterns,
-    regex_cache,
-)
-
-# from seaks.features.key import oneshot, press, release, set_state, start_delay
-from seaks.logic.event import Timer
+import seaks.logic.event_handler as EventHandler
+from seaks.features.key import func_mapping, get_actions_for
+from seaks.logic.timer import Timer
 from seaks.utils.memory import memory_cost
 
 delay = [0.5]
@@ -25,121 +16,68 @@ def _tap_hold(
     delay: float = delay,
 ) -> None:
     switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_uid = key_uid
-    hold_event_uid = f"{key_uid}.hold"
-    interrupt_event_uid = f"{key_uid}.interrupt"
-    release_event_uid = f"!{key_uid}"
+    press_event_id = key_uid
     release_event_id = f"!{switch_uid}"
+    hold_event_id = f"{key_uid}.hold"
 
     # Timer to control the hold delay
-    Timer(hold_event_uid, delay)
-
-    regex_cache[press_event_uid] = re.compile(f"^{press_event_uid}$").search
-    regex_cache[release_event_uid] = re.compile(f"^{release_event_id}$").search
-    regex_cache[hold_event_uid] = re.compile(f"^{hold_event_uid}$").search
-
-    interrupt_regex = lambda event_ids: (
-        len(event_ids) != 0
-        and True
-        not in [
-            event_id in event_ids.split("/")
-            for event_id in [release_event_id, hold_event_uid]
-        ]
-    )
-
-    regex_cache[interrupt_event_uid] = interrupt_regex
-    debug = lambda x: lambda: print(x)
-
-    clean_active_patterns = lambda: [
-        active_patterns.pop(event_uid)
-        for event_uid in [
-            press_event_uid,
-            release_event_uid,
-            hold_event_uid,
-            interrupt_event_uid,
-        ]
-        if event_uid in active_patterns.keys()
-    ]
+    Timer(hold_event_id, delay)
+    start_timer = action.start_timer(hold_event_id, True)
+    stop_timer = action.stop_timer(hold_event_id)
 
     # Tap
     on_press_tap, on_release_tap = get_actions_for(keycode_tap)
     tap_action = action.chain(
-        debug("t before"),
-        action.claim(release_event_id),
-        action.stop_timer(hold_event_uid),
+        stop_timer,
         on_press_tap,
         on_release_tap,
-        clean_active_patterns,
     )
 
     # Hold
     on_press_hold, on_release_hold = get_actions_for(keycode_hold)
-    hold_release_action = action.chain(
-        debug("h r before"),
-        action.claim(release_event_id),
-        on_release_hold,
-        clean_active_patterns,
-    )
     hold_action = action.chain(
-        debug("h before"),
-        action.claim(hold_event_uid),
         on_press_hold,
-        lambda: active_patterns.update({release_event_uid: hold_release_action}),
-        lambda: active_patterns.pop(interrupt_event_uid),
-        debug("h after"),
+        EventHandler.followup_actions_for(key_uid, {release_event_id: on_release_hold}),
     )
 
     # Interrupt
     if on_interrupt == "tap":
-        interrupt_release_action = action.chain(
-            action.claim(release_event_id),
-            clean_active_patterns,
-        )
         interrupt_action = action.chain(
-            debug("it before"),
-            lambda: active_patterns.pop(interrupt_event_uid),
-            action.stop_timer(hold_event_uid),
+            stop_timer,
             on_press_tap,
-            on_release_tap,
-            lambda: active_patterns.update(
-                {release_event_uid: interrupt_release_action}
+            EventHandler.followup_actions_for(
+                key_uid, {release_event_id: on_release_tap}
             ),
         )
     elif on_interrupt == "hold":
-        interrupt_release_action = hold_release_action
         interrupt_action = action.chain(
-            debug("ih before"),
-            lambda: active_patterns.pop(interrupt_event_uid),
-            action.stop_timer(hold_event_uid),
+            stop_timer,
             on_press_hold,
-            lambda: active_patterns.update(
-                {release_event_uid: interrupt_release_action}
+            EventHandler.followup_actions_for(
+                key_uid, {release_event_id: on_release_hold}
             ),
         )
     else:
-        interrupt_release_action = action.chain(
-            action.claim(release_event_id),
-            clean_active_patterns,
-        )
         interrupt_action = action.chain(
-            debug("i0 before"),
-            lambda: active_patterns.pop(interrupt_event_uid),
-            action.stop_timer(hold_event_uid),
-            lambda: active_patterns.update(
-                {release_event_uid: interrupt_release_action}
+            stop_timer,
+            EventHandler.followup_actions_for(
+                key_uid,
+                {release_event_id: action.noop},
             ),
         )
 
     # Activate switch
-    press_action = action.chain(
-        action.claim(press_event_uid),
-        lambda: active_patterns.update({release_event_uid: tap_action}),
-        lambda: active_patterns.update({hold_event_uid: hold_action}),
-        lambda: active_patterns.update({interrupt_event_uid: interrupt_action}),
-        action.start_timer(hold_event_uid, True),
+    EventHandler.key_to_action[press_event_id] = action.chain(
+        EventHandler.followup_actions_for(
+            key_uid,
+            {
+                release_event_id: tap_action,
+                hold_event_id: hold_action,
+                EventHandler.INTERRUPT: interrupt_action,
+            },
+        ),
+        start_timer,
     )
-
-    press_patterns[1][press_event_uid] = press_action
 
 
 def _get_delay(user_delay: str) -> float:

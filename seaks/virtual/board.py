@@ -1,10 +1,8 @@
 from collections import namedtuple
 
-from seaks.features.key import KeyTicker
+import seaks.logic.event_handler as EventHandler
 from seaks.features.layer import ActiveLayer, Layer
 from seaks.hardware.board import Board as HardwareBoard
-from seaks.logic.buffer import Buffer
-from seaks.logic.controller import Controller
 from seaks.utils.memory import check_memory
 
 Board = namedtuple(
@@ -18,20 +16,29 @@ instances: dict[str, Board] = {}
 @check_memory("virtual.Board")
 def create(hardware_board: HardwareBoard, name: str, default_layer_name: str) -> Board:
     def start():
-        KeyTicker()
         Layer.activate_layer(default_layer_name)
+
+    def get_event_id(event) -> str:
+        switch_id = hardware_board.get_switch_id(event.key_number)
+        if event.pressed:
+            prefix = f"{name}.{ActiveLayer.get_layer_for(int(switch_id))}."
+        else:
+            prefix = "!"
+        return f"{prefix}switch.{switch_id}"
 
     def tick() -> None:
         if event := hardware_board._keymatrix.events.get():
-            print(f"\n{'#' * 120}")
-            switch_id = hardware_board.get_switch_id(event.key_number)
-            if event.pressed:
-                prefix = f"{name}.{ActiveLayer.get_layer_for(int(switch_id))}."
-            else:
-                prefix = "!"
-            Buffer.instance.register(f"{prefix}switch.{switch_id}")
+            event_id = get_event_id(event)
+            print(f"\n# {event_id} {'#' * 120}"[:120])
+            if event.pressed and EventHandler.has_interrupted(event_id):
+                event_id = get_event_id(event)
+            EventHandler.handle_event(event_id)
 
     board = Board(name, hardware_board, start, tick)
-    Controller.set_board(board)
     instances[name] = board
     return board
+
+
+def tick() -> None:
+    for board in instances.values():
+        board.tick()
