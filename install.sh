@@ -56,7 +56,7 @@ init() {
     CIRCUITPYTHON_LIB_URL="https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/download/$(echo "$CIRCUITPYTHON_LIB_VERSION" | cut -d- -f6)/$CIRCUITPYTHON_LIB_VERSION.zip"
     DRIVE_SOURCE="$PROJECT_DIR/drive"
     mkdir -p "$DRIVE_SOURCE/lib"
-    SYNCED_DRIVES=()
+    ln -sf "$PROJECT_DIR/seaks" "$DRIVE_SOURCE/"
 }
 
 get_drive() {
