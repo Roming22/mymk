@@ -33,7 +33,7 @@ def main() -> None:
             # fmt: off
     "ESC",              "TH_HD(D, LSFT)",           "TH_HD(C, LALT)",   "TH_HD(L, LCTL)",
     "LY_MO(symbols)",   "TH_HD(T, LY_MO(symbols))", "A",                "E",
-                        "NO",                       "SPACE",            "LGUI",             "LY_TG(symbols)",
+                        "LY_TO(symbols)",           "SPACE",            "LGUI",             "LY_TG(symbols)",
 
             "TH_HD(R, RSFT)",   "TH_HD(S, RALT)",   "TH_HD(H, RSFT)",   "ENTER",
             "I",                "O",                "N",                "NO",
@@ -46,7 +46,7 @@ def main() -> None:
             # fmt: off
     None,   "GRAVE",        "BACKSLASH",    "UNDERSCORE",
     None,   "HASH",         "DOLLAR",       "EXCLAIM",
-            "LY_MO(alpha)", None,           None,           None,
+            "LY_TO(alpha)", None,           None,           None,
 
             "MINUS",    "SLASH",    "EQUAL",    None,
             "DOT",      "COMMA",    "QUOTE",    None,

@@ -33,8 +33,11 @@ class ActiveLayer:
                     raise RuntimeError(
                         f"Layer '{self.id}' cannot have a transparent key."
                     )
+                previous_layer_switch_uid = switch_uid.replace(
+                    self.id, current_layer.id, 1
+                )
                 self.switch_to_keycode[switch_uid] = current_layer.switch_to_keycode[
-                    switch_uid
+                    previous_layer_switch_uid
                 ]
 
     @classmethod
@@ -97,7 +100,7 @@ class Layer:
         return active_layer.deactivate
 
 
-def make_toggle(layer_name: str):
+def make_toggle(_, layer_name: str):
     def make_func():
         deactivate = None
 
@@ -116,18 +119,18 @@ def make_toggle(layer_name: str):
     return make_func()
 
 
-def get_momentary_action(layer_name: str):
-    toggle = make_toggle(layer_name)
+def get_momentary_action(key_uid: str, layer_name: str):
+    toggle = make_toggle(key_uid, layer_name)
     return (toggle, toggle, None)
 
 
-def get_toggle_action(layer_name: str):
+def get_toggle_action(key_uid: str, layer_name: str):
     on_release = lambda: True
-    on_press = make_toggle(layer_name)
+    on_press = make_toggle(key_uid, layer_name)
     return (on_press, on_release, None)
 
 
-def get_to_action(layer_name: str):
+def get_to_action(_, layer_name: str):
     on_release = lambda: True
     on_press = lambda: Layer.to(layer_name)
     return (on_press, on_release, None)
