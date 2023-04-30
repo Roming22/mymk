@@ -22,7 +22,6 @@ def get_actions_for(key_uid: str, keycode: str):
                 raise RuntimeError("Keycode not implemented:", func_name)
         else:
             raise RuntimeError(f"Keycode not implemented: '{keycode}'")
-    print(func, args)
     return func(key_uid, *args)
 
 

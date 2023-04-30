@@ -29,7 +29,6 @@ def create(hardware_board: HardwareBoard, name: str, default_layer_name: str) ->
     def tick() -> None:
         if event := hardware_board._keymatrix.events.get():
             event_id = get_event_id(event)
-            print(f"\n# {event_id} {'#' * 100}"[:100])
             if event.pressed and EventHandler.has_interrupted(event_id):
                 event_id = get_event_id(event)
             EventHandler.handle_event(event_id)

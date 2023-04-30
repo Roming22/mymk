@@ -50,5 +50,4 @@ class Timer:
         for timer_name in cls.running:
             timer = Timer.instances[timer_name]
             if timer.is_expired():
-                print(f"\n# {timer_name} {'#' * 100}"[:100])
                 EventHandler.handle_event(timer_name)
