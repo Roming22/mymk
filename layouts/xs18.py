@@ -33,7 +33,7 @@ def main() -> None:
             # fmt: off
     "ESC",              "TH_HD(D, LSFT)",           "TH_HD(C, LALT)",   "TH_HD(L, LCTL)",
     "LY_MO(symbols)",   "TH_HD(T, LY_MO(symbols))", "A",                "E",
-                        "LY_TO(symbols)",           "SPACE",            "LGUI",             "LY_TG(symbols)",
+                        "LY_TO(symbols)",           "SPACE",            "LGUI",             "NO",
 
             "TH_HD(R, RSFT)",   "TH_HD(S, RALT)",   "TH_HD(H, RSFT)",   "ENTER",
             "I",                "O",                "N",                "NO",

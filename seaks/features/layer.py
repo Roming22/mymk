@@ -100,7 +100,7 @@ class Layer:
         return active_layer.deactivate
 
 
-def make_toggle(_, layer_name: str):
+def make_toggle(layer_name: str):
     def make_func():
         deactivate = None
 
@@ -119,15 +119,9 @@ def make_toggle(_, layer_name: str):
     return make_func()
 
 
-def get_momentary_action(key_uid: str, layer_name: str):
-    toggle = make_toggle(key_uid, layer_name)
+def get_momentary_action(_, layer_name: str):
+    toggle = make_toggle(layer_name)
     return (toggle, toggle, None)
-
-
-def get_toggle_action(key_uid: str, layer_name: str):
-    on_release = lambda: True
-    on_press = make_toggle(key_uid, layer_name)
-    return (on_press, on_release, None)
 
 
 def get_to_action(_, layer_name: str):
@@ -137,5 +131,4 @@ def get_to_action(_, layer_name: str):
 
 
 action_func["LY_MO"] = get_momentary_action
-action_func["LY_TG"] = get_toggle_action
 action_func["LY_TO"] = get_to_action
