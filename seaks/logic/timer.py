@@ -10,31 +10,28 @@ class Timer:
     running = set()
 
     @memory_cost("Timer")
-    def __init__(self, name: str, seconds: float) -> None:
+    def __init__(self, name: str) -> None:
         if name in Timer.instances.keys():
             raise RuntimeError(
                 "You cannot instanciate the same object twice. Use get() instead."
             )
-        print("Timer:", name, f", {seconds}s,", name)
-        self.seconds = seconds
+        print("Timer:", name)
         self.name = name
         Timer.instances[name] = self
 
     @classmethod
     def get(cls, name: str) -> "Timer":
-        return cls.instances[name]
+        try:
+            return cls.instances[name]
+        except KeyError:
+            return cls(name)
 
     @classmethod
-    def start(cls, name):
+    def start(cls, name: str, delay: float):
         # print(f"    Timer: {name} starting")
-        timer = cls.instances[name]
+        timer = cls.get(name)
         cls.running.add(name)
-        timer.reset(name)
-
-    @classmethod
-    def reset(cls, name):
-        timer = cls.instances[name]
-        timer.end_at = time.monotonic_ns() + timer.seconds * 10**9
+        timer.end_at = time.monotonic_ns() + delay * 10**9
 
     @classmethod
     def stop(cls, name):
@@ -53,4 +50,5 @@ class Timer:
         for timer_name in cls.running:
             timer = Timer.instances[timer_name]
             if timer.is_expired():
+                print(f"\n# {timer_name} {'#' * 100}"[:100])
                 EventHandler.handle_event(timer_name)

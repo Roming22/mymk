@@ -1,6 +1,6 @@
 import seaks.logic.action as action
 import seaks.logic.event_handler as EventHandler
-from seaks.features.key import func_mapping, get_actions_for
+from seaks.features.key import action_func, get_actions_for
 from seaks.logic.timer import Timer
 from seaks.utils.memory import memory_cost
 
@@ -12,72 +12,45 @@ def _tap_hold(
     key_uid: str,
     keycode_tap: str,
     keycode_hold: str,
-    on_interrupt: str,
+    interrupt_mode: str,
     delay: float = delay,
 ) -> None:
-    switch_uid = ".".join(key_uid.split(".")[-2:])
-    press_event_id = key_uid
-    release_event_id = f"!{switch_uid}"
     hold_event_id = f"{key_uid}.hold"
 
+    if not key_uid in EventHandler.event_to_followup_actions.keys():
+        EventHandler.event_to_followup_actions[key_uid] = {}
+
     # Timer to control the hold delay
-    Timer(hold_event_id, delay)
-    start_timer = action.start_timer(hold_event_id, True)
+    start_timer = action.start_timer(hold_event_id, delay)
     stop_timer = action.stop_timer(hold_event_id)
 
+    on_press = start_timer
+
     # Tap
-    on_press_tap, on_release_tap = get_actions_for(keycode_tap)
-    tap_action = action.chain(
+    on_press_tap, on_release_tap, _ = get_actions_for(key_uid, keycode_tap)
+    on_release = action.chain(
         stop_timer,
         on_press_tap,
         on_release_tap,
     )
 
     # Hold
-    on_press_hold, on_release_hold = get_actions_for(keycode_hold)
-    hold_action = action.chain(
-        on_press_hold,
-        EventHandler.followup_actions_for(key_uid, {release_event_id: on_release_hold}),
-    )
+    hold_action = lambda: EventHandler.handle_keycode(key_uid, keycode_hold)
+    EventHandler.event_to_followup_actions[key_uid][hold_event_id] = hold_action
 
     # Interrupt
-    if on_interrupt == "tap":
-        interrupt_action = action.chain(
+    if interrupt_mode == "tap":
+        on_interrupt = on_release
+    elif interrupt_mode == "hold":
+        on_interrupt = action.chain(
             stop_timer,
-            on_press_tap,
-            EventHandler.followup_actions_for(
-                key_uid, {release_event_id: on_release_tap}
-            ),
-        )
-    elif on_interrupt == "hold":
-        interrupt_action = action.chain(
-            stop_timer,
-            on_press_hold,
-            EventHandler.followup_actions_for(
-                key_uid, {release_event_id: on_release_hold}
-            ),
+            hold_action,
         )
     else:
-        interrupt_action = action.chain(
+        on_interrupt = action.chain(
             stop_timer,
-            EventHandler.followup_actions_for(
-                key_uid,
-                {release_event_id: action.noop},
-            ),
         )
-
-    # Activate switch
-    EventHandler.key_to_action[press_event_id] = action.chain(
-        EventHandler.followup_actions_for(
-            key_uid,
-            {
-                release_event_id: tap_action,
-                hold_event_id: hold_action,
-                EventHandler.INTERRUPT: interrupt_action,
-            },
-        ),
-        start_timer,
-    )
+    return (on_press, on_release, on_interrupt)
 
 
 def _get_delay(user_delay: str) -> float:
@@ -95,7 +68,9 @@ def hold_tap(
     user_delay: str = "",
 ) -> None:
     print("Creating HoldTap:", switch_uid, keycode_tap, delay, keycode_hold)
-    _tap_hold(switch_uid, keycode_tap, keycode_hold, "hold", _get_delay(user_delay))
+    return _tap_hold(
+        switch_uid, keycode_tap, keycode_hold, "hold", _get_delay(user_delay)
+    )
 
 
 def interrupt_noop(
@@ -107,7 +82,9 @@ def interrupt_noop(
     print(
         "Creating interruptible TapHold:", switch_uid, keycode_tap, delay, keycode_hold
     )
-    _tap_hold(switch_uid, keycode_tap, keycode_hold, "noop", _get_delay(user_delay))
+    return _tap_hold(
+        switch_uid, keycode_tap, keycode_hold, "noop", _get_delay(user_delay)
+    )
 
 
 def tap_hold(
@@ -117,9 +94,11 @@ def tap_hold(
     user_delay: str = "",
 ) -> None:
     print("Creating TapHold:", switch_uid, keycode_tap, delay, keycode_hold)
-    _tap_hold(switch_uid, keycode_tap, keycode_hold, "tap", _get_delay(user_delay))
+    return _tap_hold(
+        switch_uid, keycode_tap, keycode_hold, "tap", _get_delay(user_delay)
+    )
 
 
-func_mapping["TH_NO"] = interrupt_noop
-func_mapping["TH_HD"] = hold_tap
-func_mapping["TH_TP"] = tap_hold
+action_func["TH_NO"] = interrupt_noop
+action_func["TH_HD"] = hold_tap
+action_func["TH_TP"] = tap_hold

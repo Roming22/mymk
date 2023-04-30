@@ -1,4 +1,4 @@
-from seaks.features.key import action_func, func_mapping, set_key
+from seaks.features.key import action_func
 from seaks.utils.memory import memory_cost
 
 
@@ -59,11 +59,9 @@ class ActiveLayer:
             print(f"Fallbacking to Layer '{self.LAYERS[-1].uid}'")
 
     @classmethod
-    def handle(cls, event_id):
+    def get_keycode(cls, event_id):
         keycode = cls.LAYERS[-1].switch_to_keycode.get(event_id)
-        if not keycode:
-            return
-        print(keycode)
+        return keycode
 
 
 class Layer:
@@ -99,21 +97,6 @@ class Layer:
         return active_layer.deactivate
 
 
-@memory_cost("LY_TO")
-def layer_to(key_uid: str, layer_name: str) -> None:
-    set_key(key_uid, *get_to_action(layer_name))
-
-
-@memory_cost("LY_MO")
-def layer_momentary(key_uid: str, layer_name: str) -> None:
-    set_key(key_uid, *get_momentary_action(layer_name))
-
-
-@memory_cost("LY_TG")
-def layer_toggle(key_uid: str, layer_name: str) -> None:
-    set_key(key_uid, *get_toggle_action(layer_name))
-
-
 def make_toggle(layer_name: str):
     def make_func():
         deactivate = None
@@ -135,24 +118,20 @@ def make_toggle(layer_name: str):
 
 def get_momentary_action(layer_name: str):
     toggle = make_toggle(layer_name)
-    return (toggle, toggle)
+    return (toggle, toggle, None)
 
 
 def get_toggle_action(layer_name: str):
     on_release = lambda: True
     on_press = make_toggle(layer_name)
-    return (on_press, on_release)
+    return (on_press, on_release, None)
 
 
 def get_to_action(layer_name: str):
     on_release = lambda: True
     on_press = lambda: Layer.to(layer_name)
-    return (on_press, on_release)
+    return (on_press, on_release, None)
 
-
-func_mapping["LY_MO"] = layer_momentary
-func_mapping["LY_TG"] = layer_toggle
-func_mapping["LY_TO"] = layer_to
 
 action_func["LY_MO"] = get_momentary_action
 action_func["LY_TG"] = get_toggle_action
