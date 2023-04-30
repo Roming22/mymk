@@ -19,17 +19,17 @@ def create(hardware_board: HardwareBoard, name: str, default_layer_name: str) ->
         Layer.activate_layer(default_layer_name)
 
     def get_event_id(event) -> str:
-        switch_id = hardware_board.get_switch_id(event.key_number)
+        switch_id = event.key_number
         if event.pressed:
-            prefix = f"{name}.{ActiveLayer.get_layer_for(int(switch_id))}."
+            prefix = f"{ActiveLayer.LAYERS[-1].id}."
         else:
-            prefix = "!"
+            prefix = f"!{name}."
         return f"{prefix}switch.{switch_id}"
 
     def tick() -> None:
         if event := hardware_board._keymatrix.events.get():
             event_id = get_event_id(event)
-            print(f"\n# {event_id} {'#' * 120}"[:120])
+            print(f"\n# {event_id} {'#' * 100}"[:100])
             if event.pressed and EventHandler.has_interrupted(event_id):
                 event_id = get_event_id(event)
             EventHandler.handle_event(event_id)

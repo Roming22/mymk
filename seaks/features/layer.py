@@ -1,6 +1,4 @@
-from seaks.features.key import action_func, func_mapping
-from seaks.features.key import set as Key
-from seaks.features.key import set_key
+from seaks.features.key import action_func, func_mapping, set_key
 from seaks.utils.memory import memory_cost
 
 
@@ -9,9 +7,9 @@ class ActiveLayer:
 
     @memory_cost("ActiveLayer")
     def __init__(self, layer: list) -> None:
-        self.id = layer.id
-        self.uid = f"{layer.id}|{id(self)}"
-        self.keys_to_layer = list(layer.keys_to_layer)
+        self.id = layer.uid
+        self.uid = f"{layer.uid}|{id(self)}"
+        self.switch_to_keycode = dict(layer.switch_to_keycode)
         self.freeze()
         self.LAYERS.append(self)
         print(f"Activating Layer '{self.uid}'. Layers: {[l.uid for l in self.LAYERS]}")
@@ -29,13 +27,15 @@ class ActiveLayer:
             current_layer = self.LAYERS[-1]
         except IndexError:
             current_layer = None
-        for index, key_to_layer in enumerate(self.keys_to_layer):
-            if key_to_layer is None:
+        for switch_uid, keycode in self.switch_to_keycode.items():
+            if keycode is None:
                 if current_layer is None:
                     raise RuntimeError(
                         f"Layer '{self.id}' cannot have a transparent key."
                     )
-                self.keys_to_layer[index] = current_layer.keys_to_layer[index]
+                self.switch_to_keycode[switch_uid] = current_layer.switch_to_keycode[
+                    switch_uid
+                ]
 
     @classmethod
     def collapse(cls) -> None:
@@ -59,10 +59,11 @@ class ActiveLayer:
             print(f"Fallbacking to Layer '{self.LAYERS[-1].uid}'")
 
     @classmethod
-    def get_layer_for(cls, switch_id: int) -> str:
-        """Get the layer"""
-        current_layer = cls.LAYERS[-1]
-        return current_layer.keys_to_layer[switch_id]
+    def handle(cls, event_id):
+        keycode = cls.LAYERS[-1].switch_to_keycode.get(event_id)
+        if not keycode:
+            return
+        print(keycode)
 
 
 class Layer:
@@ -74,19 +75,12 @@ class Layer:
     def __init__(self, board, layer_name: str, layer_definition) -> None:
         print(layer_name, end=":")
         self.LAYERS[layer_name] = self
-        self.uid = f"{board.name}.{layer_name}"
+        self.uid = f"{board.name}.layer.{layer_name}"
         self.id = layer_name
-        self.keys_to_layer = []
+        self.switch_to_keycode = {}
         for switch_id, keycode in enumerate(layer_definition["keys"]):
-            if keycode is None:
-                self.keys_to_layer.append(None)
-            else:
-                self.keys_to_layer.append(layer_name)
-            Key(
-                self.uid,
-                board.hardware_board.get_switch_id(switch_id),
-                keycode,
-            )
+            switch_uid = f"{self.uid}.switch.{switch_id}"
+            self.switch_to_keycode[switch_uid] = keycode
         print()
 
         # Check that the first layer has no transparent key.
@@ -107,7 +101,6 @@ class Layer:
 
 @memory_cost("LY_TO")
 def layer_to(key_uid: str, layer_name: str) -> None:
-    print("GNRX", layer_name)
     set_key(key_uid, *get_to_action(layer_name))
 
 
