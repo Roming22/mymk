@@ -36,6 +36,9 @@ parse_args(){
             --dev)
                 DEV_MODE="1"
                 ;;
+            --fast)
+                FAST_MODE="1"
+                ;;
             -d|--debug)
                 set -x
                 ;;
@@ -181,7 +184,9 @@ install_drive() {
 
 parse_args "$@"
 init
-get_libs
+if [ -z "${FAST_MODE:-}" ]; then
+    get_libs
+fi
 if [ -z "${DEV_MODE:-}" ]; then
     install_drive
     install_layout
