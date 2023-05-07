@@ -1,4 +1,5 @@
 import seaks.virtual.board as Board
+from seaks.features.combo import load_combos
 from seaks.features.layer import Layer
 from seaks.hardware.board import create as create_hardware_board
 from seaks.logic.fps import FPS
@@ -22,11 +23,14 @@ class Keyboard:
         except IndexError:
             raise RuntimeError("'layout.layers' must have at least one layer defined.")
 
+        # The switch count is doubled in case of a split keyboard
         switch_count = (
             len(definition["hardware"]["pins"]["cols"])
             * len(definition["hardware"]["pins"]["rows"])
             * 2 ** int(definition["hardware"]["split"])
         )
+
+        # Load layers
         for layer_name, layer_definition in definition["layout"]["layers"].items():
             Layer(board, layer_name, layer_definition)
 
@@ -36,6 +40,12 @@ class Keyboard:
                 raise RuntimeError(
                     f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
                 )
+
+        # Load combos
+        try:
+            load_combos(definition["layout"]["combos"])
+        except KeyError:
+            print("No combo has been declared")
 
         self.board = board
 

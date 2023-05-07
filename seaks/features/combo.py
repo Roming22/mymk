@@ -1,35 +1,28 @@
-from seaks.features.key import instances as key_instances
-from seaks.logic.event import Timer
-from seaks.utils.memory import check_memory
+from seaks.logic.timer import Timer
+from seaks.utils.memory import memory_cost
 from seaks.utils.toolbox import permutations
 
-
-class Sequence:
-    @check_memory("Sequence")
-    def __init__(self, keys: list[tuple[str, str]], keycode: str, delay: float) -> None:
-        keycode = str.upper(keycode)
-        print("Setup", keycode)
-
-        combo_name = (
-            ".".join([f"{layer}.switch.{switch}" for layer, switch in keys])
-            + ".timer.combo"
-        )
-        self.name = combo_name
-        self.keycode = keycode
-        print(f"Sequence: {combo_name}")
-
-        # Timer to control the hold delay
-        self.timer = Timer(combo_name, delay)
-
-        # Add to first key
-        first_key_uid = f"{keys[0][0]}.switch.{keys[0][1]}"
-        key_instances[first_key_uid].combos.append(self)
+delay = [0.1]
 
 
-class Chord:
-    @check_memory("Chord")
-    def __init__(self, keys: list[str], key_name: str) -> None:
-        keys = [str.upper(k) for k in keys]
-        key_name = str.upper(key_name)
-        for event_sequence in permutations(keys):
-            Sequence(event_sequence, key_name)
+@memory_cost("Combos")
+def load_combos(definitions: dict) -> None:
+    print("Loading combos")
+    if "sequences" not in definitions.keys():
+        definitions["sequences"] = {}
+
+    # Expand chords to sequences
+    for chord, keycode in definitions.get("chords", {}).items():
+        for sequence in permutations(chord.split("+")):
+            sequence_id = "+".join(sequence)
+            # Do not allow a chord to override a user defined sequence
+            if sequence_id not in definitions["sequences"].keys():
+                definitions["sequences"][sequence_id] = keycode
+
+    # Load all sequences
+    for sequence, keycode in definitions["sequences"].items():
+        load_sequence(sequence, keycode)
+
+
+def load_sequence(sequence, keycode) -> None:
+    print(sequence, keycode)

@@ -74,7 +74,7 @@ class Layer:
 
     @memory_cost("Layer")
     def __init__(self, board, layer_name: str, layer_definition) -> None:
-        print(layer_name, end=":")
+        print("Loading layer:", layer_name)
         self.LAYERS[layer_name] = self
         self.uid = f"{board.name}.layer.{layer_name}"
         self.id = layer_name
@@ -82,7 +82,6 @@ class Layer:
         for switch_id, keycode in enumerate(layer_definition["keys"]):
             switch_uid = f"{self.uid}.switch.{switch_id}"
             self.switch_to_keycode[switch_uid] = keycode
-        print()
 
         # Check that the first layer has no transparent key.
         if self.id == 0 and None in self.keys:

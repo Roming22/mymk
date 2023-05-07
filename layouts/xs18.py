@@ -9,6 +9,7 @@ def main() -> None:
     print("\n" * 8)
     print("#" * 120)
 
+    # Hardware definition
     definition = {
         "hardware": {
             "pins": {
@@ -28,6 +29,10 @@ def main() -> None:
         },
         "layout": {"layers": OrderedDict()},
     }
+
+    # Layer definitions
+
+    ##  Alpha layer
     definition["layout"]["layers"]["alpha"] = {
         "keys": [
             # fmt: off
@@ -41,6 +46,8 @@ def main() -> None:
             # fmt: on
         ]
     }
+
+    ## Symbol layer
     definition["layout"]["layers"]["symbols"] = {
         "keys": [
             # fmt: off
@@ -54,17 +61,21 @@ def main() -> None:
             # fmt: on
         ],
     }
+
+    # Combo definitions
+    definition["layout"]["combos"] = {
+        ## Chords (can be pressed in any order)
+        "chords": {
+            # "board.layer.alpha.switch.1+board.layer.alpha.switch.2+board.layer.alpha.switch.3": "DELETE",
+            "board.layer.alpha.switch.6+board.layer.alpha.switch.7": "Y",
+        },
+        ## Sequences (must be pressed in the order defined)
+        "sequences": {
+            "board.layer.alpha.switch.5+board.layer.alpha.switch.6": "W",
+        },
+    }
+
     keyboard = Keyboard(definition)
-
-    # # C,A = G
-    # Sequence([("board.alpha", "03"), ("board.alpha", "01")], "G", 1.0)
-    # # Sequence(["F", "E", "D"], "H")
-    # # Chord(["B", "C"], "I")
-    # # Chord(["A", "B", "C"], "J")
-
-    # # Just for fun, let's allow the user to chain HOLD action together
-    # TapHold(("board.alpha1", "01"), ["A", "K", "L"], 0.5)
-
     keyboard.go()
 
 
