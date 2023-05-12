@@ -1,15 +1,24 @@
+import time
+
 from seaks.features.combo import handle_event as combo_handle_event
 from seaks.features.key import get_actions_for
 from seaks.features.layer import ActiveLayer
+from seaks.logic.timer import Timer
 from seaks.utils.memory import get_usage as get_memory_usage
+from seaks.utils.time import pretty_print
 
 event_to_followup_actions = {}
 INTERRUPT = "interrupt"
 
+time_last_event = time.monotonic_ns()
 
 def handle_event(event_id: str) -> None:
-    print(f"\n# {event_id} {'#' * 100}"[:100])
+    global time_last_event
     print(get_memory_usage(True))
+    print(f"\n# {event_id} {'#' * 100}"[:100])
+    now = time.monotonic_ns()
+    print("# At:", pretty_print(now), f"(+{(now-time_last_event)/10**6}ms)")
+    Timer.now = now
 
     combo_handle_event(event_id)
 
@@ -20,11 +29,16 @@ def handle_event(event_id: str) -> None:
             print(event_id, event_uid)
             actions = event_to_followup_actions.pop(event_uid)
             actions[event_id]()
+            time_last_event = now
+            print(f"# Processed in {(time.monotonic_ns()-now)/10**6}ms")
+            print(get_memory_usage(True))
             return
 
     keycode = ActiveLayer.get_keycode(event_id)
     print(keycode)
     handle_keycode(event_id, keycode)
+    time_last_event = now
+    print(f"# Processed in {(time.monotonic_ns()-now)/10**6}ms")
     print(get_memory_usage(True))
 
 

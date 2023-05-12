@@ -34,8 +34,8 @@ parse_args(){
 }
 
 format_python() {
-    isort --overwrite-in-place --profile black "$PROJECT_DIR"
-    black  "$PROJECT_DIR"
+    isort --skip-gitignore --overwrite-in-place --profile black "$PROJECT_DIR"
+    black "$PROJECT_DIR"
 }
 
 parse_args "$@"

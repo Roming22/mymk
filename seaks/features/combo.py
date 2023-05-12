@@ -32,20 +32,16 @@ def load_combos(layer_uid: str, definitions: dict) -> None:
     print("Combo for:", list(current_combo.keys()))
 
 
-def load_sequence(layer_uid, sequence, keycode, prefix="") -> None:
+def load_sequence(layer_uid, sequence, keycode, index=0) -> None:
     global current_combo
-    print("Loading combo", prefix if prefix else "''", sequence, keycode)
+    combo_uid = f"{layer_uid}.switch.{'.'.join(sequence[0:index+1])}.{'.'.join(['combo'] + sequence[index+1:])}"
+    print(f"Loading step {index} of combo {combo_uid}: {keycode}")
 
-    switch_id = sequence.pop(0)
+    switch_id = sequence[index]
     key_uid = f"{layer_uid}.switch.{switch_id}"
     release_event_id = f"!board.switch.{switch_id}"
-    if prefix:
-        combo_uid = f"{prefix}.{switch_id}"
-    else:
-        combo_uid = key_uid
-    print("UID:", combo_uid)
 
-    combo_timeout_event = f"{combo_uid}.combo.{'.'.join(sequence)}"
+    combo_timeout_event = combo_uid
 
     # Timer to control the delay before the presses are not registered as a combo
     start_timer = action.start_timer(combo_timeout_event, delay[0])
@@ -55,7 +51,7 @@ def load_sequence(layer_uid, sequence, keycode, prefix="") -> None:
         stop_timer,
         reset_current_combo,
     )
-    if len(sequence) == 0:
+    if index == len(sequence)-1:
         print("Combo keycode:", keycode, "on", key_uid)
         on_press = action.chain(
             action.press(keycode),
@@ -64,7 +60,7 @@ def load_sequence(layer_uid, sequence, keycode, prefix="") -> None:
         )
     else:
         on_press = action.chain(
-            lambda: load_sequence(layer_uid, list(sequence), keycode, combo_uid),
+            lambda: load_sequence(layer_uid, list(sequence), keycode, index+1),
             lambda: add_action_for_event_id(combo_timeout_event, clean_up),
             # lambda: add_interrupt(clean_up),
             lambda: add_action_for_event_id(release_event_id, clean_up),

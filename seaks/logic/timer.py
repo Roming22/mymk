@@ -3,10 +3,9 @@ import time
 import seaks.logic.event_handler as EventHandler
 from seaks.utils.memory import memory_cost
 
-
 class Timer:
+    now = 0
     instances: dict[str, "Timer"] = {}
-
     running = set()
 
     @memory_cost("Timer")
@@ -31,7 +30,7 @@ class Timer:
         # print(f"    Timer: {name} starting", delay)
         timer = cls.get(name)
         cls.running.add(name)
-        timer.end_at = time.monotonic_ns() + delay * 10**9
+        timer.end_at = cls.now + delay * 10**9
 
     @classmethod
     def stop(cls, name) -> None:
