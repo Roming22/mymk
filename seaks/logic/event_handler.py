@@ -1,3 +1,4 @@
+from seaks.features.combo import handle_event as combo_handle_event
 from seaks.features.key import get_actions_for
 from seaks.features.layer import ActiveLayer
 from seaks.utils.memory import get_usage as get_memory_usage
@@ -9,6 +10,9 @@ INTERRUPT = "interrupt"
 def handle_event(event_id: str) -> None:
     print(f"\n# {event_id} {'#' * 100}"[:100])
     print(get_memory_usage(True))
+
+    combo_handle_event(event_id)
+
     for event_uid, k2a in event_to_followup_actions.items():
         if event_id in k2a.keys():
             # The action is responsible for setting

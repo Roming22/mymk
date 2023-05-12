@@ -1,3 +1,4 @@
+from seaks.features.combo import load_combos
 from seaks.features.key import action_func
 from seaks.utils.memory import memory_cost
 
@@ -86,6 +87,12 @@ class Layer:
         # Check that the first layer has no transparent key.
         if self.id == 0 and None in self.keys:
             raise RuntimeError("Transparent keys not allowed on Layer 0.")
+
+        # Load combos
+        try:
+            load_combos(self.uid, layer_definition["combos"])
+        except KeyError:
+            print("No combo has been declared")
 
     @classmethod
     def activate_layer(cls, layer_name: str):

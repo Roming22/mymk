@@ -1,7 +1,6 @@
 import seaks.logic.action as action
 import seaks.logic.event_handler as EventHandler
 from seaks.features.key import action_func, get_actions_for
-from seaks.logic.timer import Timer
 from seaks.utils.memory import memory_cost
 
 delay = [0.5]
@@ -14,7 +13,7 @@ def _tap_hold(
     keycode_hold: str,
     interrupt_mode: str,
     delay: float = delay,
-) -> None:
+) -> tuple:
     hold_event_id = f"{key_uid}.hold"
 
     if not key_uid in EventHandler.event_to_followup_actions.keys():
@@ -66,7 +65,7 @@ def hold_tap(
     keycode_tap: str,
     keycode_hold: str,
     user_delay: str = "",
-) -> None:
+) -> tuple:
     print("Creating HoldTap:", switch_uid, keycode_tap, delay, keycode_hold)
     return _tap_hold(
         switch_uid, keycode_tap, keycode_hold, "hold", _get_delay(user_delay)
@@ -78,7 +77,7 @@ def interrupt_noop(
     keycode_tap: str,
     keycode_hold: str,
     user_delay: str = "",
-) -> None:
+) -> tuple:
     print(
         "Creating interruptible TapHold:", switch_uid, keycode_tap, delay, keycode_hold
     )
@@ -92,7 +91,7 @@ def tap_hold(
     keycode_tap: str,
     keycode_hold: str,
     user_delay: str = "",
-) -> None:
+) -> tuple:
     print("Creating TapHold:", switch_uid, keycode_tap, delay, keycode_hold)
     return _tap_hold(
         switch_uid, keycode_tap, keycode_hold, "tap", _get_delay(user_delay)

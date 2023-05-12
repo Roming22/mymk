@@ -44,7 +44,18 @@ def main() -> None:
             "I",                "O",                "N",                "NO",
     "NO",   "RGUI",             "MEH",              "NO",
             # fmt: on
-        ]
+        ],
+        "combos": {
+            ## Chords (can be pressed in any order)
+            "chords": {
+                # "1+2+3": "DELETE",
+                "6+7": "Y",
+            },
+            ## Sequences (must be pressed in the order defined)
+            "sequences": {
+                "6&5": "W",
+            },
+        },
     }
 
     ## Symbol layer
@@ -60,19 +71,6 @@ def main() -> None:
     None,   None,       None,       None,
             # fmt: on
         ],
-    }
-
-    # Combo definitions
-    definition["layout"]["combos"] = {
-        ## Chords (can be pressed in any order)
-        "chords": {
-            # "board.layer.alpha.switch.1+board.layer.alpha.switch.2+board.layer.alpha.switch.3": "DELETE",
-            "board.layer.alpha.switch.6+board.layer.alpha.switch.7": "Y",
-        },
-        ## Sequences (must be pressed in the order defined)
-        "sequences": {
-            "board.layer.alpha.switch.5+board.layer.alpha.switch.6": "W",
-        },
     }
 
     keyboard = Keyboard(definition)
