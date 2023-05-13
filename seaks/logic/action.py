@@ -4,9 +4,13 @@ from seaks.hardware.keys import oneshot as key_oneshot
 from seaks.hardware.keys import press as key_press
 from seaks.hardware.keys import release as key_release
 from seaks.logic.timer import Timer
-from seaks.utils.memory import memory_cost
 
 noop = lambda: None
+
+
+def debug(*args) -> None:
+    func = lambda: print(*args)
+    return func
 
 
 def chain(*actions) -> "Callable":

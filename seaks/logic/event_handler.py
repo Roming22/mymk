@@ -12,6 +12,7 @@ INTERRUPT = "interrupt"
 
 time_last_event = time.monotonic_ns()
 
+
 def handle_event(event_id: str) -> None:
     global time_last_event
     print(get_memory_usage(True))

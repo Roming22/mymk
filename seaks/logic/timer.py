@@ -3,6 +3,7 @@ import time
 import seaks.logic.event_handler as EventHandler
 from seaks.utils.memory import memory_cost
 
+
 class Timer:
     now = 0
     instances: dict[str, "Timer"] = {}

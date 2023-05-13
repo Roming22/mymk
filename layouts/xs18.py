@@ -48,12 +48,12 @@ def main() -> None:
         "combos": {
             ## Chords (can be pressed in any order)
             "chords": {
-                # "1+2+3": "DELETE",
                 "6+7": "Y",
             },
             ## Sequences (must be pressed in the order defined)
             "sequences": {
-                "6&5": "W",
+                "7&5": "W",
+                "7&6&5": "Z",
             },
         },
     }
