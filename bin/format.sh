@@ -14,7 +14,7 @@ EOF
 
 }
 PROJECT_DIR=$(
-    cd $(dirname $0) >/dev/null;
+    cd $(dirname $0)/.. >/dev/null;
     pwd;
 )
 cd "$PROJECT_DIR"
