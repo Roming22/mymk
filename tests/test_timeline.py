@@ -105,24 +105,90 @@ class TestTapHold:
         ]
         return do, timeline_events
 
-    def test_taphold_tap_key_timeline(self):
+    def test_tap_key_timeline(self):
         do, timeline_events = self.get_timeline_events()
         events = ["press", "release"]
         run_scenario(timeline_events, events)
         assert do.call_args_list == [call("A"), call("a")]
 
-    def test_taphold_hold_key_timeline(self):
-        action, timeline_events = self.get_timeline_events()
+    def test_hold_key_timeline(self):
+        do, timeline_events = self.get_timeline_events()
         events = ["press", "hold", "release"]
         run_scenario(timeline_events, events)
-        assert action.call_args_list == [call("Start timer"), call("B"), call("b")]
+        assert do.call_args_list == [call("Start timer"), call("B"), call("b")]
 
-    def test_taphold_interrupt_key_timeline(self):
-        action, timeline_events = self.get_timeline_events()
+    def test_interrupt_key_timeline(self):
+        do, timeline_events = self.get_timeline_events()
         events = ["press", "interrupt", "release"]
         run_scenario(timeline_events, events)
-        assert action.call_args_list == [call("C"), call("c")]
+        assert do.call_args_list == [call("C"), call("c")]
 
+class TestCombo:
+    @staticmethod
+    def get_timeline_events():
+        do = MagicMock()
+        timeline_events = [
+            (
+                "switch.1",
+                lambda: Timeline.split(
+                    [
+                        # Simple key
+                        {
+                            "events": [],
+                            "output": lambda: do("A"),
+                        },
+                        # 1+2 = B
+                        {
+                            "events": [("switch.2", None, lambda: do("B"))],
+                        },
+                        # 1+3 = C
+                        {
+                            "events": [("switch.3", None, lambda: do("C"))],
+                        },
+                        # 1+2+3 = D
+                        {
+                            "events": [("switch.2", None, None),("switch.3", None, lambda: do("D"))],
+                        },
+                        # 1+3+2 = E
+                        {
+                            "events": [("switch.3", None, None),("switch.2", None, lambda: do("E"))],
+                        },
+                    ]
+                ),
+                None,
+            )
+        ]
+        return do, timeline_events
+
+    def test_1(self):
+        do, timeline_events = self.get_timeline_events()
+        events = ["switch.1", "the start of something new"]
+        run_scenario(timeline_events, events)
+        assert do.call_args_list == [call("A")]
+
+    def test_1_2(self):
+        do, timeline_events = self.get_timeline_events()
+        events = ["switch.1", "switch.2", "the start of something new"]
+        run_scenario(timeline_events, events)
+        assert do.call_args_list == [call("B")]
+
+    def test_1_3(self):
+        do, timeline_events = self.get_timeline_events()
+        events = ["switch.1", "switch.3", "timeout of combo 1+3+2"]
+        run_scenario(timeline_events, events)
+        assert do.call_args_list == [call("C")]
+
+    def test_1_2_3(self):
+        do, timeline_events = self.get_timeline_events()
+        events = ["switch.1", "switch.2", "switch.3"]
+        run_scenario(timeline_events, events)
+        assert do.call_args_list == [call("D")]
+
+    def test_1_3_2(self):
+        do, timeline_events = self.get_timeline_events()
+        events = ["switch.1", "switch.3", "switch.2"]
+        run_scenario(timeline_events, events)
+        assert do.call_args_list == [call("E")]
 
 def reset_timeline_class():
     Timeline.active_timelines.clear()

@@ -44,11 +44,13 @@ class Timeline:
             events:
         """
         for definition in timeline_definitions:
-            new_timeline = Timeline(definition["events"], cls.current_timeline)
+            events = definition["events"]
+            new_timeline = Timeline(events, cls.current_timeline)
             if action := definition.get("action"):
                 action()
             if action := definition.get("output"):
                 new_timeline.output.append(action)
+            new_timeline._check_is_determined()
 
         cls.current_timeline.determined = True
         cls.active_timelines.remove(cls.current_timeline)
@@ -62,19 +64,29 @@ class Timeline:
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
+        # TODO: Workaround until a new timeline is created by _check_is_determined()
+        if not self.events:
+            return
+
         expected_event, action, output = self.events.pop(0)
         if event != expected_event:
             self.__class__.active_timelines.remove(self)
             self.deadend()
+            return
         if action:
             action()
         if output:
             self.output.append(output)
+        self._check_is_determined()
 
+    def _check_is_determined(self):
         # Timeline conditions are satisfied
         if self.parent and len(self.events) == 0:
             self.determined = True
             self.parent.next_timeline = self
+            # TODO: Start a new timeline.
+            # The current layer should be able to instanciate it.
+            # Be careful, 
 
     def deadend(self):
         """Some timelines might be deadends. They are removed from the multiverse"""
