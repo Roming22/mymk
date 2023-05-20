@@ -17,7 +17,7 @@ def free_memory(name):
     return inner
 
 
-def check_memory(name):
+def check_memory():
     total_mem = gc.mem_free() + gc.mem_alloc()
 
     def inner(func):

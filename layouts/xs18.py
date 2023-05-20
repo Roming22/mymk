@@ -1,8 +1,7 @@
 from collections import OrderedDict
 
+from mymk.feature.keyboard import Keyboard
 import board
-
-from seaks.logic.keyboard import Keyboard
 
 
 def main() -> None:
@@ -12,20 +11,22 @@ def main() -> None:
     # Hardware definition
     definition = {
         "hardware": {
-            "pins": {
-                "cols": (
-                    board.D26,
-                    board.D22,
-                    board.D20,
-                    board.D23,
-                ),
-                "rows": (board.D6, board.D7, board.D9),
+            "board": {
+                "pins": {
+                    "cols": (
+                        board.D26,
+                        board.D22,
+                        board.D20,
+                        board.D23,
+                    ),
+                    "rows": (board.D6, board.D7, board.D9),
+                },
+                "leds": {
+                    "pin": None,
+                    "count": 0,
+                },
+                "split": True,
             },
-            "leds": {
-                "pin": None,
-                "count": 0,
-            },
-            "split": True,
         },
         "layout": {"layers": OrderedDict()},
     }

@@ -1,8 +1,12 @@
+import time
+
 from mymk.multiverse.timeline import Timeline
+from seaks.utils.time import pretty_print, time_it
 
 
 class TimelineManager:
     _universes = []
+    _time_last_event = time.monotonic_ns()
 
     def __init__(self):
         self.active_timelines = None
@@ -60,6 +64,7 @@ class TimelineManager:
         timeline.check_is_determined()
 
     @classmethod
+    @time_it
     def process_event(cls, event):
         """Process an event in all active timelines
 
@@ -68,6 +73,11 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
+        print(" ".join(["\n\n\n#", event, "#" * 100])[:120])
+        now = time.monotonic_ns()
+        print("# At:", pretty_print(now), f"(+{(now-cls._time_last_event)/10**6}ms)")
+        cls._time_last_event = now
+
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in list(universe.active_timelines):
