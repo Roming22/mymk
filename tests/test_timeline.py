@@ -1,35 +1,44 @@
 from unittest.mock import MagicMock, call
 
-from explore.multiverse.timeline import Timeline
+from mymk.multiverse.timeline import Timeline
+from mymk.multiverse.timeline_manager import TimelineManager
 
 
-class TestTimeline:
+class TestTimelineManager:
     @staticmethod
     def test_new():
         """
         Test the creation of a Timeline
         """
-        reset_timeline_class()
-
-        timeline_events = [(1, None, None)]
+        timeline_events = [
+            (
+                "event1",
+                lambda: "action on match".split(),
+                lambda: "action on resolution".split(),
+            )
+        ]
         timeline = Timeline(timeline_events)
+
         assert timeline.events == timeline_events
         assert timeline.output == []
         assert timeline.determined == False
 
-        assert Timeline.timeline_start == timeline
-        assert Timeline.active_timelines == [timeline]
-        assert Timeline.current_timeline is None
+        multiverse = TimelineManager()
+        multiverse.start(timeline)
+
+        assert multiverse.timeline_start == timeline
+        assert multiverse.active_timelines == [timeline]
+        assert multiverse.current_timeline is None
 
     @staticmethod
     def test_split():
         """
         Test a timeline split
         """
-        reset_timeline_class()
-
         timeline = Timeline([])
         timeline.output = ["A", "B"]
+        multiverse = TimelineManager()
+        multiverse.start(timeline)
         events_list = [
             {
                 "events": [("timelineA", None, None)],
@@ -42,8 +51,8 @@ class TestTimeline:
             },
         ]
 
-        Timeline.current_timeline = timeline
-        Timeline.split(events_list)
+        multiverse.current_timeline = timeline
+        multiverse.split(events_list)
 
         assert timeline.determined == True
         assert len(timeline.children) == len(events_list)
@@ -53,9 +62,9 @@ class TestTimeline:
             assert child.output == timeline.output
             assert child.determined == False
 
-        assert Timeline.timeline_start == timeline
-        assert timeline not in Timeline.active_timelines
-        assert Timeline.active_timelines == timeline.children
+        assert multiverse.timeline_start == timeline
+        assert timeline not in multiverse.active_timelines
+        assert multiverse.active_timelines == timeline.children
 
 
 class TestSimpleKey:
@@ -65,19 +74,24 @@ class TestSimpleKey:
             ("press", lambda: do("A"), None),
             ("release", lambda: do("a"), None),
         ]
+        timeline = Timeline(timeline_events)
+        multiverse = TimelineManager()
+        multiverse.start(timeline)
+
         events = ["press", "release"]
-        run_scenario(timeline_events, events)
+        run_scenario(events)
         assert do.call_args_list == [call("A"), call("a")]
 
 
 class TestTapHold:
     @staticmethod
-    def get_timeline_events():
+    def setup():
         do = MagicMock()
+        multiverse = TimelineManager()
         timeline_events = [
             (
                 "press",
-                lambda: Timeline.split(
+                lambda: multiverse.split(
                     [
                         {
                             "action": None,
@@ -103,34 +117,37 @@ class TestTapHold:
                 None,
             )
         ]
-        return do, timeline_events
+        multiverse.start(Timeline(timeline_events))
+        return multiverse, do
 
     def test_tap_key_timeline(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["press", "release"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("A"), call("a")]
 
     def test_hold_key_timeline(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["press", "hold", "release"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("Start timer"), call("B"), call("b")]
 
     def test_interrupt_key_timeline(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["press", "interrupt", "release"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("C"), call("c")]
+
 
 class TestCombo:
     @staticmethod
-    def get_timeline_events():
+    def setup():
         do = MagicMock()
+        multiverse = TimelineManager()
         timeline_events = [
             (
                 "switch.1",
-                lambda: Timeline.split(
+                lambda: multiverse.split(
                     [
                         # Simple key
                         {
@@ -147,60 +164,58 @@ class TestCombo:
                         },
                         # 1+2+3 = D
                         {
-                            "events": [("switch.2", None, None),("switch.3", None, lambda: do("D"))],
+                            "events": [
+                                ("switch.2", None, None),
+                                ("switch.3", None, lambda: do("D")),
+                            ],
                         },
                         # 1+3+2 = E
                         {
-                            "events": [("switch.3", None, None),("switch.2", None, lambda: do("E"))],
+                            "events": [
+                                ("switch.3", None, None),
+                                ("switch.2", None, lambda: do("E")),
+                            ],
                         },
                     ]
                 ),
                 None,
             )
         ]
-        return do, timeline_events
+        multiverse.start(Timeline(timeline_events))
+        return multiverse, do
 
     def test_1(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["switch.1", "the start of something new"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("A")]
 
     def test_1_2(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["switch.1", "switch.2", "the start of something new"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("B")]
 
     def test_1_3(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["switch.1", "switch.3", "timeout of combo 1+3+2"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("C")]
 
     def test_1_2_3(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["switch.1", "switch.2", "switch.3"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("D")]
 
     def test_1_3_2(self):
-        do, timeline_events = self.get_timeline_events()
         events = ["switch.1", "switch.3", "switch.2"]
-        run_scenario(timeline_events, events)
+        multiverse, do = self.setup()
+        run_scenario(events)
         assert do.call_args_list == [call("E")]
 
-def reset_timeline_class():
-    Timeline.active_timelines.clear()
-    Timeline.current_timeline = None
-    Timeline.timeline_start = None
 
-
-def run_scenario(timeline_events, events):
-    # Reset Timeline
-    reset_timeline_class()
-
+def run_scenario(events):
     # Run test
-    Timeline(timeline_events)
     for event in events:
-        Timeline.process_event(event)
+        TimelineManager.process_event(event)
