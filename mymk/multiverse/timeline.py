@@ -1,5 +1,5 @@
 class Timeline:
-    def __init__(self, events, parent=None) -> None:
+    def __init__(self, events=dict(), parent=None) -> None:
         """Create a new timeline
 
         events: an ordered list of expected events in the timeline. Each event
@@ -16,18 +16,18 @@ class Timeline:
                 A determined timeline will spawn new children timelines as
                 new events are coming in.
         """
-        self.parent = parent
         self.children = []
-
-        self.events = events
-        if parent:
-            self.output = list(parent.output)
-            parent.children.append(self)
-        else:
-            self.determined = True
-            self.output = []
         self.determined = False
+        self.events = events
+        self.layer = None
+        self.output = []
         self.next_timeline = None
+        self.parent = parent
+
+        if parent:
+            self.layer = parent.layer
+            self.output += list(parent.output)
+            parent.children.append(self)
 
     def check_is_determined(self):
         # Timeline conditions are satisfied

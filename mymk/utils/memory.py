@@ -1,6 +1,11 @@
 import gc
 from math import ceil
 
+# Test mode
+for func in ["mem_alloc", "mem_free"]:
+    if not func in dir(gc):
+        setattr(gc, func, lambda: 1)
+
 profile = True
 # profile = False
 
@@ -33,17 +38,19 @@ def check_memory():
     return inner
 
 
-def memory_cost(name):
+def memory_cost(name, run_gc=True):
     total_mem = gc.mem_free() + gc.mem_alloc()
 
     def inner(func):
         def wrapper(*args, **kwargs):
-            if profile:
+            if run_gc:
                 gc.collect()
+            if profile:
                 free_mem = gc.mem_free()
             result = func(*args, **kwargs)
-            if profile:
+            if run_gc:
                 gc.collect()
+            if profile:
                 mem_used = free_mem - gc.mem_free()
                 print(
                     f"[Memory] {name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%). Total memory used: {ceil(100*gc.mem_alloc()/total_mem)}%"

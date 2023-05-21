@@ -1,8 +1,18 @@
-import usb_hid
-from adafruit_hid.keyboard import Keyboard as USB_Keyboard
-from adafruit_hid.keycode import Keycode
+try:
+    import usb_hid
+    from adafruit_hid.keyboard import Keyboard as USB_Keyboard
+    from adafruit_hid.keycode import Keycode
 
-_kbd = USB_Keyboard(usb_hid.devices)
+    _kbd = USB_Keyboard(usb_hid.devices)
+except ModuleNotFoundError as ex:
+    # Test mode
+    import sys
+
+    if "pytest" not in sys.modules:
+        raise ex
+    Keycode = []
+    _kbd = object()
+
 
 _KC = {
     "DOLLAR": ["LEFT_SHIFT", "FOUR"],
@@ -17,7 +27,6 @@ _KC = {
     "LGUI": "LEFT_GUI",
     "LSFT": "LEFT_SHIFT",
     "MEH": ["LEFT_ALT", "LEFT_CONTROL", "LEFT_SHIFT"],
-    "NO": None,
     "RALT": "RIGHT_ALT",
     "RCTL": "RIGHT_CONTROL",
     "RGUI": "RIGHT_GUI",
@@ -35,15 +44,6 @@ def get_keycodes_for(keycode: str) -> list[Keycode]:
     return [getattr(Keycode, kc) for kc in keycode]
 
 
-def oneshot(key_name: str) -> None:
-    print(f"Oneshot {key_name}")
-    keycodes = get_keycodes_for(key_name)
-    for kc in keycodes:
-        _kbd.press(kc)
-    for kc in keycodes:
-        _kbd.release(kc)
-
-
 def panic():
     print("!!! PANIC !!!")
     _kbd.send(Keycode.MEH)
@@ -59,5 +59,5 @@ def press(key_name: str) -> None:
 def release(key_name: str) -> None:
     print(f"Release {key_name}")
     keycodes = get_keycodes_for(key_name)
-    for kc in keycodes:
+    for kc in reversed(keycodes):
         _kbd.release(kc)

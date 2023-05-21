@@ -1,7 +1,7 @@
 import keypad
 
 from mymk.multiverse.timeline_manager import TimelineManager
-from seaks.utils.memory import memory_cost
+from mymk.utils.memory import memory_cost
 
 
 class Board:

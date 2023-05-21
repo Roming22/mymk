@@ -60,7 +60,6 @@ init() {
     DRIVE_SOURCE="$PROJECT_DIR/drive"
     mkdir -p "$DRIVE_SOURCE/lib"
     ln -sf "$PROJECT_DIR/mymk" "$DRIVE_SOURCE/"
-    ln -sf "$PROJECT_DIR/seaks" "$DRIVE_SOURCE/"
 }
 
 get_drive() {

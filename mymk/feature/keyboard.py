@@ -1,8 +1,10 @@
+from mymk.feature.layer import LayerManager
 from mymk.hardware.board import Board
-# from seaks.features.layer import Layer
-from seaks.logic.fps import FPS
+from mymk.multiverse.timeline_manager import TimelineManager
+from mymk.utils.fps import FPS
+
 # from seaks.logic.timer import Timer
-from seaks.utils.memory import get_usage, memory_cost, profile
+from mymk.utils.memory import get_usage, memory_cost, profile
 
 
 class Keyboard:
@@ -20,27 +22,34 @@ class Keyboard:
             )
 
             # Load layers
-            # for layer_name, layer_definition in definition["layout"]["layers"].items():
-            #     Layer(board, layer_name, layer_definition)
+            default_layer = ""
+            for layer_name, layer_definition in definition["layout"]["layers"].items():
+                if not default_layer:
+                    default_layer = layer_name
+                LayerManager.load(board.name, layer_name, layer_definition)
 
-            #     key_definitions = layer_definition["keys"]
-            #     key_count = len(key_definitions)
-            #     if key_count != switch_count:
-            #         raise RuntimeError(
-            #             f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
-            #         )
+                key_definitions = layer_definition["keys"]
+                key_count = len(key_definitions)
+                if key_count != switch_count:
+                    raise RuntimeError(
+                        f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
+                    )
 
             self.boards.append(board)
+            TimelineManager.activate(default_layer)
 
         if not profile:
             print(get_usage(True))
 
     def go(self, fps=False):
-        fps = True
-        print("\n\n\n")
-        # self.board.start()
         if fps:
             FPS.start(60)
+
+        print("\n" * 3)
+        print("#" * 120)
+        print("# ONLINE")
+        print("#" * 120)
+
         while True:
             if fps:
                 FPS.tick()
