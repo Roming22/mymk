@@ -91,6 +91,30 @@ class TestSingleLayerKeyboard:
             call("release", "A"),
         ]
 
+    @staticmethod
+    def test_three_keys(action):
+        events = [
+            "board.2x2.switch.0",
+            "board.2x2.switch.1",
+            "!board.2x2.switch.1",
+            "board.2x2.switch.2",
+            "!board.2x2.switch.0",
+            "board.2x2.switch.0",
+            "!board.2x2.switch.0",
+            "!board.2x2.switch.2",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("press", "B"),
+            call("release", "B"),
+            call("press", "C"),
+            call("release", "A"),
+            call("press", "A"),
+            call("release", "A"),
+            call("release", "C"),
+        ]
+
 
 def make_keyboard(definition, monkeypatch):
     kbd = MagicMock()

@@ -1,16 +1,3 @@
-from collections import OrderedDict
-from unittest.mock import MagicMock, call
-
-import pytest
-
-import mymk.hardware.keys as Keys
-
-
-@pytest.fixture(autouse=True)
-def set_keycode(monkeypatch):
-    monkeypatch.setattr(Keys, "Keycode", Keycode)
-
-
 class Keycode:
     A = "A"
     B = "B"
