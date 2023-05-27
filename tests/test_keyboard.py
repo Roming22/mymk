@@ -43,6 +43,54 @@ class TestSingleLayerKeyboard:
         run_scenario(events)
         assert action.call_args_list == [call("press", "A"), call("release", "A")]
 
+    @staticmethod
+    def test_two_keys_couplet(action):
+        events = [
+            "board.2x2.switch.0",
+            "!board.2x2.switch.0",
+            "board.2x2.switch.1",
+            "!board.2x2.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("release", "A"),
+            call("press", "B"),
+            call("release", "B"),
+        ]
+
+    @staticmethod
+    def test_two_keys_cross(action):
+        events = [
+            "board.2x2.switch.0",
+            "board.2x2.switch.1",
+            "!board.2x2.switch.0",
+            "!board.2x2.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("press", "B"),
+            call("release", "A"),
+            call("release", "B"),
+        ]
+
+    @staticmethod
+    def test_two_keys_enclosed(action):
+        events = [
+            "board.2x2.switch.0",
+            "board.2x2.switch.1",
+            "!board.2x2.switch.1",
+            "!board.2x2.switch.0",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("press", "B"),
+            call("release", "B"),
+            call("release", "A"),
+        ]
+
 
 def make_keyboard(definition, monkeypatch):
     kbd = MagicMock()
