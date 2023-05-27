@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from mymk.feature.layer import LayerManager
+from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
 from mymk.multiverse.timeline_manager import TimelineManager
 
@@ -104,21 +104,33 @@ class Test_3_TapHold:
         timelines_events = [
             {
                 "switch.1": [
-                    ("switch.1", lambda: universe.mark_determined(), lambda: action("A")),
+                    (
+                        "switch.1",
+                        lambda: universe.mark_determined(),
+                        lambda: action("A"),
+                    ),
                     ("!switch.1", None, lambda: action("a")),
                 ],
             },
             {
                 "switch.1": [
                     ("switch.1", lambda: action("Start timer"), None),
-                    ("timer.hold", lambda: universe.mark_determined(), lambda: action("B")),
+                    (
+                        "timer.hold",
+                        lambda: universe.mark_determined(),
+                        lambda: action("B"),
+                    ),
                     ("!switch.1", None, lambda: action("b")),
                 ],
             },
             {
                 "switch.1": [
                     ("switch.1", None, None),
-                    ("interrupt", lambda: universe.mark_determined(), lambda: action("C")),
+                    (
+                        "interrupt",
+                        lambda: universe.mark_determined(),
+                        lambda: action("C"),
+                    ),
                     ("!switch.1", None, lambda: action("c")),
                 ],
             },
@@ -160,21 +172,33 @@ class Test_4_Combo:
             # Simple key
             {
                 "switch.1": [
-                    ("switch.1", lambda: universe.mark_determined(), lambda: action("A")),
+                    (
+                        "switch.1",
+                        lambda: universe.mark_determined(),
+                        lambda: action("A"),
+                    ),
                 ],
             },
             # 1+2 = B
             {
                 "switch.1": [
                     ("switch.1", None, None),
-                    ("switch.2", lambda: universe.mark_determined(), lambda: action("B")),
+                    (
+                        "switch.2",
+                        lambda: universe.mark_determined(),
+                        lambda: action("B"),
+                    ),
                 ],
             },
             # 1+3 = C
             {
                 "switch.1": [
                     ("switch.1", None, None),
-                    ("switch.3", lambda: universe.mark_determined(), lambda: action("C")),
+                    (
+                        "switch.3",
+                        lambda: universe.mark_determined(),
+                        lambda: action("C"),
+                    ),
                 ],
             },
             # 1+2+3 = D
@@ -182,7 +206,11 @@ class Test_4_Combo:
                 "switch.1": [
                     ("switch.1", None, None),
                     ("switch.2", None, None),
-                    ("switch.3", lambda: universe.mark_determined(), lambda: action("D")),
+                    (
+                        "switch.3",
+                        lambda: universe.mark_determined(),
+                        lambda: action("D"),
+                    ),
                 ],
             },
             # 1+3+2 = E
@@ -190,7 +218,11 @@ class Test_4_Combo:
                 "switch.1": [
                     ("switch.1", None, None),
                     ("switch.3", None, None),
-                    ("switch.2", lambda: universe.mark_determined(), lambda: action("E")),
+                    (
+                        "switch.2",
+                        lambda: universe.mark_determined(),
+                        lambda: action("E"),
+                    ),
                 ],
             },
         ]

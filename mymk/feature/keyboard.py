@@ -1,4 +1,4 @@
-from mymk.feature.layer import LayerManager
+from mymk.feature.layers.layer_manager import LayerManager
 from mymk.hardware.board import Board
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.fps import FPS
@@ -18,7 +18,7 @@ class Keyboard:
             switch_count = (
                 len(board_definition["pins"]["cols"])
                 * len(board_definition["pins"]["rows"])
-                * 2 ** int(board_definition["split"])
+                * 2 ** int(board_definition.get("split", False))
             )
 
             # Load layers

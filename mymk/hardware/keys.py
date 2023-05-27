@@ -10,8 +10,8 @@ except ModuleNotFoundError as ex:
 
     if "pytest" not in sys.modules:
         raise ex
-    Keycode = []
-    _kbd = object()
+    _kbd = None
+    Keycode = None
 
 
 _KC = {

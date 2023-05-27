@@ -1,6 +1,6 @@
 import time
 
-from mymk.feature.layer import LayerManager
+from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
 from mymk.utils.memory import memory_cost
 from mymk.utils.time import pretty_print, time_it
@@ -92,7 +92,7 @@ class TimelineManager:
 
         # Process the event as an event triggering a new timeline
         try:
-            timelines_events = timeline.layer.load_events(timeline, event)
+            timelines_events = timeline.layer.load_events(self, event)
         except KeyError:
             if timeline.events:
                 print("Deadend")

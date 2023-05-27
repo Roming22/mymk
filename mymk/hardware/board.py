@@ -1,4 +1,12 @@
-import keypad
+try:
+    import keypad
+except ModuleNotFoundError:
+
+    class Object:
+        pass
+
+    keypad = Object()
+    keypad.KeyMatrix = lambda **kwargs: []
 
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.memory import memory_cost
