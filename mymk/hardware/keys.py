@@ -27,6 +27,7 @@ _KC = {
     "LGUI": "LEFT_GUI",
     "LSFT": "LEFT_SHIFT",
     "MEH": ["LEFT_ALT", "LEFT_CONTROL", "LEFT_SHIFT"],
+    "NO": [],
     "RALT": "RIGHT_ALT",
     "RCTL": "RIGHT_CONTROL",
     "RGUI": "RIGHT_GUI",
@@ -38,10 +39,14 @@ _KC = {
 
 def get_keycodes_for(keycode: str) -> list[Keycode]:
     if keycode in _KC.keys():
-        keycode = _KC[keycode]
-    if not isinstance(keycode, list):
-        keycode = [keycode]
-    return [getattr(Keycode, kc) for kc in keycode]
+        keycodes = _KC[keycode]
+        if not isinstance(keycodes, list):
+            keycodes = [keycodes]
+    else:
+        keycodes = [keycode]
+    # Check all keycodes are valid
+    [getattr(Keycode, kc) for kc in keycodes]
+    return keycodes
 
 
 def panic():
@@ -49,15 +54,27 @@ def panic():
     _kbd.send(Keycode.MEH)
 
 
-def press(key_name: str) -> None:
-    print(f"Press {key_name}")
+def press(key_name: str) -> callable:
     keycodes = get_keycodes_for(key_name)
-    for kc in keycodes:
-        _kbd.press(kc)
+    action = f"Press {key_name}"
+
+    def func():
+        print(action)
+        for kc in keycodes:
+            _kbd.press(getattr(Keycode, kc))
+
+    # func.action = action
+    return func
 
 
-def release(key_name: str) -> None:
-    print(f"Release {key_name}")
+def release(key_name: str) -> callable:
     keycodes = get_keycodes_for(key_name)
-    for kc in reversed(keycodes):
-        _kbd.release(kc)
+    action = f"Release {key_name}"
+
+    def func():
+        print(action)
+        for kc in reversed(keycodes):
+            _kbd.release(getattr(Keycode, kc))
+
+    # func.action = action
+    return func

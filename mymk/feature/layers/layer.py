@@ -23,7 +23,7 @@ class Layer:
         # except KeyError:
         #     print("No combo has been declared")
 
-    def load_events(self, universe, switch_uid):
+    def load_events(self, universe, switch_uid) -> list:
         timelines_events = []
         for keycode in self.switch_to_keycode[switch_uid]:
             print(switch_uid, keycode)

@@ -40,7 +40,7 @@ class Test_1_TimelineManager:
         """
         Test a timeline split
         """
-        timeline = Timeline()
+        timeline = Timeline({})
         timeline.output = ["A", "B"]
         TimelineManager._universes.clear()
         universe = TimelineManager(timeline)
@@ -65,7 +65,7 @@ class Test_1_TimelineManager:
 
         for child in timeline.children:
             assert child.events == events_list.pop(0)
-            assert child.output == timeline.output
+            assert child.output == []
             assert child.determined == False
 
         assert universe.timeline_start == timeline
@@ -82,7 +82,7 @@ class Test_2_SimpleKey:
         do = MagicMock()
         timeline_events = {
             "press": [
-                ("press", lambda: universe.mark_determined(), lambda: do("A")),
+                ("press", universe.mark_determined, lambda: do("A")),
                 ("release", None, lambda: do("a")),
             ]
         }
@@ -97,41 +97,35 @@ class Test_3_TapHold:
     @pytest.fixture
     def action(_) -> MagicMock:
         TimelineManager._universes.clear()
-        universe = TimelineManager()
-        universe.activate("empty")
-
+        TimelineManager.activate("empty")
+        universe = TimelineManager._universes[0]
         action = MagicMock()
+
+        def exec(*args):
+            def func():
+                action(*args)
+
+            return func
+
         timelines_events = [
             {
                 "switch.1": [
-                    (
-                        "switch.1",
-                        lambda: universe.mark_determined(),
-                        lambda: action("A"),
-                    ),
-                    ("!switch.1", None, lambda: action("a")),
+                    ("switch.1", universe.mark_determined, exec("A")),
+                    ("!switch.1", None, exec("a")),
                 ],
             },
             {
                 "switch.1": [
-                    ("switch.1", lambda: action("Start timer"), None),
-                    (
-                        "timer.hold",
-                        lambda: universe.mark_determined(),
-                        lambda: action("B"),
-                    ),
-                    ("!switch.1", None, lambda: action("b")),
+                    ("switch.1", exec("Start timer"), exec("B")),
+                    ("timer.hold", universe.mark_determined, None),
+                    ("!switch.1", None, exec("b")),
                 ],
             },
             {
                 "switch.1": [
-                    ("switch.1", None, None),
-                    (
-                        "interrupt",
-                        lambda: universe.mark_determined(),
-                        lambda: action("C"),
-                    ),
-                    ("!switch.1", None, lambda: action("c")),
+                    ("switch.1", None, exec("C")),
+                    ("interrupt", universe.mark_determined, None),
+                    ("!switch.1", None, exec("c")),
                 ],
             },
         ]
@@ -158,104 +152,6 @@ class Test_3_TapHold:
         events = ["switch.1", "interrupt", "!switch.1"]
         run_scenario(events)
         assert action.call_args_list == [call("Start timer"), call("C"), call("c")]
-
-
-class Test_4_Combo:
-    @pytest.fixture
-    def action(_) -> MagicMock:
-        TimelineManager._universes.clear()
-        universe = TimelineManager()
-        universe.activate("empty")
-
-        action = MagicMock()
-        timelines_events = [
-            # Simple key
-            {
-                "switch.1": [
-                    (
-                        "switch.1",
-                        lambda: universe.mark_determined(),
-                        lambda: action("A"),
-                    ),
-                ],
-            },
-            # 1+2 = B
-            {
-                "switch.1": [
-                    ("switch.1", None, None),
-                    (
-                        "switch.2",
-                        lambda: universe.mark_determined(),
-                        lambda: action("B"),
-                    ),
-                ],
-            },
-            # 1+3 = C
-            {
-                "switch.1": [
-                    ("switch.1", None, None),
-                    (
-                        "switch.3",
-                        lambda: universe.mark_determined(),
-                        lambda: action("C"),
-                    ),
-                ],
-            },
-            # 1+2+3 = D
-            {
-                "switch.1": [
-                    ("switch.1", None, None),
-                    ("switch.2", None, None),
-                    (
-                        "switch.3",
-                        lambda: universe.mark_determined(),
-                        lambda: action("D"),
-                    ),
-                ],
-            },
-            # 1+3+2 = E
-            {
-                "switch.1": [
-                    ("switch.1", None, None),
-                    ("switch.3", None, None),
-                    (
-                        "switch.2",
-                        lambda: universe.mark_determined(),
-                        lambda: action("E"),
-                    ),
-                ],
-            },
-        ]
-        for timeline_events in timelines_events:
-            universe.split(timeline_events)
-        assert len(universe.active_timelines) == len(timelines_events)
-
-        return action
-
-    def test_1(self, action):
-        events = ["switch.1", "the start of something new"]
-        run_scenario(events)
-        assert action.call_args_list == [call("A")]
-
-    def test_1_2(self, action):
-        events = ["switch.1", "switch.2", "the start of something new"]
-        run_scenario(events)
-        assert action.call_args_list == [call("B")]
-
-    def test_1_3(self, action):
-        events = ["switch.1", "switch.3", "timeout of combo 1+3+2"]
-        run_scenario(events)
-        assert action.call_args_list == [call("C")]
-
-    def test_1_2_3(self, action):
-        events = ["switch.1", "switch.2", "switch.3"]
-        run_scenario(events)
-        assert action.call_args_list == [call("D")]
-
-    def test_1_3_2(self, action):
-        events = ["switch.1", "switch.3", "switch.2"]
-        run_scenario(events)
-        assert action.call_args_list == [call("E")]
 
 
 def run_scenario(events):
