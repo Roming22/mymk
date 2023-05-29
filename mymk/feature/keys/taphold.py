@@ -1,11 +1,13 @@
 from mymk.feature.keys.key import Key
 from mymk.hardware.keys import press, release
+from mymk.logic.action import chain
+from mymk.logic.timer import Timer
 from mymk.utils.memory import memory_cost
 
-delay = 0.5
+delay = 0.3
 
 
-@memory_cost("TapHold")
+# @memory_cost("TapHold")
 def tap_hold(
     interrupt_mode: str,
     universe,
@@ -23,27 +25,34 @@ def tap_hold(
         keycode_interrupt = "NO"
 
     try:
-        key_delay = data.pop(0)
+        key_delay = float(data.pop(0))
     except IndexError:
         key_delay = delay
 
-    print(
-        f"TapHold ({key_delay}s): {keycode_tap} | {keycode_hold} ({keycode_interrupt})"
-    )
+    # print(
+    #     f"TapHold ({key_delay}s): {keycode_tap} | {keycode_hold} ({keycode_interrupt})"
+    # )
+
+    timer_name = f"timer.{switch_uid}.taphold"
+    timer = Timer(timer_name, key_delay, universe)
 
     timelines_events = [
         # Tap
         {
             switch_uid: [
                 (switch_uid, None, press(keycode_tap)),
-                (f"!{switch_uid}", universe.mark_determined, release(keycode_tap)),
+                (
+                    f"!{switch_uid}",
+                    chain(timer.stop, universe.mark_determined),
+                    release(keycode_tap),
+                ),
             ],
         },
         # Hold
         {
             switch_uid: [
-                (switch_uid, None, press(keycode_hold)),
-                (f"timer.{switch_uid}.taphold", universe.mark_determined, None),
+                (switch_uid, timer.start, press(keycode_hold)),
+                (timer_name, universe.mark_determined, None),
                 (f"!{switch_uid}", None, release(keycode_hold)),
             ]
         },
@@ -51,7 +60,7 @@ def tap_hold(
         {
             switch_uid: [
                 (switch_uid, None, press(keycode_interrupt)),
-                (f"interrupt", universe.mark_determined, None),
+                (f"interrupt", chain(timer.stop, universe.mark_determined), None),
                 (f"!{switch_uid}", None, release(keycode_interrupt)),
             ]
         },

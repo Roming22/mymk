@@ -26,6 +26,6 @@ class Layer:
     def load_events(self, universe, switch_uid) -> list:
         timelines_events = []
         for keycode in self.switch_to_keycode[switch_uid]:
-            print(switch_uid, keycode)
+            # print(switch_uid, keycode)
             timelines_events += Key.load(switch_uid, keycode, universe)
         return timelines_events

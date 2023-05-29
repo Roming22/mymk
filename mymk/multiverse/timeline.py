@@ -29,11 +29,9 @@ class Timeline:
             if parent.parent:
                 parent.parent.next_timeline = parent
             for event, timeline in parent.events.items():
-                print(event, timeline)
                 self.events[event] = list(timeline)
             self.layer = parent.layer
             parent.children.append(self)
-            print("Events:", self.events)
 
     def prune(self):
         """Some timelines might be deadends. They are removed from the multiverse"""

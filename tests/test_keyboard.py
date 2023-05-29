@@ -26,6 +26,10 @@ def run_scenario(events):
     # Run test
     for event in events:
         TimelineManager.process_event(event)
+    timeline = TimelineManager._universes[0].timeline_start
+    assert timeline.events == {}
+    assert timeline.children == []
+    assert timeline.determined == True
 
 
 class TestSingleLayerKeyboard:

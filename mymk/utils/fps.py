@@ -1,5 +1,7 @@
 import time
 
+from mymk.utils.memory import get_usage
+
 
 class FPS:
     counter = 0
@@ -8,7 +10,7 @@ class FPS:
 
     @classmethod
     def display(cls) -> None:
-        print(f"FPS: {int(cls.counter/cls.refresh_rate)}")
+        print(f"\n[FPS] {int(cls.counter/cls.refresh_rate)}")
         cls.reset()
 
     @classmethod
@@ -22,8 +24,10 @@ class FPS:
         cls.time = time.monotonic_ns() + cls.refresh_rate * 10**9
 
     @classmethod
-    def tick(cls) -> None:
+    def tick(cls, check_memory=False) -> None:
         cls.counter += 1
         now = time.monotonic_ns()
         if now >= cls.time:
             cls.display()
+            if check_memory:
+                print("[Memory]", get_usage(True))

@@ -45,10 +45,10 @@ class TimelineManager:
     def _process_event_in_timeline(self, event) -> None:
         timeline = self.current_timeline
         data = timeline.events.pop(event)
-        print("\n## Continuing timeline:", self.current_timeline)
+        # print("\n## Continuing timeline:", self.current_timeline)
         _, action, output = data.pop(0)
         if data:
-            print("Follow-up", data)
+            # print("Follow-up", data)
             timeline.events[data[0][0]] = data
         if action:
             # print("Immediate action")
@@ -59,8 +59,8 @@ class TimelineManager:
 
     def _process_interrupt_in_timeline(self) -> None:
         timeline = self.current_timeline
-        data = timeline.events["interrupt"]
-        print("## Interrupt:", self.current_timeline)
+        data = timeline.events.pop("interrupt")
+        # print("## Interrupt:", self.current_timeline)
         _, action, output = data.pop(0)
         if action:
             # print("Immediate action")
@@ -102,14 +102,14 @@ class TimelineManager:
                 try:
                     self._process_interrupt_in_timeline()
                 except KeyError:
-                    print("## Deadend:", timeline)
+                    # print("## Deadend:", timeline)
                     self.active_timelines.remove(timeline)
                     timeline.prune()
                     return
 
         # Process the event as an event triggering a new timeline
         if not timeline.determined:
-            print("## Deadend:", timeline)
+            # print("## Deadend:", timeline)
             self.active_timelines.remove(timeline)
             timeline.prune()
             return
@@ -117,14 +117,14 @@ class TimelineManager:
             timelines_events = timeline.layer.load_events(self, event)
         except KeyError:
             if timeline.events:
-                print("## Deadend:", timeline)
+                # print("## Deadend:", timeline)
                 self.active_timelines.remove(timeline)
                 timeline.prune()
             else:
                 raise RuntimeError("Unknown event sequence")
             return
 
-        print("\n## New timelines:", self.current_timeline)
+        # print("\n## New timelines:", self.current_timeline)
         new_timelines = []
         for timeline_events in timelines_events:
             # print(timeline_events)
@@ -132,10 +132,8 @@ class TimelineManager:
         for self.current_timeline in new_timelines:
             self._process_event(event)
 
-        print(self.active_timelines)
-
     @classmethod
-    @memory_cost("Process", True)
+    # @memory_cost("Process", True)
     @time_it
     def process_event(cls, event) -> None:
         """Process an event in all active timelines
@@ -165,7 +163,6 @@ class TimelineManager:
             and self.current_timeline == self.timeline_start
             and self.timeline_start.output
         ):
-            print("Running actions")
             for action in self.timeline_start.output:
                 action()
             self.timeline_start.output.clear()
@@ -173,7 +170,6 @@ class TimelineManager:
         if self.timeline_start.children and False not in [
             t.determined for t in self.timeline_start.children
         ]:
-            print("Resolving timelines")
             self.timeline_start = self.timeline_start.next_timeline
             self.timeline_start.parent = None
             self.current_timeline = self.timeline_start

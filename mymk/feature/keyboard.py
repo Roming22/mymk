@@ -1,9 +1,8 @@
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.hardware.board import Board
+from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.fps import FPS
-
-# from seaks.logic.timer import Timer
 from mymk.utils.memory import get_usage, memory_cost, profile
 
 
@@ -52,7 +51,7 @@ class Keyboard:
 
         while True:
             if fps:
-                FPS.tick()
-            # Timer.tick()
+                FPS.tick(True)
+            Timer.tick()
             for board in self.boards:
                 board.tick()

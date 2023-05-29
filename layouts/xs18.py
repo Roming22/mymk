@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import board
 
+import mymk.feature.keys.taphold
 from mymk.feature.keyboard import Keyboard
 
 
@@ -40,13 +41,13 @@ def main() -> None:
     definition["layout"]["layers"]["alpha"] = {
         "keys": [
             # fmt: off
-    "ESC",  "D",    "C",    "L",
-    "NO",   "T",    "A",    "E",
-            "NO",   "SPACE","LGUI", "NO",
+    "TH_HD(ESC,LSFT)",  "TH_HD(D, LSFT)",   "TH_HD(C,LALT)",    "TH_HD(L,LCTL)",
+    "NO",               "T",                "A",                "E",
+                        "NO",               "SPACE",            "LGUI",         "NO",
 
-            "R",    "S",    "H",    "ENTER",
-            "I",    "O",    "N",    "NO",
-    "NO",   "RGUI", "MEH",  "NO",
+            "TH_HD(R,RCTL)",    "TH_HD(S,RALT)",    "TH_HD(H,RSFT)",    "TH_HD(ENTER,RSFT)",
+            "I",                "O",                "N",                "NO",
+    "NO",   "RGUI",             "MEH",              "NO",
             # fmt: on
         ],
         # "combos": {
