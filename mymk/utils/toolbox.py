@@ -5,15 +5,20 @@ def hash(string: str) -> int:
 
 
 def permutations(items: list, n=None):
-    if n is None:
-        n = len(items)
-    if n == 1:
-        yield items
-    else:
-        for i in range(n - 1):
-            for permutation in permutations(items, n - 1):
-                yield permutation
-            j = 0 if (n % 2) == 1 else i
-            items[j], items[n - 1] = items[n - 1], items[j]
-        for permutation in permutations(items, n - 1):
-            yield permutation
+    if len(items) <= 1:
+        return [items]
+
+    result = []
+    for i in range(len(items)):
+        # Take the current element as the first element
+        first = items[i]
+
+        # Generate permutations of the remaining elements
+        remaining = items[:i] + items[i + 1 :]
+        sub_permutations = permutations(remaining)
+
+        # Append the first element to each permutation
+        for perm in sub_permutations:
+            result.append([first] + perm)
+
+    return result

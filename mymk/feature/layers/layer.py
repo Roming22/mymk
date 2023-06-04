@@ -1,7 +1,5 @@
+from mymk.feature.keys.combo import load_combo
 from mymk.feature.keys.key import Key
-
-# from seaks.features.combo import load_combos
-# from seaks.features.key import action_func
 from mymk.utils.memory import memory_cost
 
 
@@ -13,15 +11,22 @@ class Layer:
         print("Loading layer:", layer_name)
         self.uid = f"board.{board_name}.layer.{layer_name}"
         self.switch_to_keycode = {}
+        switch_prefix = f"board.{board_name}.switch"
         for switch_id, keycode in enumerate(layer_definition["keys"]):
-            switch_uid = f"board.{board_name}.switch.{switch_id}"
+            switch_uid = f"{switch_prefix}.{switch_id}"
             self.switch_to_keycode[switch_uid] = [keycode]
 
         # Load combos
-        # try:
-        #     load_combos(self.uid, layer_definition["combos"])
-        # except KeyError:
-        #     print("No combo has been declared")
+        if "combos" in layer_definition.keys():
+            for combo_definition, keycode in layer_definition["combos"].items():
+                combos = load_combo(switch_prefix, combo_definition, keycode)
+                for switch_uid, keycode in combos:
+                    if switch_uid not in self.switch_to_keycode.keys():
+                        self.switch_to_keycode[switch_uid] = []
+                    self.switch_to_keycode[switch_uid].append(keycode)
+                    print("Added combo:", keycode)
+        else:
+            print("No combo has been declared in layer", layer_name)
 
     def load_events(self, universe, switch_uid) -> list:
         timelines_events = []

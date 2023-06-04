@@ -40,7 +40,24 @@ class TimelineManager:
 
     def mark_determined(self) -> None:
         self.current_timeline.determined = True
+        if self.current_timeline.parent.next_timeline:
+            self.delete_timeline(self.current_timeline.parent.next_timeline)
         self.current_timeline.parent.next_timeline = self.current_timeline
+
+    def update_timeline(self, timeline, timeline_events) -> None:
+        if timeline.children:
+            for child in timeline.children:
+                self.update_timeline(child, timeline_events)
+        else:
+            timeline.events.update(timeline_events)
+
+    def delete_timeline(self, timeline):
+        if timeline in self.active_timelines:
+            self.active_timelines.remove(timeline)
+            timeline.prune()
+        else:
+            for children in list(timeline.children):
+                self.delete_timeline(children)
 
     def _process_event_in_timeline(self, event) -> None:
         timeline = self.current_timeline
@@ -103,23 +120,20 @@ class TimelineManager:
                     self._process_interrupt_in_timeline()
                 except KeyError:
                     # print("## Deadend:", timeline)
-                    self.active_timelines.remove(timeline)
-                    timeline.prune()
+                    self.delete_timeline(timeline)
                     return
 
         # Process the event as an event triggering a new timeline
         if not timeline.determined:
             # print("## Deadend:", timeline)
-            self.active_timelines.remove(timeline)
-            timeline.prune()
+            self.delete_timeline(timeline)
             return
         try:
             timelines_events = timeline.layer.load_events(self, event)
         except KeyError:
             if timeline.events:
                 # print("## Deadend:", timeline)
-                self.active_timelines.remove(timeline)
-                timeline.prune()
+                self.delete_timeline(timeline)
             else:
                 raise RuntimeError("Unknown event sequence")
             return
@@ -158,11 +172,7 @@ class TimelineManager:
 
     def resolve(self) -> None:
         """Solve split timelines"""
-        if (
-            self.timeline_start.output
-            and self.current_timeline == self.timeline_start
-            and self.timeline_start.output
-        ):
+        if self.timeline_start.output and self.current_timeline == self.timeline_start:
             for action in self.timeline_start.output:
                 action()
             self.timeline_start.output.clear()

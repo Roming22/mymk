@@ -8,12 +8,7 @@ delay = 0.3
 
 
 # @memory_cost("TapHold")
-def tap_hold(
-    interrupt_mode: str,
-    universe,
-    switch_uid: str,
-    data,
-) -> list:
+def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
     keycode_tap = data.pop(0)
     keycode_hold = data.pop(-1)
 

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from random import shuffle
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -277,4 +278,213 @@ class TestTapHold:
             call("press", "C"),
             call("release", "C"),
             call("release", "B"),
+        ]
+
+
+class TestCombo:
+    @pytest.fixture
+    def action(_, monkeypatch):
+        # Hardware definition
+        definition = {
+            "hardware": {
+                "test": {
+                    "pins": {
+                        "cols": (1, 2),
+                        "rows": (1, 2),
+                    },
+                },
+            },
+            "layout": {"layers": OrderedDict()},
+        }
+
+        # Layer definition
+        definition["layout"]["layers"]["myLayer"] = {
+            "keys": [
+                # fmt: off
+        "A", "B",
+        "C", "D",
+                # fmt: on
+            ],
+            "combos": {
+                "0+1": "F1",
+                "1+2": "F2",
+                "1+2+3": "F3",
+            },
+        }
+        action = make_keyboard(definition, monkeypatch)
+        return action
+
+    @staticmethod
+    def test_no_combo(action):
+        events = [
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("release", "A"),
+            call("press", "B"),
+            call("release", "B"),
+        ]
+
+    @staticmethod
+    def test_2key_enclosed(action):
+        events = [
+            "board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+            "!board.test.switch.0",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [call("press", "F1"), call("release", "F1")]
+
+    @staticmethod
+    def test_2key_cross(action):
+        events = [
+            "board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.0",
+            "!board.test.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [call("press", "F1"), call("release", "F1")]
+
+    @staticmethod
+    def test_3key(action):
+        events = [
+            "board.test.switch.1",
+            "board.test.switch.2",
+            "board.test.switch.3",
+        ]
+        release_events = [
+            "!board.test.switch.1",
+            "!board.test.switch.2",
+            "!board.test.switch.3",
+        ]
+        shuffle(release_events)
+        events += release_events
+        run_scenario(events)
+        assert action.call_args_list == [call("press", "F3"), call("release", "F3")]
+
+    @staticmethod
+    def test_sequence_break(action):
+        events = [
+            "board.test.switch.1",
+            "board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.3",
+            "!board.test.switch.1",
+            "!board.test.switch.3",
+            "!board.test.switch.2",
+            "board.test.switch.2",
+            "!board.test.switch.2",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "F2"),
+            call("press", "A"),
+            call("release", "A"),
+            call("press", "D"),
+            call("release", "F2"),
+            call("release", "D"),
+            call("press", "C"),
+            call("release", "C"),
+        ]
+
+
+class TestTapHoldCombo:
+    @pytest.fixture
+    def action(_, monkeypatch):
+        # Hardware definition
+        definition = {
+            "hardware": {
+                "test": {
+                    "pins": {
+                        "cols": (1, 2),
+                        "rows": (1, 2),
+                    },
+                },
+            },
+            "layout": {"layers": OrderedDict()},
+        }
+
+        # Layer definition
+        definition["layout"]["layers"]["myLayer"] = {
+            "keys": [
+                # fmt: off
+        "TH_HD(A, ONE)", "TH_TP(B, TWO)",
+        "C", "D",
+                # fmt: on
+            ],
+            "combos": {
+                "0+1": "F1",
+                "1+2": "F2",
+                "1+2+3": "F3",
+            },
+        }
+        action = make_keyboard(definition, monkeypatch)
+        return action
+
+    @staticmethod
+    def test_tap(action):
+        events = [
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.2",
+            "!board.test.switch.2",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "A"),
+            call("release", "A"),
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "B"),
+            call("release", "B"),
+        ]
+
+    @staticmethod
+    def test_hold(action):
+        events = [
+            "board.test.switch.0",
+            "timer.board.test.switch.0.taphold",
+            "!board.test.switch.0",
+            "board.test.switch.2",
+            "!board.test.switch.2",
+            "board.test.switch.1",
+            "timer.board.test.switch.1.taphold",
+            "!board.test.switch.1",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "ONE"),
+            call("release", "ONE"),
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "TWO"),
+            call("release", "TWO"),
+        ]
+
+    @staticmethod
+    def test_combo(action):
+        events = [
+            "board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.0",
+            "!board.test.switch.1",
+            "board.test.switch.3",
+            "!board.test.switch.3",
+        ]
+        run_scenario(events)
+        assert action.call_args_list == [
+            call("press", "F1"),
+            call("release", "F1"),
+            call("press", "D"),
+            call("release", "D"),
         ]
