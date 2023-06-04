@@ -42,6 +42,7 @@ class Timer:
         now = time.monotonic_ns()
         print("# At:", pretty_print(now))
         self.universe._process_event(self.timeline, self.name)
+        self.universe.resolve()
         self.stop()
 
     @classmethod
