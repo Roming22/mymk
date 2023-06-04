@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from random import shuffle
+from time import sleep
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -7,6 +8,8 @@ import pytest
 import mymk.feature.keys.taphold
 import mymk.hardware.keys as Keys
 from mymk.feature.keyboard import Keyboard
+from mymk.hardware.board import Board
+from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from tests.keycode import Keycode
 
@@ -18,15 +21,18 @@ def make_keyboard(definition, monkeypatch):
     kbd.release = lambda *args: action("release", *args)
     monkeypatch.setattr(Keys, "_kbd", kbd)
     monkeypatch.setattr(Keys, "Keycode", Keycode)
+    Board._instances.clear()
     TimelineManager._universes.clear()
-    Keyboard(definition)
-    return action
+    Timer.running.clear()
+    keyboard = Keyboard(definition)
+    return keyboard, action
 
 
-def run_scenario(events):
+def run_scenario(keyboard, event_delays):
     # Run test
-    for event in events:
-        TimelineManager.process_event(event)
+    for event_delay in event_delays:
+        sleep(event_delay)
+        keyboard.tick()
     timeline = TimelineManager._universes[0].timeline_start
     assert timeline.events == {}
     assert timeline.children == []
@@ -34,8 +40,8 @@ def run_scenario(events):
 
 
 class TestSingleLayerKeyboard:
-    @pytest.fixture
-    def action(_, monkeypatch):
+    @staticmethod
+    def _setup(monkeypatch, events):
         # Hardware definition
         definition = {
             "hardware": {
@@ -58,24 +64,28 @@ class TestSingleLayerKeyboard:
                 # fmt: on
             ],
         }
-        action = make_keyboard(definition, monkeypatch)
-        return action
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
 
-    @staticmethod
-    def test_one_key(action):
+    @classmethod
+    def test_one_key(cls, monkeypatch):
         events = ["board.2x2.switch.0", "!board.2x2.switch.0"]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "A"), call("release", "A")]
 
-    @staticmethod
-    def test_two_keys_couplet(action):
+    @classmethod
+    def test_two_keys_couplet(cls, monkeypatch):
         events = [
             "board.2x2.switch.0",
             "!board.2x2.switch.0",
             "board.2x2.switch.1",
             "!board.2x2.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("release", "A"),
@@ -83,15 +93,16 @@ class TestSingleLayerKeyboard:
             call("release", "B"),
         ]
 
-    @staticmethod
-    def test_two_keys_cross(action):
+    @classmethod
+    def test_two_keys_cross(cls, monkeypatch):
         events = [
             "board.2x2.switch.0",
             "board.2x2.switch.1",
             "!board.2x2.switch.0",
             "!board.2x2.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("press", "B"),
@@ -99,15 +110,16 @@ class TestSingleLayerKeyboard:
             call("release", "B"),
         ]
 
-    @staticmethod
-    def test_two_keys_enclosed(action):
+    @classmethod
+    def test_two_keys_enclosed(cls, monkeypatch):
         events = [
             "board.2x2.switch.0",
             "board.2x2.switch.1",
             "!board.2x2.switch.1",
             "!board.2x2.switch.0",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("press", "B"),
@@ -115,8 +127,8 @@ class TestSingleLayerKeyboard:
             call("release", "A"),
         ]
 
-    @staticmethod
-    def test_three_keys(action):
+    @classmethod
+    def test_three_keys(cls, monkeypatch):
         events = [
             "board.2x2.switch.0",
             "board.2x2.switch.1",
@@ -127,7 +139,8 @@ class TestSingleLayerKeyboard:
             "!board.2x2.switch.0",
             "!board.2x2.switch.2",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("press", "B"),
@@ -141,8 +154,8 @@ class TestSingleLayerKeyboard:
 
 
 class TestTapHold:
-    @pytest.fixture
-    def action(_, monkeypatch):
+    @staticmethod
+    def _setup(monkeypatch, events):
         # Hardware definition
         definition = {
             "hardware": {
@@ -160,39 +173,44 @@ class TestTapHold:
         definition["layout"]["layers"]["myLayer"] = {
             "keys": [
                 # fmt: off
-        "TH_HD(A, F1)", "TH_TP(B, F2)",
-        "TH_NO(C, F3)", "D",
+        "TH_HD(A, 0.1, F1)", "TH_TP(B, 0.1, F2)",
+        "TH_NO(C, 0.1, F3)", "D",
                 # fmt: on
             ],
         }
-        action = make_keyboard(definition, monkeypatch)
-        return action
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
 
-    @staticmethod
-    def test_tap(action):
+    @classmethod
+    def test_tap(cls, monkeypatch):
         events = ["board.test.switch.0", "!board.test.switch.0"]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "A"), call("release", "A")]
 
-    @staticmethod
-    def test_hold(action):
+    @classmethod
+    def test_hold(cls, monkeypatch):
         events = [
             "board.test.switch.0",
-            "timer.board.test.switch.0.taphold",
             "!board.test.switch.0",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = 0.2
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "F1"), call("release", "F1")]
 
-    @staticmethod
-    def test_interrupt_hold(action):
+    @classmethod
+    def test_interrupt_hold(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "board.test.switch.3",
             "!board.test.switch.3",
             "!board.test.switch.0",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F1"),
             call("press", "D"),
@@ -200,29 +218,31 @@ class TestTapHold:
             call("release", "F1"),
         ]
 
-    @staticmethod
-    def test_interrupt_noop(action):
+    @classmethod
+    def test_interrupt_noop(cls, monkeypatch):
         events = [
             "board.test.switch.2",
             "board.test.switch.3",
             "!board.test.switch.3",
             "!board.test.switch.2",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "D"),
             call("release", "D"),
         ]
 
-    @staticmethod
-    def test_interrupt_tap(action):
+    @classmethod
+    def test_interrupt_tap(cls, monkeypatch):
         events = [
             "board.test.switch.1",
             "board.test.switch.3",
             "!board.test.switch.3",
             "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "B"),
             call("press", "D"),
@@ -230,15 +250,16 @@ class TestTapHold:
             call("release", "B"),
         ]
 
-    @staticmethod
-    def test_interrupt_hold_ht(action):
+    @classmethod
+    def test_interrupt_hold_ht(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "board.test.switch.1",
             "!board.test.switch.1",
             "!board.test.switch.0",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F1"),
             call("press", "B"),
@@ -246,22 +267,23 @@ class TestTapHold:
             call("release", "F1"),
         ]
 
-    @staticmethod
-    def test_interrupt_noop_ht(action):
+    @classmethod
+    def test_interrupt_noop_ht(cls, monkeypatch):
         events = [
             "board.test.switch.2",
             "board.test.switch.0",
             "!board.test.switch.0",
             "!board.test.switch.2",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("release", "A"),
         ]
 
-    @staticmethod
-    def test_interrupt_tap_ht(action):
+    @classmethod
+    def test_interrupt_tap_ht(cls, monkeypatch):
         events = [
             "board.test.switch.1",
             "board.test.switch.2",
@@ -270,7 +292,8 @@ class TestTapHold:
             "!board.test.switch.2",
             "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "B"),
             call("press", "C"),
@@ -282,8 +305,8 @@ class TestTapHold:
 
 
 class TestCombo:
-    @pytest.fixture
-    def action(_, monkeypatch):
+    @staticmethod
+    def _setup(monkeypatch, events):
         # Hardware definition
         definition = {
             "hardware": {
@@ -311,49 +334,63 @@ class TestCombo:
                 "1+2+3": "F3",
             },
         }
-        action = make_keyboard(definition, monkeypatch)
-        return action
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
 
-    @staticmethod
-    def test_no_combo(action):
+    @classmethod
+    def test_no_combo(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "!board.test.switch.0",
             "board.test.switch.1",
             "!board.test.switch.1",
+            "board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.0",
+            "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[5] = 1.1
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("release", "A"),
             call("press", "B"),
             call("release", "B"),
+            call("press", "A"),
+            call("press", "B"),
+            call("release", "A"),
+            call("release", "B"),
         ]
 
-    @staticmethod
-    def test_2key_enclosed(action):
+    @classmethod
+    def test_2key_enclosed(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "board.test.switch.1",
             "!board.test.switch.1",
             "!board.test.switch.0",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "F1"), call("release", "F1")]
 
-    @staticmethod
-    def test_2key_cross(action):
+    @classmethod
+    def test_2key_cross(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "board.test.switch.1",
             "!board.test.switch.0",
             "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "F1"), call("release", "F1")]
 
-    @staticmethod
-    def test_3key(action):
+    @classmethod
+    def test_3key(cls, monkeypatch):
         events = [
             "board.test.switch.1",
             "board.test.switch.2",
@@ -366,11 +403,12 @@ class TestCombo:
         ]
         shuffle(release_events)
         events += release_events
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "F3"), call("release", "F3")]
 
-    @staticmethod
-    def test_sequence_break(action):
+    @classmethod
+    def test_sequence_break(cls, monkeypatch):
         events = [
             "board.test.switch.1",
             "board.test.switch.2",
@@ -383,7 +421,8 @@ class TestCombo:
             "board.test.switch.2",
             "!board.test.switch.2",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F2"),
             call("press", "A"),
@@ -397,8 +436,8 @@ class TestCombo:
 
 
 class TestTapHoldCombo:
-    @pytest.fixture
-    def action(_, monkeypatch):
+    @staticmethod
+    def _setup(monkeypatch, events):
         # Hardware definition
         definition = {
             "hardware": {
@@ -426,11 +465,13 @@ class TestTapHoldCombo:
                 "1+2+3": "F3",
             },
         }
-        action = make_keyboard(definition, monkeypatch)
-        return action
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
 
-    @staticmethod
-    def test_tap(action):
+    @classmethod
+    def test_tap(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "!board.test.switch.0",
@@ -439,7 +480,8 @@ class TestTapHoldCombo:
             "board.test.switch.1",
             "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "A"),
             call("release", "A"),
@@ -449,19 +491,20 @@ class TestTapHoldCombo:
             call("release", "B"),
         ]
 
-    @staticmethod
-    def test_hold(action):
+    @classmethod
+    def test_hold(cls, monkeypatch):
         events = [
             "board.test.switch.0",
-            "timer.board.test.switch.0.taphold",
             "!board.test.switch.0",
             "board.test.switch.2",
             "!board.test.switch.2",
             "board.test.switch.1",
-            "timer.board.test.switch.1.taphold",
             "!board.test.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = .4
+        event_delays[5] = .4
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "ONE"),
             call("release", "ONE"),
@@ -471,8 +514,8 @@ class TestTapHoldCombo:
             call("release", "TWO"),
         ]
 
-    @staticmethod
-    def test_combo(action):
+    @classmethod
+    def test_combo(cls, monkeypatch):
         events = [
             "board.test.switch.0",
             "board.test.switch.1",
@@ -481,7 +524,8 @@ class TestTapHoldCombo:
             "board.test.switch.3",
             "!board.test.switch.3",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F1"),
             call("release", "F1"),

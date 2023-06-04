@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from time import sleep
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -6,6 +7,8 @@ import pytest
 import mymk.feature.keys.taphold
 import mymk.hardware.keys as Keys
 from mymk.feature.keyboard import Keyboard
+from mymk.hardware.board import Board
+from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from tests.keycode import Keycode
 
@@ -17,15 +20,18 @@ def make_keyboard(definition, monkeypatch):
     kbd.release = lambda *args: action("release", *args)
     monkeypatch.setattr(Keys, "_kbd", kbd)
     monkeypatch.setattr(Keys, "Keycode", Keycode)
+    Board._instances.clear()
     TimelineManager._universes.clear()
-    Keyboard(definition)
-    return action
+    Timer.running.clear()
+    keyboard = Keyboard(definition)
+    return keyboard, action
 
 
-def run_scenario(events):
+def run_scenario(keyboard, event_delays):
     # Run test
-    for event in events:
-        TimelineManager.process_event(event)
+    for event_delay in event_delays:
+        sleep(event_delay)
+        keyboard.tick()
     timeline = TimelineManager._universes[0].timeline_start
     assert timeline.events == {}
     assert timeline.children == []
@@ -33,8 +39,8 @@ def run_scenario(events):
 
 
 class TestKeyboard:
-    @pytest.fixture
-    def action(_, monkeypatch):
+    @staticmethod
+    def _setup(monkeypatch, events):
         # Hardware definition
         definition = {
             "hardware": {
@@ -91,17 +97,20 @@ class TestKeyboard:
                 "18+17+16": "B",
             },
         }
-        action = make_keyboard(definition, monkeypatch)
-        return action
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
 
-    @staticmethod
-    def test_one_key(action):
+    @classmethod
+    def test_one_key(cls, monkeypatch):
         events = ["board.xs18.switch.5", "!board.xs18.switch.5"]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "T"), call("release", "T")]
 
-    @staticmethod
-    def test_2key_combo(action):
+    @classmethod
+    def test_2key_combo(cls, monkeypatch):
         events = [
             "board.xs18.switch.5",
             "board.xs18.switch.6",
@@ -110,7 +119,8 @@ class TestKeyboard:
             "board.xs18.switch.5",
             "!board.xs18.switch.5",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F"),
             call("release", "F"),
@@ -118,8 +128,8 @@ class TestKeyboard:
             call("release", "T"),
         ]
 
-    @staticmethod
-    def test_3key_combo(action):
+    @classmethod
+    def test_3key_combo(cls, monkeypatch):
         events = [
             "board.xs18.switch.5",
             "board.xs18.switch.6",
@@ -127,13 +137,20 @@ class TestKeyboard:
             "!board.xs18.switch.5",
             "!board.xs18.switch.6",
             "!board.xs18.switch.7",
-            "board.xs18.switch.5",
-            "!board.xs18.switch.5",
+            "board.xs18.switch.1",
+            "!board.xs18.switch.1",
         ]
-        run_scenario(events)
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = .1
+        event_delays[2] = .1
+        event_delays[3] = .8
+        event_delays[4] = .1
+        event_delays[5] = .1
+        event_delays[6] = .5
+        run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "W"),
             call("release", "W"),
-            call("press", "T"),
-            call("release", "T"),
+            call("press", "D"),
+            call("release", "D"),
         ]

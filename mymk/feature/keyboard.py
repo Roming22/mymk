@@ -52,6 +52,9 @@ class Keyboard:
         while True:
             if fps:
                 FPS.tick(True)
-            Timer.tick()
-            for board in self.boards:
-                board.tick()
+            self.tick()
+
+    def tick(self):
+        Timer.tick()
+        for board in self.boards:
+            board.tick()
