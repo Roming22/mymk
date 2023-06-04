@@ -29,16 +29,23 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
     # )
 
     timer_name = f"timer.{switch_uid}.taphold"
-    timer = Timer(timer_name, key_delay, universe)
+    timer_tap = Timer(timer_name, key_delay, universe)
+    timer_hold = Timer(timer_name, key_delay, universe)
+    timer_interrupt = Timer(timer_name, key_delay, universe)
 
     timelines_events = [
         # Tap
         {
             switch_uid: [
-                (switch_uid, None, press(keycode_tap)),
+                (switch_uid, timer_tap.start, press(keycode_tap)),
                 (
                     f"!{switch_uid}",
-                    chain(timer.stop, universe.mark_determined),
+                    chain(
+                        timer_tap.stop,
+                        timer_hold.stop,
+                        timer_interrupt.stop,
+                        universe.mark_determined,
+                    ),
                     release(keycode_tap),
                 ),
             ],
@@ -46,7 +53,7 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         # Hold
         {
             switch_uid: [
-                (switch_uid, timer.start, press(keycode_hold)),
+                (switch_uid, timer_hold.start, press(keycode_hold)),
                 (timer_name, universe.mark_determined, None),
                 (f"!{switch_uid}", None, release(keycode_hold)),
             ]
@@ -54,8 +61,12 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         # Interrupt
         {
             switch_uid: [
-                (switch_uid, None, press(keycode_interrupt)),
-                (f"interrupt", chain(timer.stop, universe.mark_determined), None),
+                (switch_uid, timer_interrupt.start, press(keycode_interrupt)),
+                (
+                    f"interrupt",
+                    chain(timer_tap.stop, timer_hold.stop, universe.mark_determined),
+                    None,
+                ),
                 (f"!{switch_uid}", None, release(keycode_interrupt)),
             ]
         },

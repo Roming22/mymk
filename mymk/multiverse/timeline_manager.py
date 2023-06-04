@@ -97,14 +97,14 @@ class TimelineManager:
             return False
         return True
 
-    def _process_event(self, event) -> None:
+    def _process_event(self, timeline, event) -> None:
         """Process an event
 
         The event is checked against the timeline expectation.
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
-        timeline = self.current_timeline
+        self.current_timeline = timeline
 
         if timeline.events:
             # Process an event as part of a group of event.
@@ -143,8 +143,8 @@ class TimelineManager:
         for timeline_events in timelines_events:
             # print(timeline_events)
             new_timelines.append(self.split(timeline_events))
-        for self.current_timeline in new_timelines:
-            self._process_event(event)
+        for new_timeline in new_timelines:
+            self._process_event(new_timeline, event)
 
     @classmethod
     # @memory_cost("Process", True)
@@ -166,8 +166,7 @@ class TimelineManager:
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in list(universe.active_timelines):
-                universe.current_timeline = timeline
-                universe._process_event(event)
+                universe._process_event(timeline, event)
             universe.resolve()
 
     def resolve(self) -> None:

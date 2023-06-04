@@ -56,12 +56,10 @@ class Sequence:
             else:
                 action = chain(
                     universe.mark_determined,
+                    lambda: self.to_timeline_release_events(universe),
                     timer.stop,
                 )
-                output = chain(
-                    self.press,
-                    lambda: self.to_timeline_release_events(universe),
-                )
+                output = self.press
             event = (switch_uid, action, output)
             timeline_events.append(event)
         return [{self.switch_uids[0]: timeline_events}]
