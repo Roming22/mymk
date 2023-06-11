@@ -16,6 +16,7 @@ class Timeline:
                 A determined timeline will spawn new children timelines as
                 new events are coming in.
         """
+        self.what = events.pop("what")
         self.children = []
         self.determined = len(events) == 0 and parent is None
         self.events = events
@@ -37,6 +38,9 @@ class Timeline:
         """Some timelines might be deadends. They are removed from the multiverse"""
         parent = self.parent
         if parent:
+            self.parent = None
             parent.children.remove(self)
+            if parent.next_timeline == self:
+                parent.next_timeline = None
             if not parent.children:
                 parent.prune()

@@ -141,12 +141,12 @@ class TestKeyboard:
             "!board.xs18.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[1] = .1
-        event_delays[2] = .1
-        event_delays[3] = .8
-        event_delays[4] = .1
-        event_delays[5] = .1
-        event_delays[6] = .5
+        event_delays[1] = 0.1
+        event_delays[2] = 0.1
+        event_delays[3] = 0.8
+        event_delays[4] = 0.1
+        event_delays[5] = 0.1
+        event_delays[6] = 0.5
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "W"),

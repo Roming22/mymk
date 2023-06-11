@@ -59,8 +59,8 @@ class TestSingleLayerKeyboard:
         definition["layout"]["layers"]["myLayer"] = {
             "keys": [
                 # fmt: off
-        "A", "B",
-        "C", "D",
+                "A", "B",
+                "C", "D",
                 # fmt: on
             ],
         }
@@ -324,8 +324,8 @@ class TestCombo:
         definition["layout"]["layers"]["myLayer"] = {
             "keys": [
                 # fmt: off
-        "A", "B",
-        "C", "D",
+                "A", "B",
+                "C", "D",
                 # fmt: on
             ],
             "combos": {
@@ -346,8 +346,8 @@ class TestCombo:
             "!board.test.switch.0",
             "board.test.switch.1",
             "!board.test.switch.1",
-            "board.test.switch.0",
             "board.test.switch.1",
+            "board.test.switch.0",
             "!board.test.switch.0",
             "!board.test.switch.1",
         ]
@@ -359,8 +359,8 @@ class TestCombo:
             call("release", "A"),
             call("press", "B"),
             call("release", "B"),
-            call("press", "A"),
             call("press", "B"),
+            call("press", "A"),
             call("release", "A"),
             call("release", "B"),
         ]
@@ -455,8 +455,8 @@ class TestTapHoldCombo:
         definition["layout"]["layers"]["myLayer"] = {
             "keys": [
                 # fmt: off
-        "TH_HD(A, ONE)", "TH_TP(B, TWO)",
-        "C", "D",
+        "TH_HD(A, ONE)",    "TH_TP(B, TWO)",
+        "C",                "D",
                 # fmt: on
             ],
             "combos": {

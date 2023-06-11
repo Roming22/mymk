@@ -36,6 +36,7 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
     timelines_events = [
         # Tap
         {
+            "what": f"{switch_uid} tap",
             switch_uid: [
                 (switch_uid, timer_tap.start, press(keycode_tap)),
                 (
@@ -52,14 +53,16 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         },
         # Hold
         {
+            "what": f"{switch_uid} hold",
             switch_uid: [
                 (switch_uid, timer_hold.start, press(keycode_hold)),
                 (timer_name, universe.mark_determined, None),
                 (f"!{switch_uid}", None, release(keycode_hold)),
-            ]
+            ],
         },
         # Interrupt
         {
+            "what": f"{switch_uid} interrupt",
             switch_uid: [
                 (switch_uid, timer_interrupt.start, press(keycode_interrupt)),
                 (
@@ -68,7 +71,7 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
                     None,
                 ),
                 (f"!{switch_uid}", None, release(keycode_interrupt)),
-            ]
+            ],
         },
     ]
 

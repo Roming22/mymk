@@ -15,13 +15,16 @@ class Test_1_TimelineManager:
         """
         Test the creation of a Timeline
         """
-        timeline_events = [
-            (
-                "event1",
-                lambda: "action on match".split(),
-                lambda: "action on resolution".split(),
-            )
-        ]
+        timeline_events = {
+            "what": "event1",
+            "event1": [
+                (
+                    "event1",
+                    lambda: "action on match".split(),
+                    lambda: "action on resolution".split(),
+                )
+            ],
+        }
         timeline = Timeline(timeline_events)
 
         assert timeline.events == timeline_events
@@ -32,7 +35,7 @@ class Test_1_TimelineManager:
         universe = TimelineManager(timeline)
 
         assert universe.timeline_start == timeline
-        assert universe.active_timelines == [timeline]
+        assert universe.get_active_timelines() == [timeline]
         assert universe.current_timeline == timeline
 
     @staticmethod
@@ -40,18 +43,21 @@ class Test_1_TimelineManager:
         """
         Test a timeline split
         """
-        timeline = Timeline({})
+        timeline = Timeline({"what": "begin"})
         timeline.output = ["A", "B"]
         TimelineManager._universes.clear()
         universe = TimelineManager(timeline)
         events_list = [
             {
+                "what": "splitA",
                 "press": [("timelineA", None, None)],
             },
             {
+                "what": "splitB",
                 "press": [("timelineB", None, None)],
             },
             {
+                "what": "splitC",
                 "press": [("timelineC", None, None)],
             },
         ]
@@ -69,8 +75,8 @@ class Test_1_TimelineManager:
             assert child.determined == False
 
         assert universe.timeline_start == timeline
-        assert timeline not in universe.active_timelines
-        assert universe.active_timelines == timeline.children
+        assert timeline not in universe.get_active_timelines()
+        assert universe.get_active_timelines() == timeline.children
 
 
 class Test_2_SimpleKey:
@@ -81,10 +87,11 @@ class Test_2_SimpleKey:
 
         do = MagicMock()
         timeline_events = {
+            "what": "key",
             "press": [
                 ("press", universe.mark_determined, lambda: do("A")),
                 ("release", None, lambda: do("a")),
-            ]
+            ],
         }
 
         universe.split(timeline_events)
@@ -109,12 +116,14 @@ class Test_3_TapHold:
 
         timelines_events = [
             {
+                "what": "tap",
                 "switch.1": [
                     ("switch.1", universe.mark_determined, exec("A")),
                     ("!switch.1", None, exec("a")),
                 ],
             },
             {
+                "what": "hold",
                 "switch.1": [
                     ("switch.1", exec("Start timer"), exec("B")),
                     ("timer.hold", universe.mark_determined, None),
@@ -122,6 +131,7 @@ class Test_3_TapHold:
                 ],
             },
             {
+                "what": "interrupt",
                 "switch.1": [
                     ("switch.1", None, exec("C")),
                     ("interrupt", universe.mark_determined, None),
@@ -131,7 +141,7 @@ class Test_3_TapHold:
         ]
         for timeline_events in timelines_events:
             universe.split(timeline_events)
-        assert len(universe.active_timelines) == len(timelines_events)
+        assert len(universe.get_active_timelines()) == len(timelines_events)
 
         return action
 

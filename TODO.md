@@ -1,27 +1,28 @@
 # TODO
 
 ## State-Event-Action
-[ ] Add Timer
-[ ] Add TapHold support
+[X] Add Timer
+[X] Add TapHold support
 [ ] Add MultiTap support
-[ ] Add combo key for 2 keys
-[ ] Add combo keys for n keys
+[X] Add combo key for 2 keys
+[X] Add combo keys for n keys
+[ ] Add Layer support
 
 ## Layout definition
 [X] Alpha layer single key chars
-[ ] Alpha layer Mod keys
+[X] Alpha layer Mod keys
 [ ] Alpha layer Fn keys
 [ ] Alpha layer lock Fn
-[ ] Alpha layer combo key chars
+[X] Alpha layer combo key chars
 [ ] Caps Word
 
 ## Tests
 [X] Layer0 keys
-[ ] Layer0 TapHold
-[ ] Layer0 Chord
-    [ ] Chord activates
+[X] Layer0 TapHold
+[X] Layer0 Chord
+    [X] Chord activates
     [ ] Tap key repeats when first key is held
-[ ] Layer0 Sequence
+[X] Layer0 Sequence
 [ ] Chords/Sequences can be repeated by pressing/releasing a key (any or just the last?) of the sequence fast enough.
 [ ] Layer1 keys
 [ ] Keys remained pressed when switching layer as long as they are held

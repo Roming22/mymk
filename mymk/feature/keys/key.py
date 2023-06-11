@@ -28,6 +28,7 @@ class Key:
     def create_timelines_events(universe, switch_uid, keycode) -> list[list[tuple]]:
         timeline_events = [
             {
+                "what": f"{switch_uid} press/release",
                 switch_uid: [
                     (switch_uid, universe.mark_determined, press(keycode)),
                     (f"!{switch_uid}", None, release(keycode)),

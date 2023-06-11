@@ -12,8 +12,7 @@ class TimelineManager:
 
     def __init__(self, timeline=False) -> None:
         if not timeline:
-            timeline = Timeline({})
-        self.active_timelines = [timeline]
+            timeline = Timeline({"what": "begin"})
         self.timeline_start = timeline
         self.current_timeline = timeline
         TimelineManager._universes.append(self)
@@ -23,19 +22,24 @@ class TimelineManager:
         universe = TimelineManager()
         print("Universes:", len(cls._universes))
         for universe in cls._universes:
-            for timeline in universe.active_timelines:
+            for timeline in universe.get_active_timelines():
                 universe.current_timeline = timeline
                 LayerManager.activate(layer_name, timeline)
 
+    def get_active_timelines(self, timeline=None):
+        if timeline is None:
+            timeline = self.timeline_start
+        timelines = []
+        if timeline.children:
+            for child in timeline.children:
+                timelines += self.get_active_timelines(child)
+        else:
+            timelines.append(timeline)
+        return timelines
+
     def split(self, events) -> Timeline:
         """Create new timelines"""
-
-        if self.current_timeline in self.active_timelines:
-            self.active_timelines.remove(self.current_timeline)
-
         new_timeline = Timeline(events, self.current_timeline)
-        self.active_timelines.append(new_timeline)
-
         return new_timeline
 
     def mark_determined(self) -> None:
@@ -52,12 +56,10 @@ class TimelineManager:
             timeline.events.update(timeline_events)
 
     def delete_timeline(self, timeline):
-        if timeline in self.active_timelines:
-            self.active_timelines.remove(timeline)
-            timeline.prune()
-        else:
-            for children in list(timeline.children):
-                self.delete_timeline(children)
+        parent = timeline.parent
+        timeline.prune()
+        if not parent.children:
+            self.delete(parent)
 
     def _process_event_in_timeline(self, event) -> None:
         timeline = self.current_timeline
@@ -165,7 +167,7 @@ class TimelineManager:
 
         # Send event to all timelines
         for universe in cls._universes:
-            for timeline in list(universe.active_timelines):
+            for timeline in universe.get_active_timelines():
                 universe._process_event(timeline, event)
             universe.resolve()
 

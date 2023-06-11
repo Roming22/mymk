@@ -62,7 +62,12 @@ class Sequence:
                 output = self.press
             event = (switch_uid, action, output)
             timeline_events.append(event)
-        return [{self.switch_uids[0]: timeline_events}]
+        return [
+            {
+                "what": f"combo.{'.'.join(self.switch_uids)}",
+                self.switch_uids[0]: timeline_events,
+            }
+        ]
 
     def to_timeline_release_events(self, universe):
         timeline_events = {}

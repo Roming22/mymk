@@ -41,8 +41,9 @@ class Timer:
         print(" ".join(["#", self.name, "#" * 100])[:120])
         now = time.monotonic_ns()
         print("# At:", pretty_print(now))
-        self.universe._process_event(self.timeline, self.name)
-        self.universe.resolve()
+        if self.timeline.parent is not None:
+            self.universe._process_event(self.timeline, self.name)
+            self.universe.resolve()
         self.stop()
 
     @classmethod
