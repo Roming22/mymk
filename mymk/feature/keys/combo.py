@@ -77,23 +77,43 @@ class Sequence:
         universe.update_timeline(universe.current_timeline, timeline_events)
 
 
-@memory_cost("Combo")
-def load_combo(switch_prefix: str, definition: str, keycode: str) -> list:
-    switch_to_keycodes = []
-    for combo in expand_combo(definition):
-        print("Loading", combo)
-        switch_uids = [
-            f"{switch_prefix}.{switch_uid}" for switch_uid in combo.split("+")
-        ]
-        delays = [delay for _ in switch_uids]
-        delays[-1] = None
-        combo_pairs = [
-            f"{switch_uid},{delay if delay is not None else keycode}"
-            for switch_uid, delay in zip(switch_uids, delays)
-        ]
-        combo_keycode = f"SQ({','.join(combo_pairs)})"
-        switch_to_keycodes.append((switch_uids[0], combo_keycode))
-    return switch_to_keycodes
+def load_combos(switch_prefix, combo_definitions) -> list:
+    sequences = {}
+    for chord, keycode in combo_definitions.get("chords", {}).items():
+        for sequence in expand_chord(chord):
+            sequences[sequence] = keycode
+    sequences.update(combo_definitions.get("sequences", {}))
+
+    combos = []
+    for sequence, keycode in sequences.items():
+        combo = load_sequence(switch_prefix, sequence, keycode)
+        combos.append(combo)
+    return combos
+
+
+def expand_chord(chord: str):
+    combo = chord.split("*")
+    result = []
+    for permutation in permutations(combo):
+        result.append("+".join(permutation))
+    return result
+
+
+@memory_cost("Sequence")
+def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
+    print("Loading", sequence)
+    switch_uids = [
+        f"{switch_prefix}.{switch_uid}" for switch_uid in sequence.split("+")
+    ]
+    delays = [delay for _ in switch_uids]
+    delays[-1] = None
+    combo_pairs = [
+        f"{switch_uid},{delay if delay is not None else keycode}"
+        for switch_uid, delay in zip(switch_uids, delays)
+    ]
+    combo_keycode = f"SQ({','.join(combo_pairs)})"
+    result = (switch_uids[0], combo_keycode)
+    return result
 
 
 def expand_combo(definition: str) -> list:

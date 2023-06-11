@@ -313,7 +313,7 @@ class TestCombo:
                 "test": {
                     "pins": {
                         "cols": (1, 2),
-                        "rows": (1, 2),
+                        "rows": (1, 2, 3),
                     },
                 },
             },
@@ -326,12 +326,18 @@ class TestCombo:
                 # fmt: off
                 "A", "B",
                 "C", "D",
+                "E", "F",
                 # fmt: on
             ],
             "combos": {
-                "0+1": "F1",
-                "1+2": "F2",
-                "1+2+3": "F3",
+                "chords": {
+                    "4*5": "F4",
+                },
+                "sequences": {
+                    "0+1": "F1",
+                    "1+2": "F2",
+                    "1+2+3": "F3",
+                },
             },
         }
         keyboard, action = make_keyboard(definition, monkeypatch)
@@ -363,6 +369,21 @@ class TestCombo:
             call("press", "A"),
             call("release", "A"),
             call("release", "B"),
+        ]
+
+    @classmethod
+    def test_chord(cls, monkeypatch):
+        events = [
+            "board.test.switch.5",
+            "board.test.switch.4",
+            "!board.test.switch.5",
+            "!board.test.switch.4",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "F4"),
+            call("release", "F4"),
         ]
 
     @classmethod
@@ -460,9 +481,11 @@ class TestTapHoldCombo:
                 # fmt: on
             ],
             "combos": {
-                "0+1": "F1",
-                "1+2": "F2",
-                "1+2+3": "F3",
+                "sequences": {
+                    "0+1": "F1",
+                    "1+2": "F2",
+                    "1+2+3": "F3",
+                },
             },
         }
         keyboard, action = make_keyboard(definition, monkeypatch)

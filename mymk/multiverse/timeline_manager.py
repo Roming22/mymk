@@ -58,7 +58,7 @@ class TimelineManager:
     def delete_timeline(self, timeline):
         parent = timeline.parent
         timeline.prune()
-        if not parent.children:
+        if parent and not parent.children:
             self.delete(parent)
 
     def _process_event_in_timeline(self, event) -> None:

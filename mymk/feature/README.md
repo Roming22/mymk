@@ -10,9 +10,11 @@ Example:
 # 2x2 keyboard
 definition = {
     "hardware": {
-        "pins": {
-            "cols": (board.D26, board.D22),
-            "rows": (board.D6, board.D7),
+        "myboard": {
+            "pins": {
+                "cols": (board.D26, board.D22),
+                "rows": (board.D6, board.D7),
+            },
         },
     },
     "layout": {"layers": OrderedDict()},
@@ -21,7 +23,7 @@ definition["layout"]["layers"]["WASD"] = {
     "keys": [
         "W", "A",
         "S", "D",
-    ]
+    ],
 }
 keyboard = Keyboard(definition)
 ```
@@ -44,9 +46,11 @@ Example:
 # 2x2 keyboard
 definition = {
     "hardware": {
-        "pins": {
-            "cols": (board.D26, board.D22),
-            "rows": (board.D6, board.D7),
+        "myboard": {
+            "pins": {
+                "cols": (board.D26, board.D22),
+                "rows": (board.D6, board.D7),
+            },
         },
     },
     "layout": {"layers": OrderedDict()},
@@ -55,13 +59,13 @@ definition["layout"]["layers"]["nums"] = {
     "keys": [
         "LY_TG(fn)", "1",
         "2", "3",
-    ]
+    ],
 }
 definition["layout"]["layers"]["fn"] = {
     "keys": [
         None, "F1",
         "F2", "F3",
-    ]
+    ],
 }
 keyboard = Keyboard(definition)
 ```
@@ -97,9 +101,11 @@ Example:
 # 2x2 keyboard
 definition = {
     "hardware": {
-        "pins": {
-            "cols": (board.D26, board.D22),
-            "rows": (board.D6, board.D7),
+        "myboard": {
+            "pins": {
+                "cols": (board.D26, board.D22),
+                "rows": (board.D6, board.D7),
+            },
         },
     },
     "layout": {"layers": OrderedDict()},
@@ -108,7 +114,54 @@ definition["layout"]["layers"]["alpha&sys"] = {
     "keys": [
 "TH_HD(W, ESCACPE, 1.5)", "TH_HD(A, LEFT_SHIFT)",
 "TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
-    ]
+    ],
+}
+keyboard = Keyboard(definition)
+```
+
+## Combos
+
+There are two types of combos:
+* chords: the switches can be pressed in any order. The delimiter is '*'.
+* sequences: the switches must be pressed in the right order. The delimiter is '+'.
+
+All keys of the combos must be pressed for the combo to trigger. I.e. if a key belonging
+to a combo is released while the combo is being keyed, the combo will be cancelled.
+
+If a chord conflicts with a sequence, the sequence takes priority. For example if the
+chord `1*2*3` is assigned to `ENTER` and the sequence `3+2+1` is assigned to `SPACE`:
+* 1+2+3, 1+3+2, 2+1+3, 2+3+1, 3+1+2 will output `ENTER`
+* 3+2+1 will output `SPACE`
+
+Example
+```
+# 2x2 keyboard
+definition = {
+    "hardware": {
+        "myboard": {
+            "pins": {
+                "cols": (board.D26, board.D22),
+                "rows": (board.D6, board.D7),
+            },
+        },
+    },
+    "layout": {"layers": OrderedDict()},
+}
+definition["layout"]["layers"]["alpha&sys"] = {
+    "keys": [
+"TH_HD(W, ESCACPE, 1.5)", "TH_HD(A, LEFT_SHIFT)",
+"TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
+    ],
+    "combos": {
+        "chords": {
+            "0*1": "F1",
+            "2*3": "F2",
+        },
+        "sequences": {
+            "0+3": "DOWN",
+            "3+0" :"UP",
+        },
+    },
 }
 keyboard = Keyboard(definition)
 ```

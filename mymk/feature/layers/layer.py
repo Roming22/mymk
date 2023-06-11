@@ -1,4 +1,4 @@
-from mymk.feature.keys.combo import load_combo
+from mymk.feature.keys.combo import load_combos
 from mymk.feature.keys.key import Key
 from mymk.utils.memory import memory_cost
 
@@ -18,13 +18,12 @@ class Layer:
 
         # Load combos
         if "combos" in layer_definition.keys():
-            for combo_definition, keycode in layer_definition["combos"].items():
-                combos = load_combo(switch_prefix, combo_definition, keycode)
-                for switch_uid, keycode in combos:
-                    if switch_uid not in self.switch_to_keycode.keys():
-                        self.switch_to_keycode[switch_uid] = []
-                    self.switch_to_keycode[switch_uid].append(keycode)
-                    print("Added combo:", keycode)
+            combos = load_combos(switch_prefix, layer_definition["combos"])
+            for switch_uid, keycode in combos:
+                if switch_uid not in self.switch_to_keycode.keys():
+                    self.switch_to_keycode[switch_uid] = []
+                self.switch_to_keycode[switch_uid].append(keycode)
+                print("Added combo:", keycode)
         else:
             print("No combo has been declared in layer", layer_name)
 
