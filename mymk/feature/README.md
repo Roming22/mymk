@@ -36,9 +36,8 @@ Multiple layers can be defined for various purpose, with switches assigned for t
 Layers can have transparent keys (by setting the key to None).
 When the layer is activated the switch will inherit its key/action from the the previous layer.
 
-There are 3 way to change layer:
+There are 2 way to change layer:
 * `LY_MO(layer_name)`: On switch press, activate `layer_name`. On switch release, deactivate the layer.
-* `LY_TG(layer_name)`: On switch press, activate/deactivate `layer_name`. On switch release, do nothing.
 * `LY_TO(layer_name)`: On switch press, activate `layer_name`. No action on switch release.
 
 Example:
@@ -57,23 +56,22 @@ definition = {
 }
 definition["layout"]["layers"]["nums"] = {
     "keys": [
-        "LY_TG(fn)", "1",
+        "LY_TO(fn)", "1",
         "2", "3",
     ],
 }
 definition["layout"]["layers"]["fn"] = {
     "keys": [
-        None, "F1",
+        "LY_TO(nums)", "F1",
         "F2", "F3",
     ],
 }
 keyboard = Keyboard(definition)
 ```
 The above definition will allow to use the same switches to output both numbers and Fn keys.
-A transparent key was used to toggle between the layers.
-Another valid way to flip flop between the layers would have been to use `LY_TO(fn)` on the `nums` layer and `LY_TO(nums)` on the `fn` layer.
+`LY_TO` is used to flip flop between the layers.
 
-It is currently not possible to combine `LY` keys with `TH` (TapHold) keys to make a switch that execute `LY_MO` on tap, but `LY_TO` or `LY_TG` on hold.
+It is currently not possible to combine `LY` keys with `TH` (TapHold) keys to make a switch that execute `LY_MO` on tap, but `LY_TO` on hold.
 
 ## TapHold
 
@@ -130,8 +128,8 @@ to a combo is released while the combo is being keyed, the combo will be cancell
 
 If a chord conflicts with a sequence, the sequence takes priority. For example if the
 chord `1*2*3` is assigned to `ENTER` and the sequence `3+2+1` is assigned to `SPACE`:
-* 1+2+3, 1+3+2, 2+1+3, 2+3+1, 3+1+2 will output `ENTER`
-* 3+2+1 will output `SPACE`
+* `1+2+3`, `1+3+2`, `2+1+3`, `2+3+1`, `3+1+2` will output `ENTER`
+* `3+2+1` will output `SPACE`
 
 Example
 ```

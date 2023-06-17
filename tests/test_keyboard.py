@@ -555,3 +555,155 @@ class TestTapHoldCombo:
             call("press", "D"),
             call("release", "D"),
         ]
+
+
+class TestLayer:
+    @staticmethod
+    def _setup(monkeypatch, events):
+        # Hardware definition
+        definition = {
+            "hardware": {
+                "test": {
+                    "pins": {
+                        "cols": (1, 2),
+                        "rows": (1, 2),
+                    },
+                },
+            },
+            "layout": {"layers": OrderedDict()},
+        }
+
+        # Layer definition
+        definition["layout"]["layers"]["default"] = {
+            "keys": [
+                # fmt: off
+                "A",        "B",
+                "LY_MO(1)", "LY_TO(1)",
+                # fmt: on
+            ],
+        }
+        definition["layout"]["layers"]["1"] = {
+            "keys": [
+                # fmt: off
+                "C",                "D",
+                "LY_TO(default)",   "LY_MO(2)",
+                # fmt: on
+            ],
+        }
+        definition["layout"]["layers"]["2"] = {
+            "keys": [
+                # fmt: off
+                "E", "F",
+                "G", "H",
+                # fmt: on
+            ],
+        }
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
+
+    @classmethod
+    def test_ly_mo_enclosed(cls, monkeypatch):
+        events = [
+            "board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "!board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_ly_mo_cross(cls, monkeypatch):
+        events = [
+            "board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.2",
+            "!board.test.switch.0",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_ly_to_enclosed(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.2",
+            "!board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_ly_to_cross(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.3",
+            "!board.test.switch.0",
+            "board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.2",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_ly_multiple(cls, monkeypatch):
+        events = [
+            "board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.3",
+            "!board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "!board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "E"),
+            call("release", "E"),
+            call("press", "A"),
+            call("release", "A"),
+        ]

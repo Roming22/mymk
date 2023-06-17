@@ -38,6 +38,64 @@ def run_scenario(keyboard, event_delays):
     assert timeline.determined == True
 
 
+def generate_split(layer_definitions, base_layout_name, target_layout_name):
+    definitions = {
+        f"{target_layout_name}L": {},
+        f"{target_layout_name}R": {},
+    }
+    split_index = len(layer_definitions[base_layout_name]["keys"]) // 2
+
+    # L side
+    definitions[f"{target_layout_name}L"]["keys"] = (
+        layer_definitions[base_layout_name]["keys"][:split_index]
+        + layer_definitions[target_layout_name]["keys"][split_index:]
+    )
+    definitions[f"{target_layout_name}L"]["keys"][-2] = f"LY_TO({target_layout_name})"
+
+    definitions[f"{target_layout_name}L"]["combos"] = {
+        "chords": {
+            k: v
+            for k, v in layer_definitions[base_layout_name]["combos"]["chords"].items()
+            if int(k.split("*")[0]) < split_index
+        }
+    }
+    definitions[f"{target_layout_name}L"]["combos"]["chords"].update(
+        {
+            k: v
+            for k, v in layer_definitions[target_layout_name]["combos"][
+                "chords"
+            ].items()
+            if int(k.split("*")[0]) >= split_index
+        }
+    )
+
+    # R side
+    definitions[f"{target_layout_name}R"]["keys"] = (
+        layer_definitions[target_layout_name]["keys"][:split_index]
+        + layer_definitions[base_layout_name]["keys"][split_index:]
+    )
+    definitions[f"{target_layout_name}R"]["keys"][-2] = f"LY_TO({target_layout_name})"
+
+    definitions[f"{target_layout_name}R"]["combos"] = {
+        "chords": {
+            k: v
+            for k, v in layer_definitions[target_layout_name]["combos"][
+                "chords"
+            ].items()
+            if int(k.split("*")[0]) < split_index
+        }
+    }
+    definitions[f"{target_layout_name}R"]["combos"]["chords"].update(
+        {
+            k: v
+            for k, v in layer_definitions[base_layout_name]["combos"]["chords"].items()
+            if int(k.split("*")[0]) >= split_index
+        }
+    )
+
+    return definitions
+
+
 class TestKeyboard:
     @staticmethod
     def _setup(monkeypatch, events):
@@ -55,16 +113,16 @@ class TestKeyboard:
             "layout": {"layers": OrderedDict()},
         }
 
-        # Layer definition
-        definition["layout"]["layers"]["myLayer"] = {
+        # Layer definitions
+        definition["layout"]["layers"]["alpha"] = {
             "keys": [
                 # fmt: off
-        "TH_HD(ESC,LSFT)",  "TH_HD(D, LSFT)",   "TH_HD(C,LALT)",    "TH_HD(L,LCTL)",
-        "NO",               "T",                "A",                "E",
-                            "NO",               "SPACE",            "LGUI",         "NO",
+        "TH_HD(ESC,LSFT)",  "TH_HD(D, LSFT)",           "TH_HD(C,LALT)",    "TH_HD(L,LCTL)",
+        "NO",               "TH_HD(T, LY_MO(systemL))",  "A",                "E",
+                            "NO",                       "SPACE",            "LGUI",             "NO",
 
-                "TH_HD(R,RCTL)",    "TH_HD(S,RALT)",    "TH_HD(H,RSFT)",    "TH_HD(ENTER,RSFT)",
-                "I",                "O",                "N",                "NO",
+                "TH_HD(R,RCTL)",    "TH_HD(S,RALT)",    "TH_HD(H,RSFT)",            "TH_HD(ENTER,RSFT)",
+                "I",                "O",                "TH_HD(N, LY_MO(systemR))",  "NO",
         "NO",   "RGUI",             "MEH",              "NO",
                 # fmt: on
             ],
@@ -87,6 +145,28 @@ class TestKeyboard:
                 },
             },
         }
+        split_index = len(definition["layout"]["layers"]["alpha"]["keys"]) / 2
+
+        definition["layout"]["layers"]["system"] = {
+            "keys": [
+                # fmt: off
+        None,   "ESC",  "PAGEUP",   "PRTSCR",
+        None,   "HOME", "PAGEDOWN", "END",
+                None,   None,       None,       None,
+
+                "BACKSPACE",    "UP",   "DELETE",   None,
+                "LEFT",         "DOWN", "RIGHT",    None,
+        None,   None,           "LY_TO(alpha)",    None,
+                # fmt: on
+            ],
+            "combos": {
+                "chords": {},
+            },
+        }
+        definition["layout"]["layers"].update(
+            generate_split(definition["layout"]["layers"], "alpha", "system")
+        )
+
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)

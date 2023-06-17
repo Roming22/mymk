@@ -27,9 +27,54 @@ class Layer:
         else:
             print("No combo has been declared in layer", layer_name)
 
-    def load_events(self, universe, switch_uid) -> list:
-        timelines_events = []
-        for keycode in self.switch_to_keycode[switch_uid]:
-            # print(switch_uid, keycode)
-            timelines_events += Key.load(switch_uid, keycode, universe)
-        return timelines_events
+    @classmethod
+    def get_momentary_action(cls, universe, switch_uid, data):
+        layer_name = data[0]
+        timeline = universe.current_timeline
+        layer = timeline.create_layer(layer_name)
+        activate_layer = lambda: timeline.activate(layer, False)
+        deactivate_layer = lambda: timeline.deactivate(layer)
+
+        timeline_events = [
+            {
+                "what": f"{switch_uid} press/release",
+                switch_uid: [
+                    (
+                        switch_uid,
+                        universe.mark_determined,
+                        activate_layer,
+                    ),
+                    (
+                        f"!{switch_uid}",
+                        None,
+                        deactivate_layer,
+                    ),
+                ],
+            },
+        ]
+        return timeline_events
+
+    @classmethod
+    def get_to_action(cls, universe, switch_uid, data):
+        layer_name = data[0]
+        timeline = universe.current_timeline
+        layer = timeline.create_layer(layer_name)
+        activate_layer = lambda: timeline.activate(layer, True)
+        timeline_events = [
+            {
+                "what": f"{switch_uid} press/release",
+                switch_uid: [
+                    (
+                        switch_uid,
+                        universe.mark_determined,
+                        activate_layer,
+                    ),
+                    (f"!{switch_uid}", None, None),
+                ],
+            },
+        ]
+        return timeline_events
+
+
+Key.loader_map["LY_MO"] = Layer.get_momentary_action
+Key.loader_map["LY_TO"] = Layer.get_to_action

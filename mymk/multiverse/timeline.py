@@ -1,3 +1,7 @@
+from mymk.feature.keys.key import Key
+from mymk.feature.layers.layer_manager import LayerManager
+
+
 class Timeline:
     def __init__(self, events, parent=None) -> None:
         """Create a new timeline
@@ -20,7 +24,7 @@ class Timeline:
         self.children = []
         self.determined = len(events) == 0 and parent is None
         self.events = events
-        self.layer = None
+        self.layers = []
         self.output = []
         self.next_timeline = None
         self.parent = parent
@@ -31,10 +35,40 @@ class Timeline:
                 parent.parent.next_timeline = parent
             for event, timeline in parent.events.items():
                 self.events[event] = list(timeline)
-            self.layer = parent.layer
+            self.layers = parent.layers
             parent.children.append(self)
 
-    def prune(self):
+    def create_layer(self, layer_name: str):
+        # TODO: layer should be a copy. Otherwise deactivate is going to cause issues
+        layer = LayerManager.get(layer_name)
+
+        # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.
+
+        return layer
+
+    def activate(self, layer, is_root) -> None:
+        print("Activate layer", layer.uid)
+        if is_root:
+            self.layers.clear()
+        self.layers.append(layer)
+
+    def deactivate(self, layer) -> None:
+        print("Deactivate layer", layer.uid)
+        self.layers.remove(layer)
+
+    def load_events(self, universe, switch_uid) -> list:
+        keycodes = []
+        for layer in reversed(self.layers):
+            keycodes = layer.switch_to_keycode[switch_uid]
+            if keycodes:
+                break
+
+        timelines_events = []
+        for keycode in keycodes:
+            timelines_events += Key.load(switch_uid, keycode, universe)
+        return timelines_events
+
+    def prune(self) -> None:
         """Some timelines might be deadends. They are removed from the multiverse"""
         parent = self.parent
         if parent:

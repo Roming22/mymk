@@ -6,7 +6,7 @@
 [ ] Add MultiTap support
 [X] Add combo key for 2 keys
 [X] Add combo keys for n keys
-[ ] Add Layer support
+[X] Add Layer support
 
 ## Layout definition
 [X] Alpha layer single key chars
@@ -24,7 +24,7 @@
     [ ] Tap key repeats when first key is held
 [X] Layer0 Sequence
 [ ] Chords/Sequences can be repeated by pressing/releasing a key (any or just the last?) of the sequence fast enough.
-[ ] Layer1 keys
+[X] Layer1 keys
 [ ] Keys remained pressed when switching layer as long as they are held
 
 ## Known bugs

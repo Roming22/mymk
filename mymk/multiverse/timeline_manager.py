@@ -18,13 +18,13 @@ class TimelineManager:
         TimelineManager._universes.append(self)
 
     @classmethod
-    def activate(cls, layer_name: str) -> None:
+    def activate(cls, layer_name: str, is_root: bool = True) -> None:
         universe = TimelineManager()
         print("Universes:", len(cls._universes))
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
-                universe.current_timeline = timeline
-                LayerManager.activate(layer_name, timeline)
+                layer = timeline.create_layer(layer_name)
+                timeline.activate(layer, True)
 
     def get_active_timelines(self, timeline=None):
         if timeline is None:
@@ -131,7 +131,7 @@ class TimelineManager:
             self.delete_timeline(timeline)
             return
         try:
-            timelines_events = timeline.layer.load_events(self, event)
+            timelines_events = timeline.load_events(self, event)
         except KeyError:
             if timeline.events:
                 # print("## Deadend:", timeline)
