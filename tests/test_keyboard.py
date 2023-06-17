@@ -707,3 +707,96 @@ class TestLayer:
             call("press", "A"),
             call("release", "A"),
         ]
+
+
+class TestNestedCommands:
+    @staticmethod
+    def _setup(monkeypatch, events):
+        # Hardware definition
+        definition = {
+            "hardware": {
+                "test": {
+                    "pins": {
+                        "cols": (1, 2),
+                        "rows": (1, 2),
+                    },
+                },
+            },
+            "layout": {"layers": OrderedDict()},
+        }
+
+        # Layer definition
+        definition["layout"]["layers"]["default"] = {
+            "keys": [
+                # fmt: off
+                "TH_HD(A,LY_TO(1))",    "TH_HD(B,TH_HD(Y,Z))",
+                "C",                    "TH_HD(B,TH_HD(V,TH_HD(W,X)))",
+                # fmt: on
+            ],
+        }
+        definition["layout"]["layers"]["1"] = {
+            "keys": [
+                # fmt: off
+                "E",                        "F",
+                "TH_TP(LY_TO(default), G)", "H",
+                # fmt: on
+            ],
+        }
+
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
+
+    @classmethod
+    def test_th_ly(cls, monkeypatch):
+        events = [
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = .4
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "F"),
+            call("release", "F"),
+        ]
+
+    @classmethod
+    def test_th_th(cls, monkeypatch):
+        events = [
+            "board.test.switch.1",
+            "!board.test.switch.1",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[3] = .4
+        event_delays[5] = .7
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "B"),
+            call("release", "B"),
+            call("press", "Y"),
+            call("release", "Y"),
+            call("press", "Z"),
+            call("release", "Z"),
+        ]
+
+    @classmethod
+    def test_th_th_th(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "!board.test.switch.3",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = 1
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "X"),
+            call("release", "X"),
+        ]
