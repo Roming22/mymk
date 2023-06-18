@@ -43,8 +43,6 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
                     f"!{switch_uid}",
                     chain(
                         timer_tap.stop,
-                        timer_hold.stop,
-                        timer_interrupt.stop,
                         universe.mark_determined,
                     ),
                     release(keycode_tap),
@@ -67,7 +65,7 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
                 (switch_uid, timer_interrupt.start, press(keycode_interrupt)),
                 (
                     f"interrupt",
-                    chain(timer_tap.stop, timer_hold.stop, universe.mark_determined),
+                    universe.mark_determined,
                     None,
                 ),
                 (f"!{switch_uid}", None, release(keycode_interrupt)),
