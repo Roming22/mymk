@@ -12,6 +12,7 @@ class Time:
     def now() -> int:
         return time.monotonic_ns()
 
+
 def pretty_print(timestamp: int) -> None:
     useconds = timestamp % 10**9 // 1000
     seconds = (timestamp // 10**9) % 60
@@ -25,9 +26,7 @@ def time_it(func):
     def wrapper(*args, **kwargs):
         now = Time.now()
         result = func(*args, **kwargs)
-        print(
-            " ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120]
-        )
+        print(" ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120])
         return result
 
     return wrapper

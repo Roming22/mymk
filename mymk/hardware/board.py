@@ -37,4 +37,18 @@ class Board:
     def tick(cls) -> None:
         for board in cls._instances:
             if event_id := board.get_event():
+                print(
+                    "Before:",
+                    [
+                        t.what
+                        for t in TimelineManager._universes[0].get_active_timelines()
+                    ],
+                )
                 TimelineManager.process_event(event_id)
+                print(
+                    "After:",
+                    [
+                        t.what
+                        for t in TimelineManager._universes[0].get_active_timelines()
+                    ],
+                )

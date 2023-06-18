@@ -16,7 +16,6 @@ class Test_1_TimelineManager:
         Test the creation of a Timeline
         """
         timeline_events = {
-            "what": "event1",
             "event1": [
                 (
                     "event1",
@@ -25,11 +24,12 @@ class Test_1_TimelineManager:
                 )
             ],
         }
-        timeline = Timeline(timeline_events)
+        timeline = Timeline("event1")
+        timeline.events.update(timeline_events)
 
         assert timeline.events == timeline_events
         assert timeline.output == []
-        assert timeline.determined == False
+        assert timeline.determined == True
 
         TimelineManager._universes.clear()
         universe = TimelineManager(timeline)
@@ -43,7 +43,7 @@ class Test_1_TimelineManager:
         """
         Test a timeline split
         """
-        timeline = Timeline({"what": "begin"})
+        timeline = Timeline("begin")
         timeline.output = ["A", "B"]
         TimelineManager._universes.clear()
         universe = TimelineManager(timeline)
@@ -64,7 +64,8 @@ class Test_1_TimelineManager:
 
         universe.current_timeline = timeline
         for events in events_list:
-            universe.split(events)
+            new_timeline = universe.split(events.pop("what"))
+            new_timeline.events.update(events)
 
         assert timeline.determined == True
         assert len(timeline.children) == len(events_list)
@@ -87,14 +88,14 @@ class Test_2_SimpleKey:
 
         do = MagicMock()
         timeline_events = {
-            "what": "key",
             "press": [
                 ("press", [universe.mark_determined], [lambda: do("A")]),
                 ("release", [], [lambda: do("a")]),
             ],
         }
 
-        universe.split(timeline_events)
+        timeline = universe.split("key")
+        timeline.events.update(timeline_events)
         events = ["press", "release"]
         run_scenario(events)
         assert do.call_args_list == [call("A"), call("a")]
@@ -140,7 +141,8 @@ class Test_3_TapHold:
             },
         ]
         for timeline_events in timelines_events:
-            universe.split(timeline_events)
+            new_timeline = universe.split(timeline_events.pop("what"))
+            new_timeline.events.update(timeline_events)
         assert len(universe.get_active_timelines()) == len(timelines_events)
 
         return action

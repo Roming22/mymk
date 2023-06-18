@@ -1,25 +1,19 @@
 from mymk.utils.memory import memory_cost
-from mymk.utils.time import pretty_print, time_it, Time
+from mymk.utils.time import Time, pretty_print, time_it
 
 
 class Timer:
     running: list["Timer"] = []
 
     # @memory_cost("Timer")
-    def __init__(self, name: str, delay: float, universe) -> None:
+    def __init__(self, name: str, delay: float, universe, timeline) -> None:
         # print("Timer:", name)
-        self.delay = delay
-        self.end_at = 0
         self.name = name
+        self.delay = delay
+        self.end_at = Time.tick_time + self.delay * 10**9
+        self.timeline = timeline
         self.universe = universe
-        self.timeline = None
-
-    def start(self) -> None:
-        # print(f"    Timer: {self.name} starting", self.delay)
-        now = Time.tick_time
         Timer.running.append(self)
-        self.end_at = now + self.delay * 10**9
-        self.timeline = self.universe.current_timeline
 
     def stop(self) -> None:
         # print(f"    Timer: {self.name} stopping")
@@ -38,9 +32,10 @@ class Timer:
         now = Time.tick_time
         print("# At:", pretty_print(now))
         if self.timeline.parent is not None:
+            print("Before:", [t.what for t in self.universe.get_active_timelines()])
             self.universe._process_event(self.timeline, self.name)
             self.universe.resolve()
-            print([t.what for t in self.universe.get_active_timelines()])
+            print("After:", [t.what for t in self.universe.get_active_timelines()])
         self.stop()
 
     @classmethod

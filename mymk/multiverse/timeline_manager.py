@@ -1,7 +1,7 @@
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
 from mymk.utils.memory import memory_cost
-from mymk.utils.time import pretty_print, time_it, Time
+from mymk.utils.time import Time, pretty_print, time_it
 
 
 class TimelineManager:
@@ -10,7 +10,7 @@ class TimelineManager:
 
     def __init__(self, timeline=False) -> None:
         if not timeline:
-            timeline = Timeline({"what": "begin"})
+            timeline = Timeline("begin")
         self.timeline_start = timeline
         self.current_timeline = timeline
         TimelineManager._universes.append(self)
@@ -21,8 +21,7 @@ class TimelineManager:
         print("Universes:", len(cls._universes))
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
-                layer = timeline.create_layer(layer_name)
-                timeline.activate(layer, True)
+                timeline.activate(layer_name, True)
 
     def get_active_timelines(self, timeline=None):
         if timeline is None:
@@ -35,9 +34,9 @@ class TimelineManager:
             timelines.append(timeline)
         return timelines
 
-    def split(self, events) -> Timeline:
+    def split(self, what) -> Timeline:
         """Create new timelines"""
-        new_timeline = Timeline(events, self.current_timeline)
+        new_timeline = Timeline(what, self.current_timeline)
         return new_timeline
 
     def mark_determined(self) -> None:
@@ -116,22 +115,13 @@ class TimelineManager:
             self.delete_timeline(timeline)
             return
         try:
-            timelines_events = timeline.load_events(self, event)
+            timeline.load_events(self, event)
         except KeyError:
             if timeline.events:
                 # print("## Deadend:", timeline)
                 self.delete_timeline(timeline)
             else:
                 raise RuntimeError("Unknown event sequence")
-            return
-
-        # print("\n## New timelines:", self.current_timeline)
-        new_timelines = []
-        for timeline_events in timelines_events:
-            # print(timeline_events)
-            new_timelines.append(self.split(timeline_events))
-        for new_timeline in new_timelines:
-            self._process_event(new_timeline, event)
 
     @classmethod
     # @memory_cost("Process", True)

@@ -1,6 +1,5 @@
-from mymk.utils.time import Time
-
 from mymk.utils.memory import get_usage
+from mymk.utils.time import Time
 
 
 class FPS:

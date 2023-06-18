@@ -27,54 +27,29 @@ class Layer:
         else:
             print("No combo has been declared in layer", layer_name)
 
-    @classmethod
-    def get_momentary_action(cls, universe, switch_uid, data):
+    @staticmethod
+    def split_timeline_momentary(universe, switch_uid, data) -> None:
         layer_name = data[0]
-        timeline = universe.current_timeline
-        layer = timeline.create_layer(layer_name)
-        activate_layer = lambda: timeline.activate(layer, False)
+
+        events = {"what": f"{switch_uid} press/release {layer_name}"}
+        timeline = universe.split(events)
+
+        layer = timeline.activate(layer_name, False)
         deactivate_layer = lambda: timeline.deactivate(layer)
+        timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], [deactivate_layer])]
+        timeline.mark_determined()
 
-        timeline_events = [
-            {
-                "what": f"{switch_uid} press/release",
-                switch_uid: [
-                    (
-                        switch_uid,
-                        [universe.mark_determined],
-                        [activate_layer],
-                    ),
-                    (
-                        f"!{switch_uid}",
-                        [],
-                        [deactivate_layer],
-                    ),
-                ],
-            },
-        ]
-        return timeline_events
-
-    @classmethod
-    def get_to_action(cls, universe, switch_uid, data):
+    @staticmethod
+    def split_timeline_to(universe, switch_uid, data) -> None:
         layer_name = data[0]
-        timeline = universe.current_timeline
-        layer = timeline.create_layer(layer_name)
-        activate_layer = lambda: timeline.activate(layer, True)
-        timeline_events = [
-            {
-                "what": f"{switch_uid} press/release",
-                switch_uid: [
-                    (
-                        switch_uid,
-                        [universe.mark_determined],
-                        [activate_layer],
-                    ),
-                    (f"!{switch_uid}", [], None),
-                ],
-            },
-        ]
-        return timeline_events
+
+        events = {"what": f"{switch_uid} press/release {layer_name}"}
+        timeline = universe.split(events)
+
+        timeline.activate(layer_name, True)
+        timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], [])]
+        timeline.mark_determined()
 
 
-Key.loader_map["LY_MO"] = Layer.get_momentary_action
-Key.loader_map["LY_TO"] = Layer.get_to_action
+Key.loader_map["LY_MO"] = Layer.split_timeline_momentary
+Key.loader_map["LY_TO"] = Layer.split_timeline_to

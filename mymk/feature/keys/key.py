@@ -11,18 +11,15 @@ class Key:
             return timelines_events
         try:
             get_keycodes_for(keycode)
-            timelines_events += cls.create_timelines_events(
-                universe, switch_uid, keycode
-            )
-            return timelines_events
+            cls.split_timeline(universe, switch_uid, keycode)
+            return
         except AttributeError:
             pass
         loader_name, data = cls.parse_keycode(keycode)
         try:
-            timelines_events += cls.loader_map[loader_name](universe, switch_uid, data)
+            cls.loader_map[loader_name](universe, switch_uid, data)
         except KeyError:
             raise RuntimeError("Invalid keycode:", keycode)
-        return timelines_events
 
     @staticmethod
     def create_timelines_events(universe, switch_uid, keycode) -> list[list[tuple]]:
@@ -36,6 +33,14 @@ class Key:
             },
         ]
         return timeline_events
+
+    @staticmethod
+    def split_timeline(universe, switch_uid, keycode) -> None:
+        timeline = universe.split(f"{switch_uid} press/release {keycode}")
+        events = {f"!{switch_uid}": [(f"!{switch_uid}", [], [release(keycode)])]}
+        timeline.events.update(events)
+        timeline.output.append(press(keycode))
+        timeline.mark_determined()
 
     @staticmethod
     def parse_keycode(keycode: str) -> tuple[str, list[str]]:

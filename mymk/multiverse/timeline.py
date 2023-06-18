@@ -3,7 +3,7 @@ from mymk.feature.layers.layer_manager import LayerManager
 
 
 class Timeline:
-    def __init__(self, events, parent=None) -> None:
+    def __init__(self, what, parent=None) -> None:
         """Create a new timeline
 
         events: an ordered list of expected events in the timeline. Each event
@@ -20,16 +20,17 @@ class Timeline:
                 A determined timeline will spawn new children timelines as
                 new events are coming in.
         """
-        self.what = events.pop("what")
+        self.what = what
         self.children = []
-        self.determined = len(events) == 0 and parent is None
-        self.events = events
+        self.determined = True
+        self.events = {}
         self.layers = []
         self.output = []
         self.next_timeline = None
         self.parent = parent
 
         if parent:
+            self.determined = False
             parent.determined = True
             if parent.parent:
                 parent.parent.next_timeline = parent
@@ -38,38 +39,41 @@ class Timeline:
             self.layers = parent.layers
             parent.children.append(self)
 
-    def create_layer(self, layer_name: str):
+    def activate(self, layer_name, is_root):
         # TODO: layer should be a copy. Otherwise deactivate is going to cause issues
         layer = LayerManager.get(layer_name)
-
         # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.
 
-        return layer
-
-    def activate(self, layer, is_root) -> None:
         print("Activate layer", layer.uid)
         if is_root:
             self.layers.clear()
         self.layers.append(layer)
+        return layer
 
     def deactivate(self, layer) -> None:
         print("Deactivate layer", layer.uid)
         self.layers.remove(layer)
 
-    def load_events(self, universe, switch_uid) -> list:
+    def load_events(self, universe, switch_uid) -> None:
         keycodes = []
         for layer in reversed(self.layers):
             keycodes = layer.switch_to_keycode[switch_uid]
             if keycodes:
                 break
 
-        timelines_events = []
         for keycode in keycodes:
-            timelines_events += Key.load(switch_uid, keycode, universe)
-        return timelines_events
+            Key.load(switch_uid, keycode, universe)
+
+    def mark_determined(self) -> None:
+        self.determined = True
+        parent = self.parent
+        if parent:
+            parent.next_timeline = self
+            if len(parent.children) == 1:
+                parent.mark_determined()
 
     def prune(self) -> None:
-        """Some timelines might be deadends. They are removed from the multiverse"""
+        """Some timelines might be deadends. They are removed from the universe"""
         parent = self.parent
         if parent:
             self.parent = None

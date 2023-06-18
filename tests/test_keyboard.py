@@ -525,8 +525,8 @@ class TestTapHoldCombo:
             "!board.test.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[1] = .4
-        event_delays[5] = .4
+        event_delays[1] = 0.4
+        event_delays[5] = 0.4
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "ONE"),

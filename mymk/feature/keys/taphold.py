@@ -7,7 +7,7 @@ delay = 0.3
 
 
 # @memory_cost("TapHold")
-def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
+def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
     keycode_tap = data.pop(0)
     keycode_hold = data.pop(-1)
 
@@ -22,56 +22,47 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
     except IndexError:
         key_delay = delay
 
+    timer_name = f"timer.{switch_uid}.taphold"
+
     # print(
     #     f"TapHold ({key_delay}s): {keycode_tap} | {keycode_hold} ({keycode_interrupt})"
     # )
 
-    timer_name = f"timer.{switch_uid}.taphold"
-    timer_tap = Timer(timer_name, key_delay, universe)
-    timer_hold = Timer(timer_name, key_delay, universe)
-    timer_interrupt = Timer(timer_name, key_delay, universe)
+    # Tap
+    timeline = universe.split(f"{switch_uid} press/release tap {keycode_tap}")
+    timer_name_tap = f"{timer_name}.tap.{keycode_tap}"
+    timer_tap = Timer(timer_name_tap, key_delay, universe, timeline)
+    events = {
+        f"!{switch_uid}": [(f"!{switch_uid}", [timer_tap.stop, timeline.mark_determined], [release(keycode_tap)])],
+    }
+    timeline.events.update(events)
+    timeline.output.append(press(keycode_tap))
 
-    timelines_events = [
-        # Tap
-        {
-            "what": f"{switch_uid} tap",
-            switch_uid: [
-                (switch_uid, [timer_tap.start], [press(keycode_tap)]),
-                (
-                    f"!{switch_uid}",
-                    [
-                        timer_tap.stop,
-                        universe.mark_determined,
-                    ],
-                    [release(keycode_tap)],
-                ),
-            ],
-        },
-        # Hold
-        {
-            "what": f"{switch_uid} hold",
-            switch_uid: [
-                (switch_uid, [timer_hold.start], [press(keycode_hold)]),
-                (timer_name, [universe.mark_determined], []),
-                (f"!{switch_uid}", [], [release(keycode_hold)]),
-            ],
-        },
-        # Interrupt
-        {
-            "what": f"{switch_uid} interrupt",
-            switch_uid: [
-                (switch_uid, [timer_interrupt.start], [press(keycode_interrupt)]),
-                (
-                    f"interrupt",
-                    [universe.mark_determined],
-                    [],
-                ),
-                (f"!{switch_uid}", [], [release(keycode_interrupt)]),
-            ],
-        },
-    ]
+    # Hold
+    timeline = universe.split(f"{switch_uid} press/release hold {keycode_hold}")
+    timer_name_hold = f"{timer_name}.hold.{keycode_hold}"
+    Timer(timer_name_hold, key_delay, universe, timeline)
+    events = {
+        timer_name_hold: [
+            (timer_name_hold, [timeline.mark_determined], []),
+            (f"!{switch_uid}", [], [release(keycode_hold)])
+        ],
+    }
+    timeline.events.update(events)
+    timeline.output.append(press(keycode_hold))
 
-    return timelines_events
+    # Interrupt
+    timeline = universe.split(f"{switch_uid} press/release interrupt {keycode_interrupt}")
+    timer_name_interrupt = f"{timer_name}.interrupt.{keycode_interrupt}"
+    timer_interrupt = Timer(timer_name_interrupt, key_delay, universe, timeline)
+    events = {
+        "interrupt": [
+            ("interrupt", [timer_interrupt.stop, timeline.mark_determined], []),
+            (f"!{switch_uid}", [], [release(keycode_interrupt)])
+        ],
+    }
+    timeline.events.update(events)
+    timeline.output.append(press(keycode_interrupt))
 
 
 Key.loader_map["TH_HD"] = lambda *args, **kwargs: tap_hold("hold", *args, **kwargs)

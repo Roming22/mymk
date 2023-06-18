@@ -20,7 +20,7 @@ class Sequence:
         self.pressed = False
 
     @classmethod
-    def load(cls, universe, switch_uid: str, data):
+    def load(cls, universe, _: str, data):
         switch_uids = []
         interlaced_data = []
         while data:
@@ -30,7 +30,7 @@ class Sequence:
         delays = [float(x) for x in interlaced_data]
         delays.append(None)
         sequence = cls(switch_uids, delays, keycode)
-        return sequence.to_timeline_press_events(universe)
+        sequence.to_timeline_press_events(universe)
 
     def press(self) -> None:
         self.pressed = True
@@ -43,30 +43,34 @@ class Sequence:
         release(self.keycode)()
 
     def to_timeline_press_events(self, universe):
-        timeline_events = []
+        combo_uid = f"{'+'.join([s.split('.')[-1] for s in self.switch_uids])}"
+        timeline = universe.split(f"combo.{combo_uid}")
 
-        timer_name = f"timer.{'.'.join(self.switch_uids)}.sequence"
-        timer = Timer(timer_name, self.delays[0], universe)
-
+        sum_delay = 0
+        sum_switch = []
+        events = {
+            self.switch_uids[1]: [],
+        }
         for switch_uid, delay in zip(self.switch_uids, self.delays):
             if delay is not None:
-                actions = [timer.start]
+                sum_delay += delay
+                sum_switch.append(switch_uid.split('.')[-1])
+                timer_name = f"timer.{combo_uid}.sequence.{'+'.join(sum_switch)}"
+                timer = Timer(timer_name,sum_delay,universe,timeline)
+                actions = []
                 output = []
             else:
                 actions = [
-                    universe.mark_determined,
+                    timeline.mark_determined,
                     lambda: self.to_timeline_release_events(universe),
                     timer.stop,
                 ]
                 output = [self.press]
             event = (switch_uid, actions, output)
-            timeline_events.append(event)
-        return [
-            {
-                "what": f"combo.{'.'.join(self.switch_uids)}",
-                self.switch_uids[0]: timeline_events,
-            }
-        ]
+            if switch_uid != self.switch_uids[0]:
+                events[self.switch_uids[1]].append(event)
+
+        timeline.events.update(events)
 
     def to_timeline_release_events(self, universe):
         timeline_events = {}
@@ -119,27 +123,6 @@ def expand_combo(definition: str) -> list:
     combos = []
     print(definition)
     return [definition]
-
-
-# def _tokenize_groups(definition) -> list:
-#     return definition
-
-
-def _tokenize_or(definition) -> list:
-    tokens = definition.split("|")
-    return tokens
-
-
-def _tokenize_and(definition) -> list:
-    return [definition]
-
-
-def _tokenize_star(definition) -> list:
-    combos = []
-    tokens = definition.split("*")
-    for sequence in permutations(tokens):
-        combos += ["+".join(sequence)]
-    return combos
 
 
 Key.loader_map["SQ"] = Sequence.load
