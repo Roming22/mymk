@@ -1,11 +1,8 @@
-import time
-
 from mymk.utils.memory import memory_cost
-from mymk.utils.time import pretty_print, time_it
+from mymk.utils.time import pretty_print, time_it, Time
 
 
 class Timer:
-    now = 0
     running: list["Timer"] = []
 
     # @memory_cost("Timer")
@@ -19,10 +16,9 @@ class Timer:
 
     def start(self) -> None:
         # print(f"    Timer: {self.name} starting", self.delay)
-        if not Timer.running:
-            Timer.now = time.monotonic_ns()
+        now = Time.tick_time
         Timer.running.append(self)
-        self.end_at = Timer.now + self.delay * 10**9
+        self.end_at = now + self.delay * 10**9
         self.timeline = self.universe.current_timeline
 
     def stop(self) -> None:
@@ -33,17 +29,18 @@ class Timer:
             pass
 
     def is_expired(self) -> bool:
-        return self.end_at and self.end_at <= Timer.now
+        return self.end_at and self.end_at <= Time.tick_time
 
     @time_it
     def process_event(self):
         print("\n" * 3)
         print(" ".join(["#", self.name, "#" * 100])[:120])
-        now = time.monotonic_ns()
+        now = Time.tick_time
         print("# At:", pretty_print(now))
         if self.timeline.parent is not None:
             self.universe._process_event(self.timeline, self.name)
             self.universe.resolve()
+            print([t.what for t in self.universe.get_active_timelines()])
         self.stop()
 
     @classmethod
@@ -51,7 +48,6 @@ class Timer:
         if not cls.running:
             return
         # print("Timers ticking")
-        cls.now = time.monotonic_ns()
         for timer in list(cls.running):
             if timer.is_expired():
                 timer.process_event()

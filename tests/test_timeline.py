@@ -89,8 +89,8 @@ class Test_2_SimpleKey:
         timeline_events = {
             "what": "key",
             "press": [
-                ("press", universe.mark_determined, lambda: do("A")),
-                ("release", None, lambda: do("a")),
+                ("press", [universe.mark_determined], [lambda: do("A")]),
+                ("release", [], [lambda: do("a")]),
             ],
         }
 
@@ -118,24 +118,24 @@ class Test_3_TapHold:
             {
                 "what": "tap",
                 "switch.1": [
-                    ("switch.1", universe.mark_determined, exec("A")),
-                    ("!switch.1", None, exec("a")),
+                    ("switch.1", [universe.mark_determined], [exec("A")]),
+                    ("!switch.1", [], [exec("a")]),
                 ],
             },
             {
                 "what": "hold",
                 "switch.1": [
-                    ("switch.1", exec("Start timer"), exec("B")),
-                    ("timer.hold", universe.mark_determined, None),
-                    ("!switch.1", None, exec("b")),
+                    ("switch.1", [exec("Start timer")], [exec("B")]),
+                    ("timer.hold", [universe.mark_determined], []),
+                    ("!switch.1", [], [exec("b")]),
                 ],
             },
             {
                 "what": "interrupt",
                 "switch.1": [
-                    ("switch.1", None, exec("C")),
-                    ("interrupt", universe.mark_determined, None),
-                    ("!switch.1", None, exec("c")),
+                    ("switch.1", [], [exec("C")]),
+                    ("interrupt", [universe.mark_determined], []),
+                    ("!switch.1", [], [exec("c")]),
                 ],
             },
         ]

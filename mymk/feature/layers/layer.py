@@ -41,13 +41,13 @@ class Layer:
                 switch_uid: [
                     (
                         switch_uid,
-                        universe.mark_determined,
-                        activate_layer,
+                        [universe.mark_determined],
+                        [activate_layer],
                     ),
                     (
                         f"!{switch_uid}",
-                        None,
-                        deactivate_layer,
+                        [],
+                        [deactivate_layer],
                     ),
                 ],
             },
@@ -66,10 +66,10 @@ class Layer:
                 switch_uid: [
                     (
                         switch_uid,
-                        universe.mark_determined,
-                        activate_layer,
+                        [universe.mark_determined],
+                        [activate_layer],
                     ),
-                    (f"!{switch_uid}", None, None),
+                    (f"!{switch_uid}", [], None),
                 ],
             },
         ]

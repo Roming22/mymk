@@ -30,8 +30,8 @@ class Key:
             {
                 "what": f"{switch_uid} press/release",
                 switch_uid: [
-                    (switch_uid, universe.mark_determined, press(keycode)),
-                    (f"!{switch_uid}", None, release(keycode)),
+                    (switch_uid, [universe.mark_determined], [press(keycode)]),
+                    (f"!{switch_uid}", [], [release(keycode)]),
                 ],
             },
         ]

@@ -4,6 +4,7 @@ from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.fps import FPS
 from mymk.utils.memory import get_usage, memory_cost, profile
+from mymk.utils.time import Time
 
 
 class Keyboard:
@@ -50,11 +51,12 @@ class Keyboard:
         print("#" * 120)
 
         while True:
+            self.tick()
             if fps:
                 FPS.tick(True)
-            self.tick()
 
     def tick(self):
+        Time.tick()
         Timer.tick()
         for board in self.boards:
             board.tick()

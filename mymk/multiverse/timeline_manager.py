@@ -1,14 +1,12 @@
-import time
-
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
 from mymk.utils.memory import memory_cost
-from mymk.utils.time import pretty_print, time_it
+from mymk.utils.time import pretty_print, time_it, Time
 
 
 class TimelineManager:
     _universes = []
-    _time_last_event = time.monotonic_ns()
+    _time_last_event = Time.now()
 
     def __init__(self, timeline=False) -> None:
         if not timeline:
@@ -59,35 +57,22 @@ class TimelineManager:
         parent = timeline.parent
         timeline.prune()
         if parent and not parent.children:
-            self.delete(parent)
+            self.delete_timeline(parent)
 
     def _process_event_in_timeline(self, event) -> None:
         timeline = self.current_timeline
         data = timeline.events.pop(event)
         # print("\n## Continuing timeline:", self.current_timeline)
-        _, action, output = data.pop(0)
+        _, actions, output = data.pop(0)
         if data:
             # print("Follow-up", data)
             timeline.events[data[0][0]] = data
-        if action:
+        for action in actions:
             # print("Immediate action")
             action()
         if output:
             # print("Output action")
-            timeline.output.append(output)
-
-    def _process_interrupt_in_timeline(self) -> None:
-        timeline = self.current_timeline
-        data = timeline.events.pop("interrupt")
-        # print("## Interrupt:", self.current_timeline)
-        _, action, output = data.pop(0)
-        if action:
-            # print("Immediate action")
-            action()
-        if output:
-            # print("Output action")
-            timeline.output.append(output)
-        timeline.events[data[0][0]] = data
+            timeline.output.extend(output)
 
     def _event_is_interrupt(self, event) -> bool:
         timeline = self.current_timeline
@@ -119,7 +104,7 @@ class TimelineManager:
             # Process a press event as an interrupt
             if self._event_is_interrupt(event) and not timeline.determined:
                 try:
-                    self._process_interrupt_in_timeline()
+                    self._process_event_in_timeline("interrupt")
                 except KeyError:
                     # print("## Deadend:", timeline)
                     self.delete_timeline(timeline)
@@ -161,7 +146,7 @@ class TimelineManager:
         """
         print("\n" * 3)
         print(" ".join(["#", event, "#" * 100])[:120])
-        now = time.monotonic_ns()
+        now = Time.tick_time
         print("# At:", pretty_print(now), f"(+{(now-cls._time_last_event)/10**6}ms)")
         cls._time_last_event = now
 

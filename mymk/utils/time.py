@@ -1,7 +1,18 @@
 import time
 
 
-def pretty_print(timestamp: int):
+class Time:
+    tick_time = 0
+
+    @classmethod
+    def tick(cls) -> None:
+        cls.tick_time = cls.now()
+
+    @staticmethod
+    def now() -> int:
+        return time.monotonic_ns()
+
+def pretty_print(timestamp: int) -> None:
     useconds = timestamp % 10**9 // 1000
     seconds = (timestamp // 10**9) % 60
     minutes = ((timestamp // 10**9) // 60) % 60
@@ -12,10 +23,10 @@ def pretty_print(timestamp: int):
 
 def time_it(func):
     def wrapper(*args, **kwargs):
-        now = time.monotonic_ns()
+        now = Time.now()
         result = func(*args, **kwargs)
         print(
-            " ".join(["#", str((time.monotonic_ns() - now) / 10**6), "#" * 120])[:120]
+            " ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120]
         )
         return result
 

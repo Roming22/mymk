@@ -5,7 +5,6 @@ See the shunting yard algorithm.
 
 from mymk.feature.keys.key import Key
 from mymk.hardware.keys import press, release
-from mymk.logic.action import chain
 from mymk.logic.timer import Timer
 from mymk.utils.memory import memory_cost
 from mymk.utils.toolbox import permutations
@@ -51,16 +50,16 @@ class Sequence:
 
         for switch_uid, delay in zip(self.switch_uids, self.delays):
             if delay is not None:
-                action = timer.start
-                output = None
+                actions = [timer.start]
+                output = []
             else:
-                action = chain(
+                actions = [
                     universe.mark_determined,
                     lambda: self.to_timeline_release_events(universe),
                     timer.stop,
-                )
-                output = self.press
-            event = (switch_uid, action, output)
+                ]
+                output = [self.press]
+            event = (switch_uid, actions, output)
             timeline_events.append(event)
         return [
             {
@@ -73,7 +72,7 @@ class Sequence:
         timeline_events = {}
 
         for switch_uid in self.switch_uids:
-            timeline_events[f"!{switch_uid}"] = [(switch_uid, None, self.release)]
+            timeline_events[f"!{switch_uid}"] = [(switch_uid, [], [self.release])]
         universe.update_timeline(universe.current_timeline, timeline_events)
 
 

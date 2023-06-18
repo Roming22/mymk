@@ -1,6 +1,5 @@
 from mymk.feature.keys.key import Key
 from mymk.hardware.keys import press, release
-from mymk.logic.action import chain
 from mymk.logic.timer import Timer
 from mymk.utils.memory import memory_cost
 
@@ -18,7 +17,6 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         keycode_interrupt = keycode_tap
     else:
         keycode_interrupt = "NO"
-
     try:
         key_delay = float(data.pop(0))
     except IndexError:
@@ -38,14 +36,14 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         {
             "what": f"{switch_uid} tap",
             switch_uid: [
-                (switch_uid, timer_tap.start, press(keycode_tap)),
+                (switch_uid, [timer_tap.start], [press(keycode_tap)]),
                 (
                     f"!{switch_uid}",
-                    chain(
+                    [
                         timer_tap.stop,
                         universe.mark_determined,
-                    ),
-                    release(keycode_tap),
+                    ],
+                    [release(keycode_tap)],
                 ),
             ],
         },
@@ -53,22 +51,22 @@ def tap_hold(interrupt_mode: str, universe, switch_uid: str, data) -> list:
         {
             "what": f"{switch_uid} hold",
             switch_uid: [
-                (switch_uid, timer_hold.start, press(keycode_hold)),
-                (timer_name, universe.mark_determined, None),
-                (f"!{switch_uid}", None, release(keycode_hold)),
+                (switch_uid, [timer_hold.start], [press(keycode_hold)]),
+                (timer_name, [universe.mark_determined], []),
+                (f"!{switch_uid}", [], [release(keycode_hold)]),
             ],
         },
         # Interrupt
         {
             "what": f"{switch_uid} interrupt",
             switch_uid: [
-                (switch_uid, timer_interrupt.start, press(keycode_interrupt)),
+                (switch_uid, [timer_interrupt.start], [press(keycode_interrupt)]),
                 (
                     f"interrupt",
-                    universe.mark_determined,
-                    None,
+                    [universe.mark_determined],
+                    [],
                 ),
-                (f"!{switch_uid}", None, release(keycode_interrupt)),
+                (f"!{switch_uid}", [], [release(keycode_interrupt)]),
             ],
         },
     ]
