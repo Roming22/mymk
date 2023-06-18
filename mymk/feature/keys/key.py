@@ -7,7 +7,7 @@ class Key:
     @classmethod
     def load(cls, switch_uid: str, keycode: str, universe) -> list[list[tuple]]:
         timelines_events = []
-        if keycode in ["NO", None]:
+        if keycode in [None]:
             return timelines_events
         try:
             get_keycodes_for(keycode)
