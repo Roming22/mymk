@@ -2,9 +2,6 @@ from collections import OrderedDict
 from time import sleep
 from unittest.mock import MagicMock, call
 
-import pytest
-
-import mymk.feature.keys.taphold
 import mymk.hardware.keys as Keys
 from mymk.feature.keyboard import Keyboard
 from mymk.hardware.board import Board
@@ -145,7 +142,6 @@ class TestKeyboard:
                 },
             },
         }
-        split_index = len(definition["layout"]["layers"]["alpha"]["keys"]) / 2
 
         definition["layout"]["layers"]["system"] = {
             "keys": [
@@ -178,6 +174,14 @@ class TestKeyboard:
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "T"), call("release", "T")]
+
+    @classmethod
+    def test_one_key_hold(cls, monkeypatch):
+        events = ["board.xs18.switch.1", "!board.xs18.switch.1"]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = 0.4
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [call("press", "LEFT_SHIFT"), call("release", "LEFT_SHIFT")]
 
     @classmethod
     def test_2key_combo(cls, monkeypatch):

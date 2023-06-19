@@ -6,11 +6,15 @@ loader_map = {}
 def load(switch_uid: str, keycode: str, universe, debug=False) -> list[list[tuple]]:
     try:
         get_keycodes_for(keycode)
-        loader_name, data = "KEY", keycode
+        command, data = "KEY", keycode
     except AttributeError:
-        loader_name, data = parse_keycode(keycode)
+        command, data = parse_keycode(keycode)
     try:
-        loader_map[loader_name](universe, switch_uid, data)
+        loader = loader_map[command]
+    except KeyError:
+        raise RuntimeError("Invalid command:", command)
+    try:
+        loader(universe, switch_uid, data)
     except KeyError:
         raise RuntimeError("Invalid keycode:", keycode)
 

@@ -2,7 +2,6 @@ from collections import OrderedDict
 
 import board
 
-import mymk.feature.keys.taphold
 from mymk.feature.keyboard import Keyboard
 
 

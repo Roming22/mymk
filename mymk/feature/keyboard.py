@@ -1,3 +1,4 @@
+import mymk.feature
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer

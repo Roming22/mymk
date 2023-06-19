@@ -3,10 +3,6 @@ from random import shuffle
 from time import sleep
 from unittest.mock import MagicMock, call
 
-import pytest
-
-import mymk.feature.keys.key
-import mymk.feature.keys.taphold
 import mymk.hardware.keys as Keys
 from mymk.feature.keyboard import Keyboard
 from mymk.hardware.board import Board
