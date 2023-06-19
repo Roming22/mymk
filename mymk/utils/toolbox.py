@@ -1,3 +1,14 @@
+import supervisor
+
+debug_mode = supervisor.runtime.serial_connected
+
+def debug(*args) -> None:
+    # No printing if there's no serial connection
+    if not debug_mode:
+        return
+    print(*args, flush=False)
+
+
 def hash(string: str) -> int:
     bits = "".join([f"{bin(ord(c))}"[2:] for c in string])
     value = int(bits, 2) % 10**9

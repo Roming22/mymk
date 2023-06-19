@@ -4,8 +4,9 @@ from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.fps import FPS
-from mymk.utils.memory import get_usage, memory_cost, profile
+from mymk.utils.memory import get_usage, memory_cost
 from mymk.utils.time import Time
+from mymk.utils.toolbox import debug_mode, debug
 
 
 class Keyboard:
@@ -15,10 +16,10 @@ class Keyboard:
         self.board = board
 
         if board.is_controller:
-            print("Controller board")
+            debug("Controller board")
             self.load_layers(board, definition)
         else:
-            print("Extension board")
+            debug("Extension board")
 
         if len(definition["hardware"]) > 1 and not board.is_left:
             left_board_definition = [
@@ -28,7 +29,7 @@ class Keyboard:
                 left_board_definition["pins"]["rows"]
             )
             board.switch_offset = switch_count_left
-            print("Board is on the right", switch_count_left)
+            debug("Board is on the right", switch_count_left)
 
     def load_layers(self, board: Board, definition: dict) -> None:
         switch_count = 0
@@ -45,21 +46,21 @@ class Keyboard:
                     f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
                 )
 
-        if not profile:
-            print(get_usage(True))
+        if debug_mode:
+            debug(get_usage(True))
 
         default_layer = definition["settings"]["default_layer"]
         TimelineManager.activate(default_layer)
         LayerManager.get(default_layer).set_leds()
 
-    def go(self, fps=False):
-        if fps:
+    def go(self):
+        if debug_mode:
             FPS.start(60)
 
         while True:
             self.tick()
-            if fps:
-                FPS.tick(True)
+            if debug_mode:
+                FPS.tick(check_memory=True)
 
     def tick(self):
         Time.tick()

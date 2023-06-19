@@ -1,6 +1,6 @@
 import time
 
-
+from mymk.utils.toolbox import debug
 class Time:
     tick_time = 0
 
@@ -29,7 +29,7 @@ def time_it(func):
     def wrapper(*args, **kwargs):
         now = Time.now()
         result = func(*args, **kwargs)
-        print(" ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120])
+        debug(" ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120])
         return result
 
     return wrapper

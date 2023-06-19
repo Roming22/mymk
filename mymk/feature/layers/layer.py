@@ -1,6 +1,7 @@
 from mymk.feature.keys.combo import load_combos
 from mymk.logic.keys import loader_map
 from mymk.utils.memory import memory_cost
+from mymk.utils.toolbox import debug
 
 
 class Layer:
@@ -10,7 +11,7 @@ class Layer:
     def __init__(
         self, board_name, layer_name: str, layer_definition: dict, pixels=None
     ) -> None:
-        print("Loading layer:", layer_name)
+        debug("Loading layer:", layer_name)
 
         if pixels:
             color = layer_definition.get("leds", {}).get("RGB", (127, 127, 127))

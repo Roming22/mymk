@@ -6,7 +6,6 @@ See the shunting yard algorithm.
 from mymk.hardware.keys import press, release
 from mymk.logic.keys import loader_map
 from mymk.logic.timer import Timer
-from mymk.utils.memory import memory_cost
 from mymk.utils.toolbox import permutations
 
 delay = 0.99
@@ -121,7 +120,7 @@ def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
 
 def expand_combo(definition: str) -> list:
     combos = []
-    print(definition)
+    # print(definition)
     return [definition]
 
 

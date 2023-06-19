@@ -274,7 +274,7 @@ def main() -> None:
     print("# ONLINE")
     print("#" * 120)
 
-    keyboard.go(True)
+    keyboard.go()
 
 
 if __name__ == "__main__":
