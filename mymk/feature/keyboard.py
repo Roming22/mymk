@@ -39,6 +39,11 @@ class Keyboard:
             self.boards.append(board)
             TimelineManager.activate(default_layer)
 
+            leds = board_definition.get("leds")
+            if leds:
+                # Keyboard is ready
+                board.pixels.fill(leds.get("RGB", (127, 127, 127)))
+
         if not profile:
             print(get_usage(True))
 

@@ -3,22 +3,21 @@ from random import shuffle
 from time import sleep
 from unittest.mock import MagicMock, call
 
-import mymk.hardware.keys as Keys
+import mymk.hardware.keys
 from mymk.feature.keyboard import Keyboard
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.time import Time
-from tests.keycode import Keycode
 
 
 def make_keyboard(definition, monkeypatch):
-    kbd = MagicMock()
     action = MagicMock()
-    kbd.press = lambda *args: action("press", *args)
-    kbd.release = lambda *args: action("release", *args)
-    monkeypatch.setattr(Keys, "_kbd", kbd)
-    monkeypatch.setattr(Keys, "Keycode", Keycode)
+    press = lambda *args: action("press", *args)
+    release = lambda *args: action("release", *args)
+    monkeypatch.setattr(mymk.hardware.keys._kbd, "press", press)
+    monkeypatch.setattr(mymk.hardware.keys._kbd, "release", release)
+
     Board._instances.clear()
     TimelineManager._universes.clear()
     Timer.running.clear()

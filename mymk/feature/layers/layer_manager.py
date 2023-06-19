@@ -6,9 +6,9 @@ class LayerManager:
 
     @classmethod
     def load(cls, board_name: str, layer_name: str, definition: dict) -> None:
-        print("Layers:", cls._instances.keys())
+        # print("Layers:", cls._instances.keys())
         cls._instances[layer_name] = Layer(board_name, layer_name, definition)
-        print(cls._instances[layer_name])
+        # print(cls._instances[layer_name])
 
     @classmethod
     def get(cls, layer_name):

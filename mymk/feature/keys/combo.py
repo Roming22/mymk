@@ -102,9 +102,9 @@ def expand_chord(chord: str):
     return result
 
 
-@memory_cost("Sequence")
+# @memory_cost("Sequence")
 def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
-    print("Loading", sequence)
+    # print("Loading", sequence)
     switch_uids = [
         f"{switch_prefix}.{switch_uid}" for switch_uid in sequence.split("+")
     ]

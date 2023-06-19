@@ -1,18 +1,8 @@
-try:
-    import usb_hid
-    from adafruit_hid.keyboard import Keyboard as USB_Keyboard
-    from adafruit_hid.keycode import Keycode
+import adafruit_hid.keyboard
+import usb_hid
+from adafruit_hid.keycode import Keycode
 
-    _kbd = USB_Keyboard(usb_hid.devices)
-except ModuleNotFoundError as ex:
-    # Test mode
-    import sys
-
-    if "pytest" not in sys.modules:
-        raise ex
-    _kbd = None
-    Keycode = None
-
+_kbd = adafruit_hid.keyboard.Keyboard(usb_hid.devices)
 
 _KC = {
     "0": "ZERO",

@@ -25,8 +25,9 @@ def main() -> None:
                     "rows": (board.D6, board.D7, board.D9),
                 },
                 "leds": {
-                    "pin": None,
-                    "count": 0,
+                    "pin": board.D0,
+                    "count": 4,
+                    "RGB": (127, 63, 0),
                 },
                 "split": True,
             },

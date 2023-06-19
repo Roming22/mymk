@@ -1,13 +1,6 @@
-try:
-    import keypad
-except ModuleNotFoundError:
+import keypad
 
-    class Object:
-        pass
-
-    keypad = Object()
-    keypad.KeyMatrix = lambda **kwargs: []
-
+from mymk.hardware.leds import NeoPixel
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.memory import memory_cost
 
@@ -18,6 +11,12 @@ class Board:
     @memory_cost("Board")
     def __init__(self, name: str, definition: dict) -> None:
         self.name = name
+        leds = definition.get("leds")
+        if leds:
+            # Barely light up the leds to show that the keyboard is booting
+            color = (4, 0, 0)
+            pin = leds.get("pin")
+            self.pixels = NeoPixel(name, pin, leds["count"], color)
         self.keymatrix = keypad.KeyMatrix(
             row_pins=definition["pins"]["rows"],
             column_pins=definition["pins"]["cols"],

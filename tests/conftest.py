@@ -1,3 +1,23 @@
+import sys
+from unittest.mock import MagicMock
+
+####################################################################################################
+# Mock all the RPI modules
+####################################################################################################
+
+
+# adafruit_hid
+adafruit_hid = type(sys)("adafruit_hid")
+sys.modules["adafruit_hid"] = adafruit_hid
+
+
+# adafruit_hid.keyboard
+adafruit_hid.keyboard = type(sys)("keyboard")
+adafruit_hid.keyboard.Keyboard = MagicMock()
+sys.modules["adafruit_hid.keyboard"] = adafruit_hid.keyboard
+
+
+# adafruit_hid.keycode
 class Keycode:
     A = "A"
     B = "B"
@@ -134,3 +154,26 @@ class Keycode:
     RIGHT_SHIFT = "RIGHT_SHIFT"
     RIGHT_ALT = "RIGHT_ALT"
     RIGHT_GUI = "RIGHT_GUI"
+
+
+adafruit_hid.keycode = type(sys)("keycode")
+adafruit_hid.keycode.Keycode = Keycode
+sys.modules["adafruit_hid.keycode"] = adafruit_hid.keycode
+
+
+# Keypad
+module = type(sys)("keypad")
+module.KeyMatrix = MagicMock(return_value=[])
+sys.modules["keypad"] = module
+
+
+# Neopixels
+module = type(sys)("neopixel")
+module.NeoPixel = MagicMock()
+sys.modules["neopixel"] = module
+
+
+# usb_hid
+module = type(sys)("usb_hid")
+module.devices = None
+sys.modules["usb_hid"] = module

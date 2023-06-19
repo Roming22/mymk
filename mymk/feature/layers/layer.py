@@ -23,9 +23,9 @@ class Layer:
                 if switch_uid not in self.switch_to_keycode.keys():
                     self.switch_to_keycode[switch_uid] = []
                 self.switch_to_keycode[switch_uid].append(keycode)
-                print("Added combo:", keycode)
-        else:
-            print("No combo has been declared in layer", layer_name)
+                # print("Added combo:", keycode)
+        # else:
+        #     print("No combo has been declared in layer", layer_name)
 
 
 def load_layer(mode: str, universe, switch_uid: str, data: list[str]) -> None:
