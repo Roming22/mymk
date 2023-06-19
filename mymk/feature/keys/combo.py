@@ -3,8 +3,8 @@
 See the shunting yard algorithm.
 """
 
-from mymk.feature.keys.key import Key
 from mymk.hardware.keys import press, release
+from mymk.logic.keys import loader_map
 from mymk.logic.timer import Timer
 from mymk.utils.memory import memory_cost
 from mymk.utils.toolbox import permutations
@@ -54,9 +54,9 @@ class Sequence:
         for switch_uid, delay in zip(self.switch_uids, self.delays):
             if delay is not None:
                 sum_delay += delay
-                sum_switch.append(switch_uid.split('.')[-1])
+                sum_switch.append(switch_uid.split(".")[-1])
                 timer_name = f"timer.{combo_uid}.sequence.{'+'.join(sum_switch)}"
-                timer = Timer(timer_name,sum_delay,universe,timeline)
+                timer = Timer(timer_name, sum_delay, universe, timeline)
                 actions = []
                 output = []
             else:
@@ -125,4 +125,4 @@ def expand_combo(definition: str) -> list:
     return [definition]
 
 
-Key.loader_map["SQ"] = Sequence.load
+loader_map["SQ"] = Sequence.load

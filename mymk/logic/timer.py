@@ -27,15 +27,11 @@ class Timer:
 
     @time_it
     def process_event(self):
-        print("\n" * 3)
-        print(" ".join(["#", self.name, "#" * 100])[:120])
         now = Time.tick_time
-        print("# At:", pretty_print(now))
         if self.timeline.parent is not None:
-            print("Before:", [t.what for t in self.universe.get_active_timelines()])
             self.universe._process_event(self.timeline, self.name)
             self.universe.resolve()
-            print("After:", [t.what for t in self.universe.get_active_timelines()])
+            print("After:", self.universe.print_active_timelines())
         self.stop()
 
     @classmethod
