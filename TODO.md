@@ -27,9 +27,18 @@
 [X] Layer1 keys
 [X] Keys remained pressed when switching layer as long as they are held
 
-## Known bugs
-
 ## Hardware
 [X] Turn LEDs on
 [X] Change colors based on active layer
 [ ] Split keyboard communication
+    [X] Detect Left/Right board in case of split keyboard
+    [ ] Send power to Extension board
+    [?] Detect Controller/Extension board
+    [X] Implement and execute Extension loop
+    [ ] Send switch event over the wire
+    [ ] Send leds event over the wire
+
+# General improvements
+[ ] Use supervisor.runtime.serial connected to dynamically remove print/memory/fps info
+
+## Known bugs

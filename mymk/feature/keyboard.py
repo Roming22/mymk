@@ -11,30 +11,39 @@ from mymk.utils.time import Time
 class Keyboard:
     @memory_cost("Keyboard")
     def __init__(self, definition: dict) -> None:
-        self.boards = []
-        for board_name, board_definition in definition["hardware"].items():
-            board = Board(board_name, board_definition)
+        board = Board(definition)
+        self.board = board
 
-            # The switch count is doubled in case of a split keyboard
-            switch_count = (
-                len(board_definition["pins"]["cols"])
-                * len(board_definition["pins"]["rows"])
-                * 2 ** int(board_definition.get("split", False))
+        if board.is_controller:
+            print("Controller board")
+            self.load_layers(board, definition)
+        else:
+            print("Extension board")
+
+        if len(definition["hardware"]) > 1 and not board.is_left:
+            left_board_definition = [
+                v for k, v in definition["hardware"].items() if k.endswith("L")
+            ][0]
+            switch_count_left = len(left_board_definition["pins"]["cols"]) * len(
+                left_board_definition["pins"]["rows"]
             )
+            board.switch_offset = switch_count_left
+            print("Board is on the right", switch_count_left)
 
-            # Load layers
-            for layer_name, layer_definition in definition["layout"]["layers"].items():
-                LayerManager.load(
-                    board.name, layer_name, layer_definition, board.pixels
+    def load_layers(self, board: Board, definition: dict) -> None:
+        switch_count = 0
+        for b_d in definition["hardware"].values():
+            switch_count += len(b_d["pins"]["cols"]) * len(b_d["pins"]["rows"])
+
+        # Load layers
+        for layer_name, layer_definition in definition["layout"]["layers"].items():
+            LayerManager.load(board.name, layer_name, layer_definition, board.pixels)
+            key_definitions = layer_definition["keys"]
+            key_count = len(key_definitions)
+            if key_count != switch_count:
+                raise RuntimeError(
+                    f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
                 )
-                key_definitions = layer_definition["keys"]
-                key_count = len(key_definitions)
-                if key_count != switch_count:
-                    raise RuntimeError(
-                        f"Invalid key count on layer '{layer_name}'. Layer has {key_count} keys, expected {switch_count}."
-                    )
-
-            self.boards.append(board)
 
         if not profile:
             print(get_usage(True))
@@ -55,5 +64,4 @@ class Keyboard:
     def tick(self):
         Time.tick()
         Timer.tick()
-        for board in self.boards:
-            board.tick()
+        self.board.tick()

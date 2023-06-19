@@ -177,6 +177,17 @@ module = type(sys)("neopixel")
 module.NeoPixel = MagicMock()
 sys.modules["neopixel"] = module
 
+# Storage
+module = type(sys)("storage")
+module.getmount = MagicMock(return_value=MagicMock(label="KEYBOARD-L"))
+sys.modules["storage"] = module
+
+# Supervisor
+module = type(sys)("supervisor")
+module.runtime = MagicMock(
+    return_value=MagicMock(serial_connected=True, usb_connected=True)
+)
+sys.modules["supervisor"] = module
 
 # usb_hid
 module = type(sys)("usb_hid")

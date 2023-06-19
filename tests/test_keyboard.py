@@ -17,7 +17,6 @@ def make_keyboard(definition, monkeypatch):
     monkeypatch.setattr(mymk.hardware.keys._kbd, "press", press)
     monkeypatch.setattr(mymk.hardware.keys._kbd, "release", release)
 
-    Board._instances.clear()
     TimelineManager._universes.clear()
     Timer.running.clear()
     keyboard = Keyboard(definition)
@@ -51,7 +50,7 @@ class TestSingleLayerKeyboard:
         # Hardware definition
         definition = {
             "hardware": {
-                "2x2": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2),
@@ -75,13 +74,13 @@ class TestSingleLayerKeyboard:
             },
         }
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_one_key(cls, monkeypatch):
-        events = ["board.2x2.switch.0", "!board.2x2.switch.0"]
+        events = ["board.KEYBOARD-L.switch.0", "!board.KEYBOARD-L.switch.0"]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "A"), call("release", "A")]
@@ -89,10 +88,10 @@ class TestSingleLayerKeyboard:
     @classmethod
     def test_two_keys_couplet(cls, monkeypatch):
         events = [
-            "board.2x2.switch.0",
-            "!board.2x2.switch.0",
-            "board.2x2.switch.1",
-            "!board.2x2.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -106,10 +105,10 @@ class TestSingleLayerKeyboard:
     @classmethod
     def test_two_keys_cross(cls, monkeypatch):
         events = [
-            "board.2x2.switch.0",
-            "board.2x2.switch.1",
-            "!board.2x2.switch.0",
-            "!board.2x2.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -123,10 +122,10 @@ class TestSingleLayerKeyboard:
     @classmethod
     def test_two_keys_enclosed(cls, monkeypatch):
         events = [
-            "board.2x2.switch.0",
-            "board.2x2.switch.1",
-            "!board.2x2.switch.1",
-            "!board.2x2.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -140,14 +139,14 @@ class TestSingleLayerKeyboard:
     @classmethod
     def test_three_keys(cls, monkeypatch):
         events = [
-            "board.2x2.switch.0",
-            "board.2x2.switch.1",
-            "!board.2x2.switch.1",
-            "board.2x2.switch.2",
-            "!board.2x2.switch.0",
-            "board.2x2.switch.0",
-            "!board.2x2.switch.0",
-            "!board.2x2.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.2",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -169,7 +168,7 @@ class TestTapHold:
         # Hardware definition
         definition = {
             "hardware": {
-                "test": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2),
@@ -195,13 +194,13 @@ class TestTapHold:
 
         # Layer definition
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_tap(cls, monkeypatch):
-        events = ["board.test.switch.0", "!board.test.switch.0"]
+        events = ["board.KEYBOARD-L.switch.0", "!board.KEYBOARD-L.switch.0"]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [call("press", "A"), call("release", "A")]
@@ -209,8 +208,8 @@ class TestTapHold:
     @classmethod
     def test_hold(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 0.2
@@ -220,10 +219,10 @@ class TestTapHold:
     @classmethod
     def test_interrupt_hold(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "board.test.switch.3",
-            "!board.test.switch.3",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -237,10 +236,10 @@ class TestTapHold:
     @classmethod
     def test_interrupt_noop(cls, monkeypatch):
         events = [
-            "board.test.switch.2",
-            "board.test.switch.3",
-            "!board.test.switch.3",
-            "!board.test.switch.2",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.2",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -252,10 +251,10 @@ class TestTapHold:
     @classmethod
     def test_interrupt_tap(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "board.test.switch.3",
-            "!board.test.switch.3",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -269,10 +268,10 @@ class TestTapHold:
     @classmethod
     def test_interrupt_hold_ht(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.1",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -286,10 +285,10 @@ class TestTapHold:
     @classmethod
     def test_interrupt_noop_ht(cls, monkeypatch):
         events = [
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "!board.test.switch.2",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.2",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -301,12 +300,12 @@ class TestTapHold:
     @classmethod
     def test_interrupt_tap_ht(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "board.test.switch.2",
-            "!board.test.switch.2",
-            "board.test.switch.2",
-            "!board.test.switch.2",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -326,7 +325,7 @@ class TestCombo:
         # Hardware definition
         definition = {
             "hardware": {
-                "test": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2, 3),
@@ -363,21 +362,21 @@ class TestCombo:
 
         # Layer definition
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_no_combo(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.1",
-            "board.test.switch.1",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[5] = 1.1
@@ -396,10 +395,10 @@ class TestCombo:
     @classmethod
     def test_chord(cls, monkeypatch):
         events = [
-            "board.test.switch.5",
-            "board.test.switch.4",
-            "!board.test.switch.5",
-            "!board.test.switch.4",
+            "board.KEYBOARD-L.switch.5",
+            "board.KEYBOARD-L.switch.4",
+            "!board.KEYBOARD-L.switch.5",
+            "!board.KEYBOARD-L.switch.4",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -411,10 +410,10 @@ class TestCombo:
     @classmethod
     def test_2key_enclosed(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.1",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -423,10 +422,10 @@ class TestCombo:
     @classmethod
     def test_2key_cross(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.0",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -435,14 +434,14 @@ class TestCombo:
     @classmethod
     def test_3key(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "board.test.switch.2",
-            "board.test.switch.3",
+            "board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.3",
         ]
         release_events = [
-            "!board.test.switch.1",
-            "!board.test.switch.2",
-            "!board.test.switch.3",
+            "!board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.3",
         ]
         shuffle(release_events)
         events += release_events
@@ -453,16 +452,16 @@ class TestCombo:
     @classmethod
     def test_sequence_break(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.3",
-            "!board.test.switch.1",
-            "!board.test.switch.3",
-            "!board.test.switch.2",
-            "board.test.switch.2",
-            "!board.test.switch.2",
+            "board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -484,7 +483,7 @@ class TestTapHoldCombo:
         # Hardware definition
         definition = {
             "hardware": {
-                "test": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2),
@@ -516,19 +515,19 @@ class TestTapHoldCombo:
         }
 
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_tap(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.2",
-            "!board.test.switch.2",
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -544,12 +543,12 @@ class TestTapHoldCombo:
     @classmethod
     def test_hold(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.2",
-            "!board.test.switch.2",
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 0.4
@@ -567,12 +566,12 @@ class TestTapHoldCombo:
     @classmethod
     def test_combo(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.0",
-            "!board.test.switch.1",
-            "board.test.switch.3",
-            "!board.test.switch.3",
+            "board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.1",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -590,7 +589,7 @@ class TestLayer:
         # Hardware definition
         definition = {
             "hardware": {
-                "test": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2),
@@ -631,19 +630,19 @@ class TestLayer:
         }
 
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_ly_mo_enclosed(cls, monkeypatch):
         events = [
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "!board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -657,12 +656,12 @@ class TestLayer:
     @classmethod
     def test_ly_mo_cross(cls, monkeypatch):
         events = [
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.2",
-            "!board.test.switch.0",
-            "board.test.switch.0",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -676,14 +675,14 @@ class TestLayer:
     @classmethod
     def test_ly_to_enclosed(cls, monkeypatch):
         events = [
-            "board.test.switch.3",
-            "!board.test.switch.3",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.2",
-            "!board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -697,14 +696,14 @@ class TestLayer:
     @classmethod
     def test_ly_to_cross(cls, monkeypatch):
         events = [
-            "board.test.switch.3",
-            "board.test.switch.0",
-            "!board.test.switch.3",
-            "!board.test.switch.0",
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.2",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.3",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.2",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -718,16 +717,16 @@ class TestLayer:
     @classmethod
     def test_ly_multiple(cls, monkeypatch):
         events = [
-            "board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.3",
-            "!board.test.switch.2",
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "!board.test.switch.3",
-            "board.test.switch.0",
-            "!board.test.switch.0",
+            "board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.2",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.3",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -747,7 +746,7 @@ class TestNestedCommands:
         # Hardware definition
         definition = {
             "hardware": {
-                "test": {
+                "KEYBOARD-L": {
                     "pins": {
                         "cols": (1, 2),
                         "rows": (1, 2),
@@ -780,17 +779,17 @@ class TestNestedCommands:
         }
 
         keyboard, action = make_keyboard(definition, monkeypatch)
-        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        keyboard.board.get_event_controller = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
         return keyboard, event_delays, action
 
     @classmethod
     def test_th_ly(cls, monkeypatch):
         events = [
-            "board.test.switch.0",
-            "!board.test.switch.0",
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.0",
+            "!board.KEYBOARD-L.switch.0",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 0.4
@@ -803,8 +802,8 @@ class TestNestedCommands:
     @classmethod
     def test_th_th_1(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
@@ -816,8 +815,8 @@ class TestNestedCommands:
     @classmethod
     def test_th_th_2(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 0.4
@@ -830,8 +829,8 @@ class TestNestedCommands:
     @classmethod
     def test_th_th_3(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "!board.test.switch.1",
+            "board.KEYBOARD-L.switch.1",
+            "!board.KEYBOARD-L.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 0.7
@@ -844,8 +843,8 @@ class TestNestedCommands:
     @classmethod
     def test_th_th_th_4(cls, monkeypatch):
         events = [
-            "board.test.switch.3",
-            "!board.test.switch.3",
+            "board.KEYBOARD-L.switch.3",
+            "!board.KEYBOARD-L.switch.3",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         event_delays[1] = 1.0
