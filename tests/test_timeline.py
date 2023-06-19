@@ -6,7 +6,7 @@ from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
 from mymk.multiverse.timeline_manager import TimelineManager
 
-LayerManager.load("test", "empty", {"keys": []})
+LayerManager.load("test", "empty", {"keys": []}, None)
 
 
 class Test_1_TimelineManager:

@@ -1,8 +1,8 @@
-from collections import OrderedDict
 from time import sleep
 from unittest.mock import MagicMock, call
 
 import mymk.hardware.keys
+from layouts.xs18 import get_definition
 from mymk.feature.keyboard import Keyboard
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
@@ -34,134 +34,11 @@ def run_scenario(keyboard, event_delays):
     assert timeline.determined == True
 
 
-def generate_split(layer_definitions, base_layout_name, target_layout_name):
-    definitions = {
-        f"{target_layout_name}L": {},
-        f"{target_layout_name}R": {},
-    }
-    split_index = len(layer_definitions[base_layout_name]["keys"]) // 2
-
-    # L side
-    definitions[f"{target_layout_name}L"]["keys"] = (
-        layer_definitions[base_layout_name]["keys"][:split_index]
-        + layer_definitions[target_layout_name]["keys"][split_index:]
-    )
-    definitions[f"{target_layout_name}L"]["keys"][-2] = f"LY_TO({target_layout_name})"
-
-    definitions[f"{target_layout_name}L"]["combos"] = {
-        "chords": {
-            k: v
-            for k, v in layer_definitions[base_layout_name]["combos"]["chords"].items()
-            if int(k.split("*")[0]) < split_index
-        }
-    }
-    definitions[f"{target_layout_name}L"]["combos"]["chords"].update(
-        {
-            k: v
-            for k, v in layer_definitions[target_layout_name]["combos"][
-                "chords"
-            ].items()
-            if int(k.split("*")[0]) >= split_index
-        }
-    )
-
-    # R side
-    definitions[f"{target_layout_name}R"]["keys"] = (
-        layer_definitions[target_layout_name]["keys"][:split_index]
-        + layer_definitions[base_layout_name]["keys"][split_index:]
-    )
-    definitions[f"{target_layout_name}R"]["keys"][-2] = f"LY_TO({target_layout_name})"
-
-    definitions[f"{target_layout_name}R"]["combos"] = {
-        "chords": {
-            k: v
-            for k, v in layer_definitions[target_layout_name]["combos"][
-                "chords"
-            ].items()
-            if int(k.split("*")[0]) < split_index
-        }
-    }
-    definitions[f"{target_layout_name}R"]["combos"]["chords"].update(
-        {
-            k: v
-            for k, v in layer_definitions[base_layout_name]["combos"]["chords"].items()
-            if int(k.split("*")[0]) >= split_index
-        }
-    )
-
-    return definitions
-
-
 class TestKeyboard:
     @staticmethod
     def _setup(monkeypatch, events):
         # Hardware definition
-        definition = {
-            "hardware": {
-                "xs18": {
-                    "pins": {
-                        "cols": (1, 2, 3, 4),
-                        "rows": (1, 2, 3),
-                    },
-                    "split": True,
-                },
-            },
-            "layout": {"layers": OrderedDict()},
-        }
-
-        # Layer definitions
-        definition["layout"]["layers"]["alpha"] = {
-            "keys": [
-                # fmt: off
-        "TH_HD(ESC,LSFT)",  "TH_HD(D, LSFT)",           "TH_HD(C,LALT)",    "TH_HD(L,LCTL)",
-        "NO",               "TH_HD(T, LY_MO(systemL))",  "A",                "E",
-                            "NO",                       "SPACE",            "LGUI",             "NO",
-
-                "TH_HD(R,RCTL)",    "TH_HD(S,RALT)",    "TH_HD(H,RSFT)",            "TH_HD(ENTER,RSFT)",
-                "I",                "O",                "TH_HD(N, LY_MO(systemR))",  "NO",
-        "NO",   "RGUI",             "MEH",              "NO",
-                # fmt: on
-            ],
-            "combos": {
-                "chords": {
-                    "1*2": "X",
-                    "2*3": "V",
-                    "1*3": "Z",
-                    "5*6": "F",
-                    "6*7": "U",
-                    "5*7": "P",
-                    "5*6*7": "W",
-                    "12*13": "K",
-                    "13*14": "Q",
-                    "12*14": "J",
-                    "16*17": "Y",
-                    "17*18": "G",
-                    "16*18": "M",
-                    "18*17*16": "B",
-                },
-            },
-        }
-
-        definition["layout"]["layers"]["system"] = {
-            "keys": [
-                # fmt: off
-        None,   "ESC",  "PAGEUP",   "PRTSCR",
-        None,   "HOME", "PAGEDOWN", "END",
-                None,   None,       None,       None,
-
-                "BACKSPACE",    "UP",   "DELETE",   None,
-                "LEFT",         "DOWN", "RIGHT",    None,
-        None,   None,           "LY_TO(alpha)",    None,
-                # fmt: on
-            ],
-            "combos": {
-                "chords": {},
-            },
-        }
-        definition["layout"]["layers"].update(
-            generate_split(definition["layout"]["layers"], "alpha", "system")
-        )
-
+        definition = get_definition()
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
@@ -192,41 +69,24 @@ class TestKeyboard:
             "board.xs18.switch.6",
             "!board.xs18.switch.6",
             "!board.xs18.switch.5",
-            "board.xs18.switch.5",
-            "!board.xs18.switch.5",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
         run_scenario(keyboard, event_delays)
-        assert action.call_args_list == [
-            call("press", "F"),
-            call("release", "F"),
-            call("press", "T"),
-            call("release", "T"),
-        ]
+        assert action.call_args_list == [call("press", "F"), call("release", "F")]
 
     @classmethod
     def test_3key_combo(cls, monkeypatch):
         events = [
-            "board.xs18.switch.5",
-            "board.xs18.switch.6",
-            "board.xs18.switch.7",
-            "!board.xs18.switch.5",
-            "!board.xs18.switch.6",
-            "!board.xs18.switch.7",
             "board.xs18.switch.1",
+            "board.xs18.switch.2",
+            "board.xs18.switch.3",
             "!board.xs18.switch.1",
+            "!board.xs18.switch.2",
+            "!board.xs18.switch.3",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[1] = 0.1
-        event_delays[2] = 0.1
-        event_delays[3] = 0.8
-        event_delays[4] = 0.1
-        event_delays[5] = 0.1
-        event_delays[6] = 0.5
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
-            call("press", "W"),
-            call("release", "W"),
-            call("press", "D"),
-            call("release", "D"),
+            call("press", "ESCAPE"),
+            call("release", "ESCAPE"),
         ]

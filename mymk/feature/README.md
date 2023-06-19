@@ -17,13 +17,19 @@ definition = {
             },
         },
     },
-    "layout": {"layers": OrderedDict()},
-}
-definition["layout"]["layers"]["WASD"] = {
-    "keys": [
-        "W", "A",
-        "S", "D",
-    ],
+    "layout": {
+        "layers": {
+            "WASD": {
+                "keys": [
+                    "W", "A",
+                    "S", "D",
+                ],
+            },
+        },
+    },
+    "settings": {
+        "default_layer": "WASD",
+    },
 }
 keyboard = Keyboard(definition)
 ```
@@ -52,19 +58,25 @@ definition = {
             },
         },
     },
-    "layout": {"layers": OrderedDict()},
-}
-definition["layout"]["layers"]["nums"] = {
-    "keys": [
-        "LY_TO(fn)", "1",
-        "2", "3",
-    ],
-}
-definition["layout"]["layers"]["fn"] = {
-    "keys": [
-        "LY_TO(nums)", "F1",
-        "F2", "F3",
-    ],
+    "layout": {
+        "layers": {
+            "nums": {
+                "keys": [
+                    "LY_TO(fn)", "1",
+                    "2", "3",
+                ],
+            },
+            "fn": {
+                "keys": [
+                    "LY_TO(nums)", "F1",
+                    "F2", "F3",
+                ],
+            },
+        },
+    },
+    "settings": {
+        "default_layer": "nums",
+    },
 }
 keyboard = Keyboard(definition)
 ```
@@ -104,13 +116,19 @@ definition = {
             },
         },
     },
-    "layout": {"layers": OrderedDict()},
-}
-definition["layout"]["layers"]["alpha&sys"] = {
-    "keys": [
-"TH_HD(W, ESCAPE, 1.5)",  "TH_HD(A, LEFT_SHIFT)",
-"TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
-    ],
+    "layout": {
+        "layers": {
+            "alpha&sys": {
+                "keys": [
+    "TH_HD(W, ESCAPE, 1.5)",  "TH_HD(A, LEFT_SHIFT)",
+    "TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
+                ],
+            },
+        },
+    },
+    "settings": {
+        "default_layer": "alpha&sys",
+    },
 }
 keyboard = Keyboard(definition)
 ```
@@ -141,22 +159,28 @@ definition = {
             },
         },
     },
-    "layout": {"layers": OrderedDict()},
-}
-definition["layout"]["layers"]["alpha&sys"] = {
-    "keys": [
-"TH_HD(W, ESCACPE, 1.5)", "TH_HD(A, LEFT_SHIFT)",
-"TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
-    ],
-    "combos": {
-        "chords": {
-            "0*1": "F1",
-            "2*3": "F2",
+    "layout": {
+        "layers": {
+            "alpha&sys": {
+                "keys": [
+    "TH_HD(W, ESCACPE, 1.5)", "TH_HD(A, LEFT_SHIFT)",
+    "TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
+                ],
+                "combos": {
+                    "chords": {
+                        "0*1": "F1",
+                        "2*3": "F2",
+                    },
+                    "sequences": {
+                        "0+3": "DOWN",
+                        "3+0" :"UP",
+                    },
+                },
+            },
         },
-        "sequences": {
-            "0+3": "DOWN",
-            "3+0" :"UP",
-        },
+    },
+    "settings": {
+        "default_layer": "alpha&sys",
     },
 }
 keyboard = Keyboard(definition)

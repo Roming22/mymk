@@ -161,6 +161,11 @@ adafruit_hid.keycode.Keycode = Keycode
 sys.modules["adafruit_hid.keycode"] = adafruit_hid.keycode
 
 
+# Board
+module = MagicMock()
+sys.modules["board"] = module
+
+
 # Keypad
 module = type(sys)("keypad")
 module.KeyMatrix = MagicMock(return_value=[])

@@ -11,8 +11,8 @@
 ## Layout definition
 [X] Alpha layer single key chars
 [X] Alpha layer Mod keys
-[ ] Alpha layer Fn keys
-[ ] Alpha layer lock Fn
+[X] Alpha layer Fn keys
+[X] Alpha layer lock Fn
 [X] Alpha layer combo key chars
 [ ] Caps Word
 
@@ -25,11 +25,11 @@
 [X] Layer0 Sequence
 [ ] Chords/Sequences can be repeated by pressing/releasing a key (any or just the last?) of the sequence fast enough.
 [X] Layer1 keys
-[ ] Keys remained pressed when switching layer as long as they are held
+[X] Keys remained pressed when switching layer as long as they are held
 
 ## Known bugs
 
 ## Hardware
-[ ] Turn LEDs on
-[ ] Change colors based on active layer
+[X] Turn LEDs on
+[X] Change colors based on active layer
 [ ] Split keyboard communication

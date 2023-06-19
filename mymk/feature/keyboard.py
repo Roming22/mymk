@@ -23,12 +23,10 @@ class Keyboard:
             )
 
             # Load layers
-            default_layer = ""
             for layer_name, layer_definition in definition["layout"]["layers"].items():
-                if not default_layer:
-                    default_layer = layer_name
-                LayerManager.load(board.name, layer_name, layer_definition)
-
+                LayerManager.load(
+                    board.name, layer_name, layer_definition, board.pixels
+                )
                 key_definitions = layer_definition["keys"]
                 key_count = len(key_definitions)
                 if key_count != switch_count:
@@ -37,24 +35,17 @@ class Keyboard:
                     )
 
             self.boards.append(board)
-            TimelineManager.activate(default_layer)
-
-            leds = board_definition.get("leds")
-            if leds:
-                # Keyboard is ready
-                board.pixels.fill(leds.get("RGB", (127, 127, 127)))
 
         if not profile:
             print(get_usage(True))
 
+        default_layer = definition["settings"]["default_layer"]
+        TimelineManager.activate(default_layer)
+        LayerManager.get(default_layer).set_leds()
+
     def go(self, fps=False):
         if fps:
             FPS.start(60)
-
-        print("\n" * 3)
-        print("#" * 120)
-        print("# ONLINE")
-        print("#" * 120)
 
         while True:
             self.tick()

@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from random import shuffle
 from time import sleep
 from unittest.mock import MagicMock, call
@@ -59,17 +58,21 @@ class TestSingleLayerKeyboard:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
-        }
-
-        # Layer definition
-        definition["layout"]["layers"]["myLayer"] = {
-            "keys": [
-                # fmt: off
-                "A", "B",
-                "C", "D",
-                # fmt: on
-            ],
+            "layout": {
+                "layers": {
+                    "myLayer": {
+                        "keys": [
+                            # fmt: off
+                            "A", "B",
+                            "C", "D",
+                            # fmt: on
+                        ],
+                    },
+                },
+            },
+            "settings": {
+                "default_layer": "myLayer",
+            },
         }
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
@@ -173,18 +176,24 @@ class TestTapHold:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
+            "layout": {
+                "layers": {
+                    "myLayer": {
+                        "keys": [
+                            # fmt: off
+            "TH_HD(A, 0.1, F1)", "TH_TP(B, 0.1, F2)",
+            "TH_NO(C, 0.1, F3)", "D",
+                            # fmt: on
+                        ],
+                    },
+                }
+            },
+            "settings": {
+                "default_layer": "myLayer",
+            },
         }
 
         # Layer definition
-        definition["layout"]["layers"]["myLayer"] = {
-            "keys": [
-                # fmt: off
-        "TH_HD(A, 0.1, F1)", "TH_TP(B, 0.1, F2)",
-        "TH_NO(C, 0.1, F3)", "D",
-                # fmt: on
-            ],
-        }
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
@@ -324,29 +333,35 @@ class TestCombo:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
+            "layout": {
+                "layers": {
+                    "myLayer": {
+                        "keys": [
+                            # fmt: off
+                            "A", "B",
+                            "C", "D",
+                            "E", "F",
+                            # fmt: on
+                        ],
+                        "combos": {
+                            "chords": {
+                                "4*5": "F4",
+                            },
+                            "sequences": {
+                                "0+1": "F1",
+                                "1+2": "F2",
+                                "1+2+3": "F3",
+                            },
+                        },
+                    },
+                },
+            },
+            "settings": {
+                "default_layer": "myLayer",
+            },
         }
 
         # Layer definition
-        definition["layout"]["layers"]["myLayer"] = {
-            "keys": [
-                # fmt: off
-                "A", "B",
-                "C", "D",
-                "E", "F",
-                # fmt: on
-            ],
-            "combos": {
-                "chords": {
-                    "4*5": "F4",
-                },
-                "sequences": {
-                    "0+1": "F1",
-                    "1+2": "F2",
-                    "1+2+3": "F3",
-                },
-            },
-        }
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
@@ -476,25 +491,30 @@ class TestTapHoldCombo:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
-        }
-
-        # Layer definition
-        definition["layout"]["layers"]["myLayer"] = {
-            "keys": [
-                # fmt: off
-        "TH_HD(A, ONE)",    "TH_TP(B, TWO)",
-        "C",                "D",
-                # fmt: on
-            ],
-            "combos": {
-                "sequences": {
-                    "0+1": "F1",
-                    "1+2": "F2",
-                    "1+2+3": "F3",
-                },
+            "layout": {
+                "layers": {
+                    "myLayer": {
+                        "keys": [
+                            # fmt: off
+            "TH_HD(A, ONE)",    "TH_TP(B, TWO)",
+            "C",                "D",
+                            # fmt: on
+                        ],
+                        "combos": {
+                            "sequences": {
+                                "0+1": "F1",
+                                "1+2": "F2",
+                                "1+2+3": "F3",
+                            },
+                        },
+                    }
+                }
+            },
+            "settings": {
+                "default_layer": "myLayer",
             },
         }
+
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
@@ -577,34 +597,39 @@ class TestLayer:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
+            "layout": {
+                "layers": {
+                    "default": {
+                        "keys": [
+                            # fmt: off
+            "A",        "B",
+            "LY_MO(1)", "LY_TO(1)",
+                            # fmt: on
+                        ],
+                    },
+                    "1": {
+                        "keys": [
+                            # fmt: off
+            "C",                "D",
+            "LY_TO(default)",   "LY_MO(2)",
+                            # fmt: on
+                        ],
+                    },
+                    "2": {
+                        "keys": [
+                            # fmt: off
+            "E", "F",
+            "G", "H",
+                            # fmt: on
+                        ],
+                    },
+                }
+            },
+            "settings": {
+                "default_layer": "default",
+            },
         }
 
-        # Layer definition
-        definition["layout"]["layers"]["default"] = {
-            "keys": [
-                # fmt: off
-                "A",        "B",
-                "LY_MO(1)", "LY_TO(1)",
-                # fmt: on
-            ],
-        }
-        definition["layout"]["layers"]["1"] = {
-            "keys": [
-                # fmt: off
-                "C",                "D",
-                "LY_TO(default)",   "LY_MO(2)",
-                # fmt: on
-            ],
-        }
-        definition["layout"]["layers"]["2"] = {
-            "keys": [
-                # fmt: off
-                "E", "F",
-                "G", "H",
-                # fmt: on
-            ],
-        }
         keyboard, action = make_keyboard(definition, monkeypatch)
         keyboard.boards[0].get_event = MagicMock(side_effect=events)
         event_delays = [0] * len(events)
@@ -729,25 +754,29 @@ class TestNestedCommands:
                     },
                 },
             },
-            "layout": {"layers": OrderedDict()},
-        }
-
-        # Layer definition
-        definition["layout"]["layers"]["default"] = {
-            "keys": [
-                # fmt: off
-                "TH_HD(A,LY_TO(1))",    "TH_HD(B,TH_HD(Y,Z))",
-                "C",                    "TH_HD(B,TH_HD(V,TH_HD(W,X)))",
-                # fmt: on
-            ],
-        }
-        definition["layout"]["layers"]["1"] = {
-            "keys": [
-                # fmt: off
-                "E",                        "F",
-                "TH_TP(LY_TO(default), G)", "H",
-                # fmt: on
-            ],
+            "layout": {
+                "layers": {
+                    "default": {
+                        "keys": [
+                            # fmt: off
+            "TH_HD(A,LY_TO(1))",    "TH_HD(B,TH_HD(Y,Z))",
+            "C",                    "TH_HD(B,TH_HD(V,TH_HD(W,X)))",
+                            # fmt: on
+                        ],
+                    },
+                    "1": {
+                        "keys": [
+                            # fmt: off
+            "E",                        "F",
+            "TH_TP(LY_TO(default), G)", "H",
+                            # fmt: on
+                        ],
+                    },
+                }
+            },
+            "settings": {
+                "default_layer": "default",
+            },
         }
 
         keyboard, action = make_keyboard(definition, monkeypatch)

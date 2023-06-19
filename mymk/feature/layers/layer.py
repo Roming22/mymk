@@ -7,8 +7,17 @@ class Layer:
     """Holds the layer definition"""
 
     @memory_cost("Layer")
-    def __init__(self, board_name, layer_name: str, layer_definition) -> None:
+    def __init__(
+        self, board_name, layer_name: str, layer_definition: dict, pixels=None
+    ) -> None:
         print("Loading layer:", layer_name)
+
+        if pixels:
+            color = layer_definition.get("leds", {}).get("RGB", (127, 127, 127))
+            print(layer_name, "color:", color, layer_definition.get("leds", {}))
+            self.set_leds = lambda: pixels.fill(color)
+        else:
+            self.set_leds = lambda: None
         self.uid = f"board.{board_name}.layer.{layer_name}"
         self.switch_to_keycode = {}
         switch_prefix = f"board.{board_name}.switch"

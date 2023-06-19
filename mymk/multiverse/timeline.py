@@ -48,11 +48,13 @@ class Timeline:
         if is_root:
             self.layers.clear()
         self.layers.append(layer)
+        self.output.append(layer.set_leds)
         return layer
 
     def deactivate(self, layer) -> None:
         print("Deactivate layer", layer.uid)
         self.layers.remove(layer)
+        self.output.append(self.layers[-1].set_leds)
 
     def load_events(self, universe, switch_uid) -> None:
         keycodes = []

@@ -1,6 +1,6 @@
 import keypad
 
-from mymk.hardware.leds import NeoPixel
+from mymk.hardware.leds import create as create_pixels
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.memory import memory_cost
 
@@ -16,7 +16,9 @@ class Board:
             # Barely light up the leds to show that the keyboard is booting
             color = (4, 0, 0)
             pin = leds.get("pin")
-            self.pixels = NeoPixel(name, pin, leds["count"], color)
+            self.pixels = create_pixels(pin, leds["count"], color)
+        else:
+            self.pixels = None
         self.keymatrix = keypad.KeyMatrix(
             row_pins=definition["pins"]["rows"],
             column_pins=definition["pins"]["cols"],
