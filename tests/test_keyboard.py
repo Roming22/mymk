@@ -5,12 +5,14 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
+import mymk.feature.keys.key
 import mymk.feature.keys.taphold
 import mymk.hardware.keys as Keys
 from mymk.feature.keyboard import Keyboard
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
+from mymk.utils.time import Time
 from tests.keycode import Keycode
 
 
@@ -30,9 +32,19 @@ def make_keyboard(definition, monkeypatch):
 
 def run_scenario(keyboard, event_delays):
     # Run test
+
+    # Increasing the precision should not be necessary until tests need to be more
+    # precise than a 10th of a second
+    precision = 10
+
     for event_delay in event_delays:
-        sleep(event_delay)
+        # In order to test nested TapHolds, time must flow in small chunks
+        for _ in range(0, int(event_delay * precision)):
+            sleep(1 / precision)
+            Time.tick()
+            Timer.tick()
         keyboard.tick()
+
     timeline = TimelineManager._universes[0].timeline_start
     assert timeline.events == {}
     assert timeline.children == []
@@ -757,7 +769,7 @@ class TestNestedCommands:
             "!board.test.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[1] = .4
+        event_delays[1] = 0.4
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "F"),
@@ -765,36 +777,54 @@ class TestNestedCommands:
         ]
 
     @classmethod
-    def test_th_th(cls, monkeypatch):
+    def test_th_th_1(cls, monkeypatch):
         events = [
-            "board.test.switch.1",
-            "!board.test.switch.1",
-            "board.test.switch.1",
-            "!board.test.switch.1",
             "board.test.switch.1",
             "!board.test.switch.1",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[3] = .4
-        event_delays[5] = .7
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "B"),
             call("release", "B"),
+        ]
+
+    @classmethod
+    def test_th_th_2(cls, monkeypatch):
+        events = [
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = 0.4
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
             call("press", "Y"),
             call("release", "Y"),
+        ]
+
+    @classmethod
+    def test_th_th_3(cls, monkeypatch):
+        events = [
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[1] = 0.7
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
             call("press", "Z"),
             call("release", "Z"),
         ]
 
     @classmethod
-    def test_th_th_th(cls, monkeypatch):
+    def test_th_th_th_4(cls, monkeypatch):
         events = [
             "board.test.switch.3",
             "!board.test.switch.3",
         ]
         keyboard, event_delays, action = cls._setup(monkeypatch, events)
-        event_delays[1] = 1
+        event_delays[1] = 1.0
         run_scenario(keyboard, event_delays)
         assert action.call_args_list == [
             call("press", "X"),

@@ -13,6 +13,9 @@ class Time:
         return time.monotonic_ns()
 
 
+Time.tick_time = Time.now()
+
+
 def pretty_print(timestamp: int) -> None:
     useconds = timestamp % 10**9 // 1000
     seconds = (timestamp // 10**9) % 60

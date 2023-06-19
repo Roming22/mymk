@@ -1,5 +1,5 @@
-from mymk.feature.keys.key import Key
 from mymk.feature.layers.layer_manager import LayerManager
+from mymk.logic.keys import load
 
 
 class Timeline:
@@ -62,7 +62,7 @@ class Timeline:
                 break
 
         for keycode in keycodes:
-            Key.load(switch_uid, keycode, universe)
+            load(switch_uid, keycode, universe)
 
     def mark_determined(self) -> None:
         self.determined = True

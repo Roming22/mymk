@@ -1,5 +1,5 @@
 from mymk.feature.keys.combo import load_combos
-from mymk.feature.keys.key import Key
+from mymk.logic.keys import loader_map
 from mymk.utils.memory import memory_cost
 
 
@@ -27,29 +27,21 @@ class Layer:
         else:
             print("No combo has been declared in layer", layer_name)
 
-    @staticmethod
-    def split_timeline_momentary(universe, switch_uid, data) -> None:
-        layer_name = data[0]
 
-        events = {"what": f"{switch_uid} press/release {layer_name}"}
-        timeline = universe.split(events)
+def load_layer(mode: str, universe, switch_uid: str, data: list[str]) -> None:
+    layer_name = data[0]
 
-        layer = timeline.activate(layer_name, False)
+    events = f"{switch_uid} press/release {layer_name}"
+    timeline = universe.split(events)
+
+    layer = timeline.activate(layer_name, False)
+    output = []
+    if mode == "momentary":
         deactivate_layer = lambda: timeline.deactivate(layer)
-        timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], [deactivate_layer])]
-        timeline.mark_determined()
-
-    @staticmethod
-    def split_timeline_to(universe, switch_uid, data) -> None:
-        layer_name = data[0]
-
-        events = {"what": f"{switch_uid} press/release {layer_name}"}
-        timeline = universe.split(events)
-
-        timeline.activate(layer_name, True)
-        timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], [])]
-        timeline.mark_determined()
+        output.append(deactivate_layer)
+    timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], output)]
+    timeline.mark_determined()
 
 
-Key.loader_map["LY_MO"] = Layer.split_timeline_momentary
-Key.loader_map["LY_TO"] = Layer.split_timeline_to
+loader_map["LY_MO"] = lambda *args, **kwargs: load_layer("momentary", *args, **kwargs)
+loader_map["LY_TO"] = lambda *args, **kwargs: load_layer("to", *args, **kwargs)

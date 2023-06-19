@@ -71,17 +71,15 @@ keyboard = Keyboard(definition)
 The above definition will allow to use the same switches to output both numbers and Fn keys.
 `LY_TO` is used to flip flop between the layers.
 
-It is currently not possible to combine `LY` keys with `TH` (TapHold) keys to make a switch that execute `LY_MO` on tap, but `LY_TO` on hold.
-
 ## TapHold
 
 TapHold allows a switch to generate an action that depends on the time the switch was held down.
 If the switch is released before a delay expires, the `tap` action is triggered.
 If the switch is held down past the delay expiration, the `hold` action is triggered.
 
-The default delay  is .5 seconds, but it can be set with:
+The default delay  is .3 seconds, but it can be set with:
 ```
-from seaks.features.taphold import delay as taphold_delay
+from mymk.features.taphold import delay as taphold_delay
 
 # Set to 2 seconds
 taphold_delay[0] = 2
@@ -110,7 +108,7 @@ definition = {
 }
 definition["layout"]["layers"]["alpha&sys"] = {
     "keys": [
-"TH_HD(W, ESCACPE, 1.5)", "TH_HD(A, LEFT_SHIFT)",
+"TH_HD(W, ESCAPE, 1.5)",  "TH_HD(A, LEFT_SHIFT)",
 "TH_TP(S, LEFT_CONTROL)", "TH_NO(D, ENTER)",
     ],
 }
@@ -123,11 +121,11 @@ There are two types of combos:
 * chords: the switches can be pressed in any order. The delimiter is '*'.
 * sequences: the switches must be pressed in the right order. The delimiter is '+'.
 
-All keys of the combos must be pressed for the combo to trigger. I.e. if a key belonging
-to a combo is released while the combo is being keyed, the combo will be cancelled.
+All keys of the combos must be pressed for the combo to trigger.
+I.e. if a key belonging to a combo is released while the combo is being keyed, the combo will be cancelled.
 
-If a chord conflicts with a sequence, the sequence takes priority. For example if the
-chord `1*2*3` is assigned to `ENTER` and the sequence `3+2+1` is assigned to `SPACE`:
+If a chord conflicts with a sequence, the sequence takes priority.
+For example if the chord `1*2*3` is assigned to `ENTER` and the sequence `3+2+1` is assigned to `SPACE`:
 * `1+2+3`, `1+3+2`, `2+1+3`, `2+3+1`, `3+1+2` will output `ENTER`
 * `3+2+1` will output `SPACE`
 

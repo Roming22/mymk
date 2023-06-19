@@ -6,7 +6,7 @@ from mymk.utils.time import Time, pretty_print, time_it
 
 class TimelineManager:
     _universes = []
-    _time_last_event = Time.now()
+    _time_last_event = Time.tick_time
 
     def __init__(self, timeline=False) -> None:
         if not timeline:
@@ -33,6 +33,9 @@ class TimelineManager:
         else:
             timelines.append(timeline)
         return timelines
+
+    def print_active_timelines(self):
+        return ", ".join([t.what for t in self.get_active_timelines()])
 
     def split(self, what) -> Timeline:
         """Create new timelines"""
@@ -73,16 +76,6 @@ class TimelineManager:
             # print("Output action")
             timeline.output.extend(output)
 
-    def _event_is_interrupt(self, event) -> bool:
-        timeline = self.current_timeline
-        if not timeline.events:
-            return False
-        if event.startswith("!"):
-            return False
-        if event.startswith("timer"):
-            return False
-        return True
-
     def _process_event(self, timeline, event) -> None:
         """Process an event
 
@@ -90,8 +83,20 @@ class TimelineManager:
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
+        print("\n" * 3)
+        print(" ".join(["#", event, "#" * 100])[:120])
+        now = Time.tick_time
+        print(
+            "# At:",
+            pretty_print(now),
+            f"(+{(now-TimelineManager._time_last_event)/10**6}ms)",
+        )
+        TimelineManager._time_last_event = now
+        print("Before:", self.print_active_timelines())
+
         self.current_timeline = timeline
 
+        new_children = 0
         if timeline.events:
             # Process an event as part of a group of event.
             try:
@@ -101,9 +106,15 @@ class TimelineManager:
                 pass
 
             # Process a press event as an interrupt
-            if self._event_is_interrupt(event) and not timeline.determined:
+            if (
+                timeline.events
+                and event.startswith("board.")
+                and not timeline.determined
+            ):
                 try:
+                    new_children = len(timeline.children)
                     self._process_event_in_timeline("interrupt")
+                    new_children = len(timeline.children) - new_children
                 except KeyError:
                     # print("## Deadend:", timeline)
                     self.delete_timeline(timeline)
@@ -115,7 +126,13 @@ class TimelineManager:
             self.delete_timeline(timeline)
             return
         try:
-            timeline.load_events(self, event)
+            if new_children:
+                for child in timeline.children[-new_children:]:
+                    self.current_timeline = child
+                    child.load_events(self, event)
+                self.current_timeline = child.parent
+            else:
+                timeline.load_events(self, event)
         except KeyError:
             if timeline.events:
                 # print("## Deadend:", timeline)
@@ -134,17 +151,13 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
-        print("\n" * 3)
-        print(" ".join(["#", event, "#" * 100])[:120])
-        now = Time.tick_time
-        print("# At:", pretty_print(now), f"(+{(now-cls._time_last_event)/10**6}ms)")
-        cls._time_last_event = now
 
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 universe._process_event(timeline, event)
             universe.resolve()
+            print("After:", universe.print_active_timelines())
 
     def resolve(self) -> None:
         """Solve split timelines"""
@@ -152,6 +165,8 @@ class TimelineManager:
             for action in self.timeline_start.output:
                 action()
             self.timeline_start.output.clear()
+            if not self.timeline_start.events:
+                self.timeline_start.what = "begin"
 
         if self.timeline_start.children and False not in [
             t.determined for t in self.timeline_start.children
