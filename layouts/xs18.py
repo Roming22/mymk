@@ -7,7 +7,7 @@ def get_definition():
     # Hardware definition
     definition = {
         "hardware": {
-            "xs18": {
+            "KEYBOARD-L": {
                 "pins": {
                     "cols": (
                         board.D26,
@@ -21,7 +21,21 @@ def get_definition():
                     "pin": board.D0,
                     "count": 4,
                 },
-                "split": True,
+            },
+            "KEYBOARD-R": {
+                "pins": {
+                    "cols": (
+                        board.D23,
+                        board.D20,
+                        board.D22,
+                        board.D26,
+                    ),
+                    "rows": (board.D6, board.D7, board.D9),
+                },
+                "leds": {
+                    "pin": board.D0,
+                    "count": 4,
+                },
             },
         },
         "layout": {
