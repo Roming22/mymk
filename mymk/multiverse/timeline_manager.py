@@ -1,12 +1,11 @@
-from mymk.feature.layers.layer_manager import LayerManager
 from mymk.multiverse.timeline import Timeline
-from mymk.utils.memory import memory_cost
-from mymk.utils.time import Time, pretty_print, time_it
+from mymk.utils.logger import logger
+# from mymk.utils.memory import memory_cost
+# from mymk.utils.time import Time, pretty_print, time_it
 
 
 class TimelineManager:
     _universes = []
-    _time_last_event = Time.tick_time
 
     def __init__(self, timeline=False) -> None:
         if not timeline:
@@ -18,7 +17,7 @@ class TimelineManager:
     @classmethod
     def activate(cls, layer_name: str, is_root: bool = True) -> None:
         universe = TimelineManager()
-        print("Universes:", len(cls._universes))
+        logger.info("Universes: %s", len(cls._universes))
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 timeline.activate(layer_name, True)
@@ -68,16 +67,16 @@ class TimelineManager:
     def _process_event_in_timeline(self, event) -> None:
         timeline = self.current_timeline
         data = timeline.events.pop(event)
-        # print("\n## Continuing timeline:", self.current_timeline)
+        # logger.debug("\n## Continuing timeline: %s", self.current_timeline)
         _, actions, output = data.pop(0)
         if data:
-            # print("Follow-up", data)
+            # logger.debug("Follow-up %s", data)
             timeline.events[data[0][0]] = data
         for action in actions:
-            # print("Immediate action")
+            # logger.debug("Immediate action")
             action()
         if output:
-            # print("Output action")
+            # logger.debug("Output action")
             timeline.output.extend(output)
 
     def _process_event(self, timeline, event) -> None:
@@ -87,8 +86,8 @@ class TimelineManager:
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
-        print("##", timeline.what)
-        print("Before:", self.print_active_timelines())
+        logger.info("## %s", timeline.what)
+        logger.info("Before: %s", self.print_active_timelines())
 
         self.current_timeline = timeline
 
@@ -112,13 +111,13 @@ class TimelineManager:
                     self._process_event_in_timeline("interrupt")
                     new_children = len(timeline.children) - new_children
                 except KeyError:
-                    # print("## Deadend:", timeline)
+                    # logger.debug("## Deadend: %s", timeline)
                     self.delete_timeline(timeline)
                     return
 
         # Process the event as an event triggering a new timeline
         if not timeline.determined:
-            # print("## Deadend:", timeline)
+            # logger.debug("## Deadend: %s", timeline)
             self.delete_timeline(timeline)
             return
         try:
@@ -131,14 +130,14 @@ class TimelineManager:
                 timeline.load_events(self, event)
         except KeyError:
             if timeline.events:
-                # print("## Deadend:", timeline)
+                # logger.debug("## Deadend: %s", timeline)
                 self.delete_timeline(timeline)
             else:
                 raise RuntimeError("Unknown event sequence")
 
     @classmethod
     # @memory_cost("Process", True)
-    @time_it
+    # @time_it
     def process_event(cls, event) -> None:
         """Process an event in all active timelines
 
@@ -147,22 +146,15 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
-        print("\n" * 3)
-        print(" ".join(["#", event, "#" * 100])[:120])
-        now = Time.tick_time
-        print(
-            "# At:",
-            pretty_print(now),
-            f"(+{(now-TimelineManager._time_last_event)/10**6}ms)",
-        )
-        TimelineManager._time_last_event = now
+        logger.info("\n" * 3)
+        logger.info(" ".join(["#", event, "#" * 100])[:120])
 
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 universe._process_event(timeline, event)
             universe.resolve()
-            print("After:", universe.print_active_timelines())
+            logger.info("After: %s", universe.print_active_timelines())
 
     def resolve(self) -> None:
         """Solve split timelines"""

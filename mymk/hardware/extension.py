@@ -4,18 +4,12 @@ import keypad
 import storage
 
 from mymk.hardware.leds import Pixel
-from mymk.multiverse.timeline_manager import TimelineManager
-from mymk.utils.memory import memory_cost
-
-
-def get_drive_name() -> bool:
-    return storage.getmount("/").label
+from mymk.utils.logger import logger
 
 
 class Board:
-    @memory_cost("Board")
     def __init__(self, definition: dict) -> None:
-        self.name = get_drive_name()
+        self.name = storage.getmount("/").label
         board_definition = definition["hardware"][self.name]
         self.is_left = not self.name.endswith("R")
 
@@ -47,18 +41,30 @@ class Board:
             )
             self.switch_offset = switch_count_left
 
-    def get_event_controller(self) -> str:
+    def get_key_event(self):
         event = self.keymatrix.events.get()
         if not event:
-            return ""
+            return (None, None)
         switch_uid = event.key_number
         if self.switch_offset:
             switch_uid += self.switch_offset
-        event_id = f"board.{self.name}.switch.{switch_uid}"
-        if event.released:
-            event_id = f"!{event_id}"
-        return event_id
+        return ("{switch_uid}", event.pressed)
+
 
     def tick(self) -> None:
-        if event_id := self.get_event_controller():
-            TimelineManager.process_event(event_id)
+        switch_uid, is_pressed = self.get_key_event()
+        # TODO: Send event to controller
+        # send((event.pressed, switch_uid))
+        # TODO: Get event from controller
+        # send((event.pressed, switch_uid))
+        if switch_uid:
+            logger.info("Switch uid, pressed: %s = %s", switch_uid, is_pressed)
+            if is_pressed:
+                color = (randint(0, 255), randint(0, 255), randint(0, 255))
+            else:
+                color = (0, 0, 0)
+            self.pixels.fill(color)
+
+    def go(self, _: bool = False):
+        while True:
+            self.tick()

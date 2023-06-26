@@ -6,6 +6,7 @@ See the shunting yard algorithm.
 from mymk.hardware.keys import press, release
 from mymk.logic.keys import loader_map
 from mymk.logic.timer import Timer
+from mymk.utils.logger import logger
 from mymk.utils.memory import memory_cost
 from mymk.utils.toolbox import permutations
 
@@ -104,7 +105,7 @@ def expand_chord(chord: str):
 
 # @memory_cost("Sequence")
 def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
-    # print("Loading", sequence)
+    # logger.info("Loading %s", sequence)
     switch_uids = [
         f"{switch_prefix}.{switch_uid}" for switch_uid in sequence.split("+")
     ]
@@ -121,7 +122,7 @@ def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
 
 def expand_combo(definition: str) -> list:
     combos = []
-    print(definition)
+    logger.info(definition)
     return [definition]
 
 

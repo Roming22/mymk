@@ -2,6 +2,9 @@ import adafruit_hid.keyboard
 import usb_hid
 from adafruit_hid.keycode import Keycode
 
+
+from mymk.utils.logger import logger
+
 _kbd = adafruit_hid.keyboard.Keyboard(usb_hid.devices)
 
 _KC = {
@@ -50,7 +53,7 @@ def get_keycodes_for(keycode: str) -> list[Keycode]:
 
 
 def panic():
-    print("!!! PANIC !!!")
+    logger.info("!!! PANIC !!!")
     _kbd.send(Keycode.MEH)
 
 
@@ -59,7 +62,7 @@ def press(key_name: str) -> callable:
     action = f"Press {key_name}"
 
     def func():
-        print(action)
+        logger.info(action)
         for kc in keycodes:
             _kbd.press(getattr(Keycode, kc))
 
@@ -72,7 +75,7 @@ def release(key_name: str) -> callable:
     action = f"Release {key_name}"
 
     def func():
-        print(action)
+        logger.info(action)
         for kc in reversed(keycodes):
             _kbd.release(getattr(Keycode, kc))
 

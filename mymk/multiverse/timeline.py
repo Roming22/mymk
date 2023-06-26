@@ -1,5 +1,6 @@
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.logic.keys import load
+from mymk.utils.logger import logger
 
 
 class Timeline:
@@ -46,7 +47,7 @@ class Timeline:
         layer = LayerManager.get(layer_name)
         # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.
 
-        print(f"[{self.what}] Activate layer {layer.uid}")
+        logger.info("[%s] Activate layer %s", self.what,layer.uid)
         if is_root:
             self.layers.clear()
         self.layers.append(layer)
@@ -54,7 +55,7 @@ class Timeline:
         return layer
 
     def deactivate(self, layer) -> None:
-        print(f"[{self.what}] Deactivate layer {layer.uid}")
+        logger.info("[%s] Deactivate layer %s", self.what, layer.uid)
         self.layers.remove(layer)
         self.output.append(self.layers[-1].set_leds)
 

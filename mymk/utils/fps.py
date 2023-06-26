@@ -1,3 +1,4 @@
+from mymk.utils.logger import logger
 from mymk.utils.memory import get_usage
 from mymk.utils.time import Time
 
@@ -9,7 +10,7 @@ class FPS:
 
     @classmethod
     def display(cls) -> None:
-        print(f"\n[FPS] {int(cls.counter/cls.refresh_rate)}")
+        logger.info("\n[FPS] %s", int(cls.counter/cls.refresh_rate))
         cls.reset()
 
     @classmethod
@@ -29,4 +30,4 @@ class FPS:
         if now >= cls.time:
             cls.display()
             if check_memory:
-                print("[Memory]", get_usage(True))
+                logger.info("[Memory]%s", get_usage(True))

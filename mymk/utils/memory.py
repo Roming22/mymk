@@ -1,6 +1,8 @@
 import gc
 from math import ceil
 
+from mymk.utils.logger import logger
+
 # Test mode
 for func in ["mem_alloc", "mem_free"]:
     if not func in dir(gc):
@@ -15,7 +17,7 @@ def free_memory(name):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
             gc.collect()
-            print(f"\n\nMemory after instanciation of {name}: ", get_usage(True))
+            logger.info("\n\nMemory after instanciation of %s: %s", name, get_usage(True))
 
         return wrapper
 
@@ -52,8 +54,12 @@ def memory_cost(name, run_gc=True):
                 gc.collect()
             if profile:
                 mem_used = free_mem - gc.mem_free()
-                print(
-                    f"[Memory] {name} cost {mem_used} bytes ({mem_used*100/(total_mem):02f}%). Total memory used: {ceil(100*gc.mem_alloc()/total_mem)}%"
+                logger.info(
+                    "[Memory] %s cost %s bytes (%s%%). Total memory used: %s%%",
+                    name,
+                    mem_used,
+                    f"{mem_used*100/(total_mem):02f}",
+                    ceil(100*gc.mem_alloc()/total_mem),
                 )
             return result
 

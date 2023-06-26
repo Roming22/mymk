@@ -32,8 +32,8 @@
 [X] Change colors based on active layer
 [ ] Split keyboard communication
     [X] Detect Left/Right board in case of split keyboard
-    [ ] Send power to Extension board
-    [?] Detect Controller/Extension board
+    [X] Send power to Extension board
+    [X] Detect Controller/Extension board
     [X] Implement and execute Extension loop
     [ ] Send switch event over the wire
     [ ] Send leds event over the wire

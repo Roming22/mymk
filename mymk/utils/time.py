@@ -1,5 +1,6 @@
 import time
 
+from mymk.utils.logger import logger
 
 class Time:
     tick_time = 0
@@ -29,7 +30,7 @@ def time_it(func):
     def wrapper(*args, **kwargs):
         now = Time.now()
         result = func(*args, **kwargs)
-        print(" ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120])
+        logger.info(" ".join(["#", str((Time.now() - now) / 10**6), "#" * 120])[:120])
         return result
 
     return wrapper

@@ -1,9 +1,9 @@
 from time import sleep
-
+from mymk.utils.logger import logger
 
 def main(string: str) -> None:
     while True:
-        print(end=string)
+        logger.info(end=string)
         sleep(2)
 
 

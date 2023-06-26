@@ -1,12 +1,12 @@
-import mymk.feature
+import mymk.feature as _
 from mymk.feature.layers.layer_manager import LayerManager
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.fps import FPS
+from mymk.utils.logger import logger
 from mymk.utils.memory import get_usage, memory_cost, profile
 from mymk.utils.time import Time
-
 
 class Keyboard:
     @memory_cost("Keyboard")
@@ -14,11 +14,7 @@ class Keyboard:
         board = Board(definition)
         self.board = board
 
-        if board.is_controller:
-            print("Controller board")
-            self.load_layers(board, definition)
-        else:
-            print("Extension board")
+        self.load_layers(board, definition)
 
         if len(definition["hardware"]) > 1 and not board.is_left:
             left_board_definition = [
@@ -28,7 +24,7 @@ class Keyboard:
                 left_board_definition["pins"]["rows"]
             )
             board.switch_offset = switch_count_left
-            print("Board is on the right", switch_count_left)
+            logger.info("Board is on the right %s", switch_count_left)
 
     def load_layers(self, board: Board, definition: dict) -> None:
         switch_count = 0
@@ -46,7 +42,7 @@ class Keyboard:
                 )
 
         if not profile:
-            print(get_usage(True))
+            logger.info(get_usage(True))
 
         default_layer = definition["settings"]["default_layer"]
         TimelineManager.activate(default_layer)

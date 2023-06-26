@@ -115,7 +115,18 @@ EOF
         esac
     done
     echo "Renaming the drive requires you to enter your password."
-    sudo mlabel -i "$(df "$DRIVE" | tail -1 | cut -d" " -f1)" ::"KEYBOARD${SUFFIX:-}"
+    DEVICE=$(df "$DRIVE" | tail -1 | cut -d" " -f1)
+    MOUNT_DIR=$(dirname "$DRIVE")
+    NAME="KEYBOARD${SUFFIX:-}"
+    sudo umount "$DEVICE"
+    sudo dosfslabel "$DEVICE" "$NAME"
+    DRIVE="$MOUNT_DIR/$NAME"
+    echo -n "Please reset the device"
+    while [ ! -e "$DRIVE" ]; do
+        echo -n "."
+        sleep 2
+    done
+    echo "OK"
     sudo chown -R "$(whoami):$(groups | cut -d ' ' -f1)" "$DRIVE"
 }
 
@@ -135,6 +146,7 @@ get_libs() {
     fi
     lib_list=(
         "adafruit_hid"
+        "adafruit_logging"
         "neopixel"
     )
     # Copying the libs will trigger an auto-reload

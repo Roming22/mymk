@@ -1,6 +1,7 @@
 from mymk.hardware.keys import press, release
 from mymk.logic.keys import load, loader_map
 from mymk.logic.timer import Timer
+from mymk.utils.logger import logger
 from mymk.utils.memory import memory_cost
 
 delay = 0.3
@@ -24,8 +25,12 @@ def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
 
     timer_name = f"timer.{switch_uid}.TH_{interrupt_mode}({keycode_tap},{keycode_hold})"
 
-    # print(
-    #     f"TapHold ({key_delay}s): {keycode_tap} | {keycode_hold} ({keycode_interrupt})"
+    # logger.info(
+    #     f"TapHold (%ss): %s | %s (%s)",
+    #     key_delay,
+    #     keycode_tap,
+    #     keycode_hold,
+    #     keycode_interrupt,
     # )
 
     # Tap

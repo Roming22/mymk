@@ -1,5 +1,6 @@
 from mymk.feature.keys.combo import load_combos
 from mymk.logic.keys import loader_map
+from mymk.utils.logger import logger
 from mymk.utils.memory import memory_cost
 
 
@@ -10,7 +11,7 @@ class Layer:
     def __init__(
         self, board_name, layer_name: str, layer_definition: dict, pixels=None
     ) -> None:
-        print("Loading layer:", layer_name)
+        logger.info("Loading layer: %s", layer_name)
 
         if pixels:
             color = layer_definition.get("leds", {}).get("RGB", (127, 127, 127))
@@ -31,9 +32,9 @@ class Layer:
                 if switch_uid not in self.switch_to_keycode.keys():
                     self.switch_to_keycode[switch_uid] = []
                 self.switch_to_keycode[switch_uid].append(keycode)
-                # print("Added combo:", keycode)
+                # logger.info("Added combo: %s", keycode)
         # else:
-        #     print("No combo has been declared in layer", layer_name)
+        #     logger.info("No combo has been declared in layer %s", layer_name)
 
 
 def load_layer(mode: str, universe, switch_uid: str, data: list[str]) -> None:

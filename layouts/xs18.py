@@ -1,6 +1,7 @@
 import board
+import supervisor
 
-from mymk.feature.keyboard import Keyboard
+from mymk.utils.logger import logger
 
 
 def get_definition():
@@ -261,18 +262,23 @@ def generate_split(layer_definitions, base_layout_name, target_layout_name):
 
 
 def main() -> None:
-    print("\n" * 5)
-    print("#" * 120)
-    print("# BOOTING")
-    print("#" * 120)
+    logger.info("\n" * 5)
+    logger.info("#" * 120)
+    logger.info("# BOOTING")
+    logger.info("#" * 120)
+
+    if supervisor.runtime.usb_connected:
+        from mymk.feature.keyboard import Keyboard
+    else:
+        from mymk.hardware.extension import Board as Keyboard
 
     definition = get_definition()
     keyboard = Keyboard(definition)
 
-    print("\n" * 3)
-    print("#" * 120)
-    print("# ONLINE")
-    print("#" * 120)
+    logger.info("\n" * 3)
+    logger.info("#" * 120)
+    logger.info("# ONLINE")
+    logger.info("#" * 120)
 
     keyboard.go(True)
 
