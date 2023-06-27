@@ -854,3 +854,153 @@ class TestNestedCommands:
             call("press", "X"),
             call("release", "X"),
         ]
+
+
+class TestMultiTap:
+    @staticmethod
+    def _setup(monkeypatch, events):
+        # Hardware definition
+        definition = {
+            "hardware": {
+                "test": {
+                    "pins": {
+                        "cols": (1, 2),
+                        "rows": (1, 2),
+                    },
+                },
+            },
+            "layout": {
+                "layers": {
+                    "default": {
+                        "keys": [
+                            # fmt: off
+            "A",        "MT(B)",
+            "MT(C,X)",  "MT(D,LY_MO(Layer1),TH_HD(Y,Z))",
+                            # fmt: on
+                        ],
+                    },
+                    "Layer1": {
+                        "keys": [
+                            # fmt: off
+            "E",        "F",
+            "G",        "H",
+                            # fmt: on
+                        ],
+                    },
+                }
+            },
+            "settings": {
+                "default_layer": "default",
+            },
+        }
+
+        keyboard, action = make_keyboard(definition, monkeypatch)
+        keyboard.boards[0].get_event = MagicMock(side_effect=events)
+        event_delays = [0] * len(events)
+        return keyboard, event_delays, action
+
+    @classmethod
+    def test_no_multitap(cls, monkeypatch):
+        events = [
+            "board.test.switch.1",
+            "!board.test.switch.1",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "B"),
+            call("release", "B"),
+        ]
+
+    @classmethod
+    def test_single_tap(cls, monkeypatch):
+        events = [
+            "board.test.switch.2",
+            "!board.test.switch.2",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "C"),
+            call("release", "C"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_double_tap(cls, monkeypatch):
+        events = [
+            "board.test.switch.2",
+            "!board.test.switch.2",
+            "board.test.switch.2",
+            "!board.test.switch.2",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "X"),
+            call("release", "X"),
+        ]
+
+    @classmethod
+    def test_doulbetap_command(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+            "!board.test.switch.3",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "E"),
+            call("release", "E"),
+        ]
+
+    @classmethod
+    def test_triple_tap_taphold_tap(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[-1] = 0.4
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "Y"),
+            call("release", "Y"),
+            call("press", "A"),
+            call("release", "A"),
+        ]
+
+    @classmethod
+    def test_triple_tap_taphold_hold(cls, monkeypatch):
+        events = [
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.3",
+            "!board.test.switch.3",
+            "board.test.switch.0",
+            "!board.test.switch.0",
+        ]
+        keyboard, event_delays, action = cls._setup(monkeypatch, events)
+        event_delays[5] = 0.4
+        run_scenario(keyboard, event_delays)
+        assert action.call_args_list == [
+            call("press", "Z"),
+            call("release", "Z"),
+            call("press", "A"),
+            call("release", "A"),
+        ]

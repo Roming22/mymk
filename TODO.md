@@ -3,7 +3,7 @@
 ## State-Event-Action
 [X] Add Timer
 [X] Add TapHold support
-[ ] Add MultiTap support
+[X] Add MultiTap support
 [X] Add combo key for 2 keys
 [X] Add combo keys for n keys
 [X] Add Layer support

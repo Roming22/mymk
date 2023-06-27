@@ -29,7 +29,7 @@ def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
     # )
 
     # Tap
-    timeline = universe.split(f"{switch_uid} press/release tap {keycode_tap}")
+    timeline = universe.split(f"{switch_uid}.tap.{keycode_tap}")
     timer_name_tap = f"{timer_name}.tap"
     timer_tap = Timer(timer_name_tap, key_delay, universe, timeline)
     events = {
@@ -45,7 +45,7 @@ def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
 
     # Interrupt
     timeline = universe.split(
-        f"{switch_uid} press/release interrupt {keycode_interrupt}"
+        f"{switch_uid}.interrupt.{keycode_interrupt}"
     )
     timer_name_interrupt = f"{timer_name}.interrupt"
     timer_interrupt = Timer(timer_name_interrupt, key_delay, universe, timeline)
@@ -64,7 +64,7 @@ def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
     timeline.events.update(events)
 
     # Hold
-    timeline = universe.split(f"{switch_uid} press/release hold {keycode_hold}")
+    timeline = universe.split(f"{switch_uid}.hold.{keycode_hold}")
     timer_name_hold = f"{timer_name}.hold"
     Timer(timer_name_hold, key_delay, universe, timeline)
     events = {

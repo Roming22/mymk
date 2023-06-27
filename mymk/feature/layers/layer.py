@@ -39,16 +39,14 @@ class Layer:
 
 def load_layer(mode: str, universe, switch_uid: str, data: list[str]) -> None:
     layer_name = data[0]
-
-    events = f"{switch_uid} press/release {layer_name}"
-    timeline = universe.split(events)
-
+    print("Layer:", layer_name)
+    timeline = universe.split(f"{switch_uid}.layer.{mode}.{layer_name}")
     layer = timeline.activate(layer_name, False)
-    output = []
+    action = []
     if mode == "momentary":
         deactivate_layer = lambda: timeline.deactivate(layer)
-        output.append(deactivate_layer)
-    timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", [], output)]
+        action.append(deactivate_layer)
+    timeline.events[f"!{switch_uid}"] = [(f"!{switch_uid}", action, [])]
     timeline.mark_determined()
 
 

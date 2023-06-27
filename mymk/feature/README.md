@@ -133,6 +133,53 @@ definition = {
 keyboard = Keyboard(definition)
 ```
 
+## MultiTap
+
+MultiTap is a special key mode that changes the output based on the number of times a key is quickly pressed in succession.
+A MultiTap key is declared using the `MT(arg1, arg2, ..., argN)` function, where the argument at position N specifies the action to be taken when the key is pressed N times.
+If the last agrument is reached, the last action is executed and the command circles back to the first argument.
+
+Example:
+```
+# 2x2 keyboard
+definition = {
+    "hardware": {
+        "myboard": {
+            "pins": {
+                "cols": (board.D26, board.D22),
+                "rows": (board.D6, board.D7),
+            },
+        },
+    },
+    "layout": {
+        "layers": {
+            "alpha&sys": {
+                "keys": [
+    "MT(A)",            "MT(B,C)",
+    "MT(D,LY_TO(fn))",  "MT(E, TH_HD(F, LEFT_SHIFT),TH_HD(ESCAPE, LEFT_CONTROL), ENTER)",
+                ],
+            },
+            "fn": {
+                "keys": [
+                    "LY_TO(alpha&sys)",     "MT(F1, F2, F3, F4)",
+                    "MT(F5, F6, F7, F8)"    "MT(F9, F10, F11, F12)",
+                ],
+            },
+        },
+    },
+    "settings": {
+        "default_layer": "alpha&sys",
+    },
+}
+keyboard = Keyboard(definition)
+```
+
+In the above example:
+* `MT(A)` is the same as `A`. This syntax is valid but useless.
+* `MT(B,C)` will output `b` if pressed once, or `c` if pressed twice. It will output `cb` if pressed three times rapidly. To output `bc`, pause shortly after the first keystroke.
+* `MT(D,LY_TO(fn))` shows that commands can be nested.
+* `MT(E, TH_HD(F, LEFT_SHIFT),TH_HD(ESCAPE, LEFT_CONTROL), ENTER)` is a complex example of a 4-MultiTap, demonstrating the use of TapHold within the multitap.
+
 ## Combos
 
 There are two types of combos:

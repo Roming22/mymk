@@ -20,7 +20,6 @@ class Timeline:
                 A determined timeline will spawn new children timelines as
                 new events are coming in.
         """
-        self.what = what
         self.children = []
         self.determined = True
         self.events = {}
@@ -30,6 +29,7 @@ class Timeline:
         self.parent = parent
 
         if parent:
+            self.what = f"{self.parent.what}/{what}"
             self.determined = False
             parent.determined = True
             if parent.parent:
@@ -38,13 +38,15 @@ class Timeline:
                 self.events[event] = list(timeline)
             self.layers = parent.layers
             parent.children.append(self)
+        else:
+            self.what = what
 
     def activate(self, layer_name, is_root):
         # TODO: layer should be a copy. Otherwise deactivate is going to cause issues
         layer = LayerManager.get(layer_name)
         # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.
 
-        print("Activate layer", layer.uid)
+        print(f"[{self.what}] Activate layer {layer.uid}")
         if is_root:
             self.layers.clear()
         self.layers.append(layer)
@@ -52,7 +54,7 @@ class Timeline:
         return layer
 
     def deactivate(self, layer) -> None:
-        print("Deactivate layer", layer.uid)
+        print(f"[{self.what}] Deactivate layer {layer.uid}")
         self.layers.remove(layer)
         self.output.append(self.layers[-1].set_leds)
 

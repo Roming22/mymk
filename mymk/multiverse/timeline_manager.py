@@ -35,7 +35,11 @@ class TimelineManager:
         return timelines
 
     def print_active_timelines(self):
-        return ", ".join([t.what for t in self.get_active_timelines()])
+        timelines = []
+        for timeline in self.get_active_timelines():
+            uid = f"\n  * {timeline.what}"
+            timelines.append(uid)
+        return "".join(timelines)
 
     def split(self, what) -> Timeline:
         """Create new timelines"""
@@ -83,15 +87,7 @@ class TimelineManager:
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
-        print("\n" * 3)
-        print(" ".join(["#", event, "#" * 100])[:120])
-        now = Time.tick_time
-        print(
-            "# At:",
-            pretty_print(now),
-            f"(+{(now-TimelineManager._time_last_event)/10**6}ms)",
-        )
-        TimelineManager._time_last_event = now
+        print("##", timeline.what)
         print("Before:", self.print_active_timelines())
 
         self.current_timeline = timeline
@@ -151,6 +147,15 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
+        print("\n" * 3)
+        print(" ".join(["#", event, "#" * 100])[:120])
+        now = Time.tick_time
+        print(
+            "# At:",
+            pretty_print(now),
+            f"(+{(now-TimelineManager._time_last_event)/10**6}ms)",
+        )
+        TimelineManager._time_last_event = now
 
         # Send event to all timelines
         for universe in cls._universes:
