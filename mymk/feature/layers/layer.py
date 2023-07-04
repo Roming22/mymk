@@ -1,7 +1,8 @@
 from mymk.feature.keys.combo import load_combos
 from mymk.logic.keys import loader_map
 from mymk.utils.logger import logger
-from mymk.utils.memory import memory_cost
+
+# from mymk.utils.memory import memory_cost
 
 
 class Layer:
@@ -9,7 +10,7 @@ class Layer:
 
     # @memory_cost("Layer")
     def __init__(
-        self, board_name, layer_name: str, layer_definition: dict, pixels=None
+        self, board_name: str, layer_name: str, layer_definition: dict, pixels=None
     ) -> None:
         logger.info("Loading layer: %s", layer_name)
 

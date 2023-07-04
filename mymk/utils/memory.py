@@ -12,7 +12,7 @@ profile = True
 # profile = False
 
 
-def free_memory(name):
+def free_memory(name: str) -> callable:
     def inner(func):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
@@ -26,7 +26,7 @@ def free_memory(name):
     return inner
 
 
-def check_memory():
+def check_memory() -> callable:
     total_mem = gc.mem_free() + gc.mem_alloc()
 
     def inner(func):
@@ -42,7 +42,7 @@ def check_memory():
     return inner
 
 
-def memory_cost(name, run_gc=True):
+def memory_cost(name, run_gc=True) -> callable:
     total_mem = gc.mem_free() + gc.mem_alloc()
 
     def inner(func):
@@ -70,7 +70,7 @@ def memory_cost(name, run_gc=True):
     return inner
 
 
-def get_usage(full=False):
+def get_usage(full: bool = False) -> str:
     gc.collect()
     F = gc.mem_free()
     A = gc.mem_alloc()

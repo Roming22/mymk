@@ -51,7 +51,7 @@ def get_keycodes_for(keycode: str) -> list[Keycode]:
     return keycodes
 
 
-def panic():
+def panic() -> None:
     logger.info("!!! PANIC !!!")
     _kbd.send(Keycode.MEH)
 

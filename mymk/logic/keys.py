@@ -3,7 +3,7 @@ from mymk.hardware.keys import get_keycodes_for
 loader_map = {}
 
 
-def load(switch_uid: str, keycode: str, universe, debug=False) -> list[list[tuple]]:
+def load(switch_uid: str, keycode: str, universe) -> list[list[tuple]]:
     try:
         get_keycodes_for(keycode)
         command, data = "KEY", keycode

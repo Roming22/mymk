@@ -1,12 +1,12 @@
 import board
 import supervisor
 
+from mymk.utils.logger import logger
+
 # try:
 #     from mymk.feature.keyboard import Keyboard
 # except OSError:
 #     from mymk.hardware.extension import Keyboard
-
-from mymk.utils.logger import logger
 
 
 def get_definition():

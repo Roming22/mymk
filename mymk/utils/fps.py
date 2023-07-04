@@ -24,7 +24,7 @@ class FPS:
         cls.time = Time.tick_time + cls.refresh_rate * 10**9
 
     @classmethod
-    def tick(cls, check_memory=False) -> None:
+    def tick(cls, check_memory: bool = False) -> None:
         cls.counter += 1
         now = Time.tick_time
         if now >= cls.time:

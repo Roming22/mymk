@@ -1,14 +1,17 @@
 from mymk.hardware.keys import press, release
 from mymk.logic.keys import load, loader_map
 from mymk.logic.timer import Timer
-from mymk.utils.logger import logger
-from mymk.utils.memory import memory_cost
+
+# from mymk.utils.logger import logger
+# from mymk.utils.memory import memory_cost
 
 delay = 0.4
 
 
 # @memory_cost("TapHold")
-def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
+def load_taphold(
+    interrupt_mode: str, universe, switch_uid: str, data: list[str]
+) -> None:
     keycode_tap = data.pop(0)
     keycode_hold = data.pop(-1)
 

@@ -2,7 +2,7 @@ from mymk.hardware.keys import press, release
 from mymk.logic.keys import loader_map
 
 
-def load_key(universe, switch_uid, keycode) -> None:
+def load_key(universe, switch_uid: str, keycode: str) -> None:
     print("Key:", keycode)
     timeline = universe.split(f"{switch_uid}.key.{keycode}")
     events = {f"!{switch_uid}": [(f"!{switch_uid}", [], [release(keycode)])]}

@@ -7,7 +7,8 @@ from mymk.hardware.keys import press, release
 from mymk.logic.keys import loader_map
 from mymk.logic.timer import Timer
 from mymk.utils.logger import logger
-from mymk.utils.memory import memory_cost
+
+# from mymk.utils.memory import memory_cost
 from mymk.utils.toolbox import permutations
 
 delay = 0.99
@@ -21,7 +22,7 @@ class Sequence:
         self.pressed = False
 
     @classmethod
-    def load(cls, universe, _: str, data):
+    def load(cls, universe, _: str, data: list[str]) -> None:
         switch_uids = []
         interlaced_data = []
         while data:
@@ -43,7 +44,7 @@ class Sequence:
         self.pressed = False
         release(self.keycode)()
 
-    def to_timeline_press_events(self, universe):
+    def to_timeline_press_events(self, universe) -> None:
         combo_uid = f"{'+'.join([s.split('.')[-1] for s in self.switch_uids])}"
         timeline = universe.split(f"combo.{combo_uid}")
 
@@ -73,7 +74,7 @@ class Sequence:
 
         timeline.events.update(events)
 
-    def to_timeline_release_events(self, universe):
+    def to_timeline_release_events(self, universe) -> None:
         timeline_events = {}
 
         for switch_uid in self.switch_uids:
@@ -81,7 +82,7 @@ class Sequence:
         universe.update_timeline(universe.current_timeline, timeline_events)
 
 
-def load_combos(switch_prefix, combo_definitions) -> list:
+def load_combos(switch_prefix: str, combo_definitions: dict) -> list:
     sequences = {}
     for chord, keycode in combo_definitions.get("chords", {}).items():
         for sequence in expand_chord(chord):
@@ -95,7 +96,7 @@ def load_combos(switch_prefix, combo_definitions) -> list:
     return combos
 
 
-def expand_chord(chord: str):
+def expand_chord(chord: str) -> list[str]:
     combo = chord.split("*")
     result = []
     for permutation in permutations(combo):
@@ -118,12 +119,6 @@ def load_sequence(switch_prefix: str, sequence: str, keycode: str) -> tuple:
     combo_keycode = f"SQ({','.join(combo_pairs)})"
     result = (switch_uids[0], combo_keycode)
     return result
-
-
-def expand_combo(definition: str) -> list:
-    combos = []
-    logger.info(definition)
-    return [definition]
 
 
 loader_map["SQ"] = Sequence.load

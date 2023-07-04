@@ -1,13 +1,13 @@
-from mymk.hardware.keys import press, release
 from mymk.logic.keys import load, loader_map
 from mymk.logic.timer import Timer
-from mymk.utils.memory import memory_cost
+
+# from mymk.utils.memory import memory_cost
 
 delay = 0.2
 
 
 # @memory_cost("MultiTap")
-def load_multitap(universe, switch_uid: str, data) -> None:
+def load_multitap(universe, switch_uid: str, data: list[str]) -> None:
     key_delay = delay
     keycode_tap = data.pop(0)
 

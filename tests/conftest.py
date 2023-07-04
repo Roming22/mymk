@@ -163,6 +163,7 @@ sys.modules["adafruit_hid.keycode"] = adafruit_hid.keycode
 # adafruit_logging
 import logging
 
+
 # Enable logging during tests
 def printf(string, *values):
     print(string % values)

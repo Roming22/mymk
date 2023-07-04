@@ -21,7 +21,6 @@ Each message contains a start and end frame.
 """
 
 import digitalio
-import gc
 from microcontroller import delay_us
 
 # from mymk.utils.logger import logger
@@ -34,7 +33,7 @@ class BitBangProtocol:
         self.tick = 10**6 // (frequency * 3)
         self.is_extension = is_extension
 
-    def send(self, value: int=0, length: int=0) -> None:
+    def send(self, value: int = 0, length: int = 0) -> None:
         """Send data
 
         Can be called with no parameters as a way to synchronize the boards."""
@@ -59,7 +58,7 @@ class BitBangProtocol:
             delay_us(self.tick)
         # logger.info("Data sent")
 
-    def receive(self, length:int=0) -> int:
+    def receive(self, length: int = 0) -> int:
         """Receive data
 
         Can be called with no parameters as a way to synchronize the boards."""
@@ -101,9 +100,9 @@ class BitBangProtocol:
         """
         # logger.info("Syncing...")
         if self.is_extension:
-            data = self.receive(8)
+            self.receive(8)
             self.send(0, 8)
         else:
-            delay_us(500)
+            delay_us(200)
             self.send(255, 8)
-            data = self.receive(8)
+            self.receive(8)

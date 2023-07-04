@@ -4,7 +4,7 @@ from mymk.utils.logger import logger
 
 
 class Timeline:
-    def __init__(self, what, parent=None) -> None:
+    def __init__(self, what: str, parent=None) -> None:
         """Create a new timeline
 
         events: an ordered list of expected events in the timeline. Each event
@@ -42,7 +42,7 @@ class Timeline:
         else:
             self.what = what
 
-    def activate(self, layer_name, is_root):
+    def activate(self, layer_name: str, is_root: bool) -> None:
         # TODO: layer should be a copy. Otherwise deactivate is going to cause issues
         layer = LayerManager.get(layer_name)
         # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.

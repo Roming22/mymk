@@ -38,7 +38,7 @@ class Keyboard:
         TimelineManager.activate(default_layer)
         LayerManager.get(default_layer).set_leds()
 
-    def go(self, fps=False):
+    def go(self, fps: bool = False) -> None:
         if fps:
             FPS.start(60)
 
@@ -47,7 +47,7 @@ class Keyboard:
             if fps:
                 FPS.tick(True)
 
-    def tick(self):
+    def tick(self) -> None:
         Time.tick()
         Timer.tick()
         self.board.tick()

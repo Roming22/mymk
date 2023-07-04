@@ -1,5 +1,6 @@
 from mymk.feature.layers.layer import Layer
-from mymk.utils.logger import logger
+
+# from mymk.utils.logger import logger
 
 
 class LayerManager:
@@ -14,5 +15,5 @@ class LayerManager:
         # logger.info(cls._instances[layer_name])
 
     @classmethod
-    def get(cls, layer_name):
+    def get(cls, layer_name: str) -> Layer:
         return cls._instances[layer_name]

@@ -1,9 +1,5 @@
-from random import randint
-
 from mymk.hardware.baseboard import BaseBoard
 from mymk.utils.logger import logger
-
-from time import sleep
 
 
 class Keyboard(BaseBoard):
@@ -13,7 +9,7 @@ class Keyboard(BaseBoard):
         self.channel.send(self.keymatrix.key_count, 8)
         self.message_length = self.keymatrix.key_count.bit_length() + 2
 
-    def get_key_event(self):
+    def get_key_event(self) -> int:
         data = 0 << self.message_length - 1
         event = self.keymatrix.events.get()
         if not event:
@@ -46,6 +42,6 @@ class Keyboard(BaseBoard):
         self.send_event()
         self.get_controller_data()
 
-    def go(self, _: bool = False):
+    def go(self, _: bool = False) -> None:
         while True:
             self.tick()

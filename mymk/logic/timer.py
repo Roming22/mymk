@@ -1,9 +1,8 @@
 from mymk.utils.logger import logger
 
 # from mymk.utils.memory import memory_cost
-from mymk.utils.time import Time
-
 # from mymk.utils.time import pretty_print, time_it
+from mymk.utils.time import Time
 
 
 class Timer:
@@ -30,7 +29,7 @@ class Timer:
         return self.end_at <= Time.tick_time
 
     # @time_it
-    def process_event(self):
+    def process_event(self) -> None:
         if self.timeline.parent is not None:
             logger.info("#" * 120)
             logger.info("# %s", self.name)

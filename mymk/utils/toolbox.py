@@ -4,7 +4,7 @@ def hash(string: str) -> int:
     return value
 
 
-def permutations(items: list, n=None):
+def permutations(items: list) -> list[list]:
     if len(items) <= 1:
         return [items]
 

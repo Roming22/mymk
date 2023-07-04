@@ -8,7 +8,7 @@ from mymk.utils.logger import logger
 class TimelineManager:
     _universes = []
 
-    def __init__(self, timeline=False) -> None:
+    def __init__(self, timeline: Timeline = None) -> None:
         if not timeline:
             timeline = Timeline("begin")
         self.timeline_start = timeline
@@ -23,7 +23,7 @@ class TimelineManager:
             for timeline in universe.get_active_timelines():
                 timeline.activate(layer_name, True)
 
-    def get_active_timelines(self, timeline=None):
+    def get_active_timelines(self, timeline: Timeline = None):
         if timeline is None:
             timeline = self.timeline_start
         timelines = []
@@ -41,7 +41,7 @@ class TimelineManager:
             timelines.append(uid)
         return "".join(timelines)
 
-    def split(self, what) -> Timeline:
+    def split(self, what: str) -> Timeline:
         """Create new timelines"""
         new_timeline = Timeline(what, self.current_timeline)
         return new_timeline
@@ -52,20 +52,20 @@ class TimelineManager:
             self.delete_timeline(self.current_timeline.parent.next_timeline)
         self.current_timeline.parent.next_timeline = self.current_timeline
 
-    def update_timeline(self, timeline, timeline_events) -> None:
+    def update_timeline(self, timeline: Timeline, timeline_events: dict) -> None:
         if timeline.children:
             for child in timeline.children:
                 self.update_timeline(child, timeline_events)
         else:
             timeline.events.update(timeline_events)
 
-    def delete_timeline(self, timeline):
+    def delete_timeline(self, timeline: Timeline) -> None:
         parent = timeline.parent
         timeline.prune()
         if parent and not parent.children:
             self.delete_timeline(parent)
 
-    def _process_event_in_timeline(self, event) -> None:
+    def _process_event_in_timeline(self, event: str) -> None:
         timeline = self.current_timeline
         data = timeline.events.pop(event)
         # logger.debug("\n## Continuing timeline: %s", self.current_timeline)
@@ -80,7 +80,7 @@ class TimelineManager:
             # logger.debug("Output action")
             timeline.output.extend(output)
 
-    def _process_event(self, timeline, event) -> None:
+    def _process_event(self, timeline: Timeline, event: str) -> None:
         """Process an event
 
         The event is checked against the timeline expectation.
@@ -140,7 +140,7 @@ class TimelineManager:
     @classmethod
     # @memory_cost("Process", True)
     # @time_it
-    def process_event(cls, event) -> None:
+    def process_event(cls, event: str) -> None:
         """Process an event in all active timelines
 
         That event might trigger a timeline resolution, in which case

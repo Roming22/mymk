@@ -2,10 +2,11 @@ from time import sleep
 
 from mymk.hardware.baseboard import BaseBoard
 from mymk.multiverse.timeline_manager import TimelineManager
+from mymk.utils.logger import logger
 from mymk.utils.memory import memory_cost
 
-from mymk.utils.logger import logger
 # from mymk.utils.memory import get_usage
+
 
 class Board(BaseBoard):
     @memory_cost("Board")

@@ -9,7 +9,7 @@ from mymk.utils.logger import logger
 
 
 class BaseBoard:
-    def __init__(self, definition: dict, is_extension = False) -> None:
+    def __init__(self, definition: dict, is_extension: bool = False) -> None:
         self.name = storage.getmount("/").label
         self.is_split = len(definition["hardware"]) > 1
         self.is_right = self.is_split and self.name.endswith("R")
@@ -38,7 +38,9 @@ class BaseBoard:
 
         # Open communication channel
         if board_definition.get("data"):
-            self.channel = BitBangProtocol(board_definition["data"]["pin"], 2000, is_extension)
+            self.channel = BitBangProtocol(
+                board_definition["data"]["pin"], 2000, is_extension
+            )
         else:
             self.channel = None
         self.loop = 0
