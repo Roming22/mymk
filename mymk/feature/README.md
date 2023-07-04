@@ -11,7 +11,7 @@ Example:
 definition = {
     "hardware": {
         "myboard": {
-            "pins": {
+            "matrix": {
                 "cols": (board.D26, board.D22),
                 "rows": (board.D6, board.D7),
             },
@@ -52,7 +52,7 @@ Example:
 definition = {
     "hardware": {
         "myboard": {
-            "pins": {
+            "matrix": {
                 "cols": (board.D26, board.D22),
                 "rows": (board.D6, board.D7),
             },
@@ -110,7 +110,7 @@ Example:
 definition = {
     "hardware": {
         "myboard": {
-            "pins": {
+            "matrix": {
                 "cols": (board.D26, board.D22),
                 "rows": (board.D6, board.D7),
             },
@@ -200,7 +200,7 @@ Example
 definition = {
     "hardware": {
         "myboard": {
-            "pins": {
+            "matrix": {
                 "cols": (board.D26, board.D22),
                 "rows": (board.D6, board.D7),
             },

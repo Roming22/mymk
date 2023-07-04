@@ -1,5 +1,6 @@
 from mymk.multiverse.timeline import Timeline
 from mymk.utils.logger import logger
+
 # from mymk.utils.memory import memory_cost
 # from mymk.utils.time import Time, pretty_print, time_it
 
@@ -87,7 +88,8 @@ class TimelineManager:
         If the event is part of the timeline, the associated action is executed.
         """
         logger.info("## %s", timeline.what)
-        logger.info("Before: %s", self.print_active_timelines())
+        for t in self.get_active_timelines():
+            logger.info("    * %s", t.what)
 
         self.current_timeline = timeline
 
@@ -146,15 +148,18 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
-        logger.info("\n" * 3)
-        logger.info(" ".join(["#", event, "#" * 100])[:120])
+        logger.info("#" * 120)
+        logger.info("# %s", event)
+        logger.info("#" * 120)
 
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 universe._process_event(timeline, event)
+                logger.info("[%s] After:", timeline.what)
+                for t in universe.get_active_timelines():
+                    logger.info("    * %s", t.what)
             universe.resolve()
-            logger.info("After: %s", universe.print_active_timelines())
 
     def resolve(self) -> None:
         """Solve split timelines"""

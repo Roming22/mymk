@@ -17,7 +17,9 @@ def free_memory(name):
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
             gc.collect()
-            logger.info("\n\nMemory after instanciation of %s: %s", name, get_usage(True))
+            logger.info(
+                "\n\nMemory after instanciation of %s: %s", name, get_usage(True)
+            )
 
         return wrapper
 
@@ -59,7 +61,7 @@ def memory_cost(name, run_gc=True):
                     name,
                     mem_used,
                     f"{mem_used*100/(total_mem):02f}",
-                    ceil(100*gc.mem_alloc()/total_mem),
+                    ceil(100 * gc.mem_alloc() / total_mem),
                 )
             return result
 

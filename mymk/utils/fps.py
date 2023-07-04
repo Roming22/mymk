@@ -10,7 +10,7 @@ class FPS:
 
     @classmethod
     def display(cls) -> None:
-        logger.info("\n[FPS] %s", int(cls.counter/cls.refresh_rate))
+        logger.info("\n[FPS] %s", int(cls.counter / cls.refresh_rate))
         cls.reset()
 
     @classmethod

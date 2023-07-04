@@ -4,7 +4,7 @@ from mymk.logic.timer import Timer
 from mymk.utils.logger import logger
 from mymk.utils.memory import memory_cost
 
-delay = 0.3
+delay = 0.4
 
 
 # @memory_cost("TapHold")
@@ -49,9 +49,7 @@ def load_taphold(interrupt_mode: str, universe, switch_uid: str, data) -> None:
     timeline.events.update(events)
 
     # Interrupt
-    timeline = universe.split(
-        f"{switch_uid}.interrupt.{keycode_interrupt}"
-    )
+    timeline = universe.split(f"{switch_uid}.interrupt.{keycode_interrupt}")
     timer_name_interrupt = f"{timer_name}.interrupt"
     timer_interrupt = Timer(timer_name_interrupt, key_delay, universe, timeline)
     events = {

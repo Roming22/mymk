@@ -2,7 +2,6 @@ import adafruit_hid.keyboard
 import usb_hid
 from adafruit_hid.keycode import Keycode
 
-
 from mymk.utils.logger import logger
 
 _kbd = adafruit_hid.keyboard.Keyboard(usb_hid.devices)

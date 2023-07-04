@@ -1,6 +1,11 @@
 import board
 import supervisor
 
+# try:
+#     from mymk.feature.keyboard import Keyboard
+# except OSError:
+#     from mymk.hardware.extension import Keyboard
+
 from mymk.utils.logger import logger
 
 
@@ -9,7 +14,7 @@ def get_definition():
     definition = {
         "hardware": {
             "KEYBOARD-L": {
-                "pins": {
+                "matrix": {
                     "cols": (
                         board.D26,
                         board.D22,
@@ -17,6 +22,9 @@ def get_definition():
                         board.D23,
                     ),
                     "rows": (board.D6, board.D7, board.D9),
+                },
+                "data": {
+                    "pin": board.D1,
                 },
                 "leds": {
                     "pin": board.D0,
@@ -24,7 +32,7 @@ def get_definition():
                 },
             },
             "KEYBOARD-R": {
-                "pins": {
+                "matrix": {
                     "cols": (
                         board.D23,
                         board.D20,
@@ -32,6 +40,9 @@ def get_definition():
                         board.D26,
                     ),
                     "rows": (board.D6, board.D7, board.D9),
+                },
+                "data": {
+                    "pin": board.D1,
                 },
                 "leds": {
                     "pin": board.D0,
@@ -262,23 +273,25 @@ def generate_split(layer_definitions, base_layout_name, target_layout_name):
 
 
 def main() -> None:
-    logger.info("\n" * 5)
     logger.info("#" * 120)
     logger.info("# BOOTING")
     logger.info("#" * 120)
 
-    if supervisor.runtime.usb_connected:
+    definition = get_definition()
+
+    # TODO: clean-up
+    import storage
+
+    if storage.getmount("/").label.endswith("R"):
+        # if supervisor.runtime.usb_connected:
         from mymk.feature.keyboard import Keyboard
     else:
-        from mymk.hardware.extension import Board as Keyboard
-
-    definition = get_definition()
+        from mymk.hardware.extension import Keyboard
     keyboard = Keyboard(definition)
 
-    logger.info("\n" * 3)
     logger.info("#" * 120)
     logger.info("# ONLINE")
-    logger.info("#" * 120)
+    logger.info("#" * 120 + "\n")
 
     keyboard.go(True)
 

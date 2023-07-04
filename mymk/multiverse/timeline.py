@@ -47,7 +47,7 @@ class Timeline:
         layer = LayerManager.get(layer_name)
         # TODO: merge layers. Otherwise deactivating a lower layer will impact the current layer.
 
-        logger.info("[%s] Activate layer %s", self.what,layer.uid)
+        logger.info("[%s] Activate layer %s", self.what, layer.uid)
         if is_root:
             self.layers.clear()
         self.layers.append(layer)

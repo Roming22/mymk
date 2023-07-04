@@ -2,6 +2,7 @@ import time
 
 from mymk.utils.logger import logger
 
+
 class Time:
     tick_time = 0
 

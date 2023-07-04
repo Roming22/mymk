@@ -8,28 +8,18 @@ from mymk.utils.logger import logger
 from mymk.utils.memory import get_usage, memory_cost, profile
 from mymk.utils.time import Time
 
+
 class Keyboard:
     @memory_cost("Keyboard")
     def __init__(self, definition: dict) -> None:
         board = Board(definition)
         self.board = board
-
         self.load_layers(board, definition)
-
-        if len(definition["hardware"]) > 1 and not board.is_left:
-            left_board_definition = [
-                v for k, v in definition["hardware"].items() if k.endswith("L")
-            ][0]
-            switch_count_left = len(left_board_definition["pins"]["cols"]) * len(
-                left_board_definition["pins"]["rows"]
-            )
-            board.switch_offset = switch_count_left
-            logger.info("Board is on the right %s", switch_count_left)
 
     def load_layers(self, board: Board, definition: dict) -> None:
         switch_count = 0
         for b_d in definition["hardware"].values():
-            switch_count += len(b_d["pins"]["cols"]) * len(b_d["pins"]["rows"])
+            switch_count += len(b_d["matrix"]["cols"]) * len(b_d["matrix"]["rows"])
 
         # Load layers
         for layer_name, layer_definition in definition["layout"]["layers"].items():

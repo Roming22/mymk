@@ -1,69 +1,50 @@
 from random import randint
 
-import keypad
-import storage
-
-from mymk.hardware.leds import Pixel
+from mymk.hardware.baseboard import BaseBoard
 from mymk.utils.logger import logger
 
+from time import sleep
 
-class Board:
+
+class Keyboard(BaseBoard):
     def __init__(self, definition: dict) -> None:
-        self.name = storage.getmount("/").label
-        board_definition = definition["hardware"][self.name]
-        self.is_left = not self.name.endswith("R")
-
-        # Set leds as early as possible to give some feedback on the boot sequence
-        leds = board_definition.get("leds")
-        if leds:
-            # Barely light up the leds to show that the keyboard is booting
-            color = (4, 0, 0) if self.is_left else (0, 4, 0)
-            pin = leds.get("pin")
-            self.pixels = Pixel.create(pin, leds["count"], color)
-        else:
-            self.pixels = None
-
-        # Create matrix
-        self.keymatrix = keypad.KeyMatrix(
-            row_pins=board_definition["pins"]["rows"],
-            column_pins=board_definition["pins"]["cols"],
-        )
-
-        # Deal with split keyboards
-        if self.is_left:
-            self.switch_offset = 0
-        else:
-            left_board_definition = [
-                v for k, v in definition["hardware"].items() if k.endswith("L")
-            ][0]
-            switch_count_left = len(left_board_definition["pins"]["cols"]) * len(
-                left_board_definition["pins"]["rows"]
-            )
-            self.switch_offset = switch_count_left
+        super().__init__(definition, True)
+        self.channel.sync()
+        self.channel.send(self.keymatrix.key_count, 8)
+        self.message_length = self.keymatrix.key_count.bit_length() + 2
 
     def get_key_event(self):
+        data = 0 << self.message_length - 1
         event = self.keymatrix.events.get()
         if not event:
-            return (None, None)
-        switch_uid = event.key_number
-        if self.switch_offset:
-            switch_uid += self.switch_offset
-        return ("{switch_uid}", event.pressed)
+            return data
+        data |= 1
 
+        if event.pressed:
+            data |= 2
+        data |= event.key_number << 2
+
+        return data
+
+    def send_event(self) -> None:
+        data = self.get_key_event()
+        self.channel.send(data, self.message_length)
+
+    def get_controller_data(self) -> None:
+        # Receive message from Controller about a possible led color change
+        self.pixels.fill((0, 0, 0))
+        color = []
+        for _ in range(3):
+            color.append(self.channel.receive(8))
+        self.pixels.fill(color)
+        # logger.info("Set color: %s", color)
 
     def tick(self) -> None:
-        switch_uid, is_pressed = self.get_key_event()
-        # TODO: Send event to controller
-        # send((event.pressed, switch_uid))
-        # TODO: Get event from controller
-        # send((event.pressed, switch_uid))
-        if switch_uid:
-            logger.info("Switch uid, pressed: %s = %s", switch_uid, is_pressed)
-            if is_pressed:
-                color = (randint(0, 255), randint(0, 255), randint(0, 255))
-            else:
-                color = (0, 0, 0)
-            self.pixels.fill(color)
+        self.loop += 1
+        # logger.info("Loop %s", self.loop)
+        self.channel.sync()
+        self.send_event()
+        self.get_controller_data()
 
     def go(self, _: bool = False):
         while True:

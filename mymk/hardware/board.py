@@ -1,51 +1,24 @@
-from random import randint
+from time import sleep
 
-import keypad
-import storage
-
-from mymk.hardware.leds import Pixel
+from mymk.hardware.baseboard import BaseBoard
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.memory import memory_cost
 
+from mymk.utils.logger import logger
+# from mymk.utils.memory import get_usage
 
-def get_drive_name() -> bool:
-    return storage.getmount("/").label
-
-
-class Board:
+class Board(BaseBoard):
     @memory_cost("Board")
     def __init__(self, definition: dict) -> None:
-        self.name = get_drive_name()
-        board_definition = definition["hardware"][self.name]
-        self.is_left = not self.name.endswith("R")
-
-        # Set leds as early as possible to give some feedback on the boot sequence
-        leds = board_definition.get("leds")
-        if leds:
-            # Barely light up the leds to show that the keyboard is booting
-            color = (4, 0, 0) if self.is_left else (0, 4, 0)
-            pin = leds.get("pin")
-            self.pixels = Pixel.create(pin, leds["count"], color)
-        else:
-            self.pixels = None
-
-        # Create matrix
-        self.keymatrix = keypad.KeyMatrix(
-            row_pins=board_definition["pins"]["rows"],
-            column_pins=board_definition["pins"]["cols"],
-        )
-
-        # Deal with split keyboards
-        if self.is_left:
-            self.switch_offset = 0
-        else:
-            left_board_definition = [
-                v for k, v in definition["hardware"].items() if k.endswith("L")
-            ][0]
-            switch_count_left = len(left_board_definition["pins"]["cols"]) * len(
-                left_board_definition["pins"]["rows"]
-            )
-            self.switch_offset = switch_count_left
+        super().__init__(definition)
+        self.switch_offset = 0
+        if self.channel:
+            self.channel.sync()
+            extension_switch_count = self.channel.receive(8)
+            logger.info("Extension has %s switches.", extension_switch_count)
+            self.message_length = extension_switch_count.bit_length() + 2
+        if self.is_right:
+            self.switch_offset = extension_switch_count
 
     def get_event_controller(self) -> str:
         event = self.keymatrix.events.get()
@@ -59,6 +32,30 @@ class Board:
             event_id = f"!{event_id}"
         return event_id
 
+    def get_event_extension(self) -> str:
+        event_id = ""
+        data = self.channel.receive(self.message_length)
+        has_event = data & 1
+        if has_event:
+            data >>= 1
+            is_pressed = data & 1
+            data >>= 1
+            event_id = f"board.{self.name}.switch.{data}"
+            if not is_pressed:
+                event_id = f"!{event_id}"
+        return event_id
+
+    def send_extension_data(self) -> None:
+        for color in (255, 0, 255):
+            self.channel.send(color, 8)
+
     def tick(self) -> None:
+        # self.loop += 1
+        # logger.info("Loop %s: %s", self.loop, get_usage(True))
         if event_id := self.get_event_controller():
             TimelineManager.process_event(event_id)
+        if self.channel:
+            self.channel.sync()
+            if event_id := self.get_event_extension():
+                TimelineManager.process_event(event_id)
+            self.send_extension_data()

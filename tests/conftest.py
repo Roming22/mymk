@@ -160,6 +160,25 @@ adafruit_hid.keycode = type(sys)("keycode")
 adafruit_hid.keycode.Keycode = Keycode
 sys.modules["adafruit_hid.keycode"] = adafruit_hid.keycode
 
+# adafruit_logging
+import logging
+
+# Enable logging during tests
+def printf(string, *values):
+    print(string % values)
+
+
+Logger = MagicMock(
+    debug=printf,
+    info=printf,
+    warning=printf,
+    error=printf,
+    critical=printf,
+    fatal=printf,
+)
+logging.getLogger = MagicMock(return_value=Logger)
+sys.modules["adafruit_logging"] = logging
+
 
 # Board
 module = MagicMock()
@@ -177,10 +196,18 @@ module = type(sys)("neopixel")
 module.NeoPixel = MagicMock()
 sys.modules["neopixel"] = module
 
+
+# OneWireIO
+module = type(sys)("onewireio")
+module.OneWire = MagicMock()
+sys.modules["onewireio"] = module
+
+
 # Storage
 module = type(sys)("storage")
 module.getmount = MagicMock(return_value=MagicMock(label="KEYBOARD-L"))
 sys.modules["storage"] = module
+
 
 # Supervisor
 module = type(sys)("supervisor")
@@ -188,6 +215,7 @@ module.runtime = MagicMock(
     return_value=MagicMock(serial_connected=True, usb_connected=True)
 )
 sys.modules["supervisor"] = module
+
 
 # usb_hid
 module = type(sys)("usb_hid")
