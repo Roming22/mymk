@@ -1,4 +1,5 @@
 import board
+import storage
 import supervisor
 
 from mymk.utils.logger import logger
@@ -274,15 +275,13 @@ def generate_split(layer_definitions, base_layout_name, target_layout_name):
 
 def main() -> None:
     logger.info("#" * 120)
-    logger.info("# BOOTING")
+    logger.info("# BOOTING: %s", storage.getmount("/").label)
     logger.info("#" * 120)
 
     definition = get_definition()
 
-    # TODO: clean-up
-    import storage
-
-    if storage.getmount("/").label.endswith("R"):
+    # For debugging while the 2 boards are connected
+    if storage.getmount("/").label.endswith("L"):
         # if supervisor.runtime.usb_connected:
         from mymk.feature.keyboard import Keyboard
     else:
@@ -290,7 +289,7 @@ def main() -> None:
     keyboard = Keyboard(definition)
 
     logger.info("#" * 120)
-    logger.info("# ONLINE")
+    logger.info("# ONLINE: %s", storage.getmount("/").label)
     logger.info("#" * 120 + "\n")
 
     keyboard.go(True)

@@ -9,19 +9,17 @@ class Layer:
     """Holds the layer definition"""
 
     # @memory_cost("Layer")
-    def __init__(
-        self, board_name: str, layer_name: str, layer_definition: dict, pixels=None
-    ) -> None:
+    def __init__(self, board: "Board", layer_name: str, layer_definition: dict) -> None:
         logger.info("Loading layer: %s", layer_name)
 
-        if pixels:
+        if board.pixels:
             color = layer_definition.get("leds", {}).get("RGB", (127, 127, 127))
-            self.set_leds = lambda: pixels.fill(color)
+            self.set_leds = lambda: board.set_pixels(color)
         else:
             self.set_leds = lambda: None
-        self.uid = f"board.{board_name}.layer.{layer_name}"
+        self.uid = f"board.{board.name}.layer.{layer_name}"
         self.switch_to_keycode = {}
-        switch_prefix = f"board.{board_name}.switch"
+        switch_prefix = f"board.{board.name}.switch"
         for switch_id, keycode in enumerate(layer_definition["keys"]):
             switch_uid = f"{switch_prefix}.{switch_id}"
             self.switch_to_keycode[switch_uid] = [keycode]

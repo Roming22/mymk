@@ -23,7 +23,7 @@ class Keyboard:
 
         # Load layers
         for layer_name, layer_definition in definition["layout"]["layers"].items():
-            LayerManager.load(board.name, layer_name, layer_definition, board.pixels)
+            LayerManager.load(board, layer_name, layer_definition)
             key_definitions = layer_definition["keys"]
             key_count = len(key_definitions)
             if key_count != switch_count:

@@ -18,7 +18,7 @@ class TimelineManager:
     @classmethod
     def activate(cls, layer_name: str, is_root: bool = True) -> None:
         universe = TimelineManager()
-        logger.info("Universes: %s", len(cls._universes))
+        logger.debug("Universes: %s", len(cls._universes))
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 timeline.activate(layer_name, True)
@@ -87,9 +87,9 @@ class TimelineManager:
         If the event is not part of the timeline, the timeline is terminated.
         If the event is part of the timeline, the associated action is executed.
         """
-        logger.info("## %s", timeline.what)
+        logger.debug("## %s", timeline.what)
         for t in self.get_active_timelines():
-            logger.info("    * %s", t.what)
+            logger.debug("    * %s", t.what)
 
         self.current_timeline = timeline
 
@@ -148,17 +148,17 @@ class TimelineManager:
         into a single timeline, and the timeline is executed if it is
         the best solution for the chain of events.
         """
-        logger.info("#" * 120)
-        logger.info("# %s", event)
-        logger.info("#" * 120)
+        logger.debug("#" * 120)
+        logger.debug("# %s", event)
+        logger.debug("#" * 120)
 
         # Send event to all timelines
         for universe in cls._universes:
             for timeline in universe.get_active_timelines():
                 universe._process_event(timeline, event)
-                logger.info("[%s] After:", timeline.what)
+                logger.debug("[%s] After:", timeline.what)
                 for t in universe.get_active_timelines():
-                    logger.info("    * %s", t.what)
+                    logger.debug("    * %s", t.what)
             universe.resolve()
 
     def resolve(self) -> None:

@@ -29,6 +29,7 @@ class BaseBoard:
             self.pixels = Pixel.create(pin, leds["count"], color)
         else:
             self.pixels = None
+        self.pixels_color = None
 
         # Create matrix
         self.keymatrix = keypad.KeyMatrix(
@@ -43,4 +44,9 @@ class BaseBoard:
             )
         else:
             self.channel = None
-        self.loop = 0
+
+    def set_pixels(self, color: tuple[int, int, int]) -> None:
+        if self.pixels_color == color:
+            return
+        self.pixels_color = color
+        self.pixels.fill(color)

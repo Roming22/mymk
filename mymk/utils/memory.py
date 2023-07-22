@@ -11,6 +11,8 @@ for func in ["mem_alloc", "mem_free"]:
 profile = True
 # profile = False
 
+total_mem = gc.mem_free() + gc.mem_alloc()
+
 
 def free_memory(name: str) -> callable:
     def inner(func):
@@ -27,8 +29,6 @@ def free_memory(name: str) -> callable:
 
 
 def check_memory() -> callable:
-    total_mem = gc.mem_free() + gc.mem_alloc()
-
     def inner(func):
         def wrapper(*args, **kwargs):
             used_mem = gc.mem_alloc()
@@ -43,8 +43,6 @@ def check_memory() -> callable:
 
 
 def memory_cost(name, run_gc=True) -> callable:
-    total_mem = gc.mem_free() + gc.mem_alloc()
-
     def inner(func):
         def wrapper(*args, **kwargs):
             if run_gc:
@@ -70,13 +68,26 @@ def memory_cost(name, run_gc=True) -> callable:
     return inner
 
 
-def get_usage(full: bool = False) -> str:
-    gc.collect()
+def get_usage(full: bool = False, collect: bool = False) -> str:
+    if collect:
+        gc.collect()
     F = gc.mem_free()
     A = gc.mem_alloc()
-    T = F + A
-    P = "{0:.2f}%".format(A / T * 100)
+    P = "{0:.2f}%".format(A / total_mem * 100)
     if not full:
         return A
     else:
-        return "Total:{0} Used:{1} ({2})".format(T, A, P)
+        return "Total:{0} Used:{1} ({2})".format(total_mem, A, P)
+
+
+def no_gc(func: callable) -> callable:
+    def decorated(*args, **kwargs):
+        gc.disable()
+        result = func(*args, **kwargs)
+        gc.enable()
+        gc.collect()
+        if gc.mem_free() < total_mem // 10:
+            logger.info("Memory: %s", get_usage(True))
+        return result
+
+    return decorated

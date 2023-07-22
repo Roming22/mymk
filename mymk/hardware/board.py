@@ -3,9 +3,7 @@ from time import sleep
 from mymk.hardware.baseboard import BaseBoard
 from mymk.multiverse.timeline_manager import TimelineManager
 from mymk.utils.logger import logger
-from mymk.utils.memory import memory_cost
-
-# from mymk.utils.memory import get_usage
+from mymk.utils.memory import memory_cost, no_gc
 
 
 class Board(BaseBoard):
@@ -14,7 +12,6 @@ class Board(BaseBoard):
         super().__init__(definition)
         self.switch_offset = 0
         if self.channel:
-            self.channel.sync()
             extension_switch_count = self.channel.receive(8)
             logger.info("Extension has %s switches.", extension_switch_count)
             self.message_length = extension_switch_count.bit_length() + 2
@@ -47,16 +44,19 @@ class Board(BaseBoard):
         return event_id
 
     def send_extension_data(self) -> None:
-        for color in (255, 0, 255):
+        for color in self.pixels_color:
             self.channel.send(color, 8)
 
+    @no_gc
     def tick(self) -> None:
+        # if not hasattr(self, "loop"):
+        #     setattr(self, "loop", 0)
         # self.loop += 1
-        # logger.info("Loop %s: %s", self.loop, get_usage(True))
+        # logger.info("Loop %s", self.loop)
         if event_id := self.get_event_controller():
             TimelineManager.process_event(event_id)
         if self.channel:
-            self.channel.sync()
+            # print(end=".")
             if event_id := self.get_event_extension():
                 TimelineManager.process_event(event_id)
             self.send_extension_data()
