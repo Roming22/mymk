@@ -6,6 +6,7 @@ from mymk.utils.logger import logger
 
 
 class TimelineManager:
+    __slots__ = ("_universes", "timeline_start", "current_timeline")
     _universes = []
 
     def __init__(self, timeline: Timeline = None) -> None:

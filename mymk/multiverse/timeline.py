@@ -1,9 +1,19 @@
-from mymk.feature.layers.layer_manager import LayerManager
+import mymk.feature.layers.layer_manager as LayerManager
 from mymk.logic.keys import load
 from mymk.utils.logger import logger
 
 
 class Timeline:
+    __slots__ = (
+        "children",
+        "determined",
+        "events",
+        "layers",
+        "output",
+        "next_timeline",
+        "parent",
+    )
+
     def __init__(self, what: str, parent=None) -> None:
         """Create a new timeline
 

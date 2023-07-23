@@ -15,6 +15,8 @@ delay = 0.99
 
 
 class Sequence:
+    __slots__ = ("switch_uids", "delays", "keycode", "pressed")
+
     def __init__(self, switch_uids, delays, keycode: str) -> None:
         self.switch_uids = switch_uids
         self.delays = delays

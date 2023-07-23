@@ -6,6 +6,7 @@ from mymk.utils.time import Time
 
 
 class Timer:
+    __slots__ = ("running", "name", "end_at", "timeline", "universe")
     running: list["Timer"] = []
 
     # @memory_cost("Timer")

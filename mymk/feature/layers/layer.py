@@ -8,6 +8,8 @@ from mymk.utils.logger import logger
 class Layer:
     """Holds the layer definition"""
 
+    __slots__ = ("set_leds", "uid", "switch_to_keycode")
+
     # @memory_cost("Layer")
     def __init__(self, board: "Board", layer_name: str, layer_definition: dict) -> None:
         logger.info("Loading layer: %s", layer_name)

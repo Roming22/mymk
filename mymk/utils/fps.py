@@ -2,32 +2,37 @@ from mymk.utils.logger import logger
 from mymk.utils.memory import get_usage
 from mymk.utils.time import Time
 
+_counter = 0
+_refresh_rate = 1
+_time = 0
 
-class FPS:
-    counter = 0
-    refresh_rate = 1
-    time = 0
 
-    @classmethod
-    def display(cls) -> None:
-        logger.info("\n[FPS] %s", int(cls.counter / cls.refresh_rate))
-        cls.reset()
+def display() -> None:
+    global _counter
+    global _refresh_rate
+    logger.info("\n[FPS] %s", int(_counter / _refresh_rate))
+    reset()
 
-    @classmethod
-    def start(cls, refresh_rate: int) -> None:
-        cls.refresh_rate = refresh_rate
-        cls.reset()
 
-    @classmethod
-    def reset(cls) -> None:
-        cls.counter = 0
-        cls.time = Time.tick_time + cls.refresh_rate * 10**9
+def start(refresh_rate: int) -> None:
+    global _refresh_rate
+    _refresh_rate = refresh_rate
+    reset()
 
-    @classmethod
-    def tick(cls, check_memory: bool = False) -> None:
-        cls.counter += 1
-        now = Time.tick_time
-        if now >= cls.time:
-            cls.display()
-            if check_memory:
-                logger.info("[Memory]%s", get_usage(True))
+
+def reset() -> None:
+    global _counter
+    global _time
+    _counter = 0
+    _time = Time.tick_time + _refresh_rate * 10**9
+
+
+def tick(check_memory: bool = False) -> None:
+    global _counter
+    global _time
+    _counter += 1
+    now = Time.tick_time
+    if now >= _time:
+        display()
+        if check_memory:
+            logger.info("[Memory]%s", get_usage(True))

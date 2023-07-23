@@ -3,8 +3,8 @@ from random import randint
 import keypad
 import storage
 
+import mymk.hardware.leds as Pixel
 from mymk.hardware.bitbang import BitBangProtocol
-from mymk.hardware.leds import Pixel
 from mymk.utils.logger import logger
 
 

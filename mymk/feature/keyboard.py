@@ -1,9 +1,9 @@
 import mymk.feature as _
-from mymk.feature.layers.layer_manager import LayerManager
+import mymk.feature.layers.layer_manager as LayerManager
+import mymk.utils.fps as FPS
 from mymk.hardware.board import Board
 from mymk.logic.timer import Timer
 from mymk.multiverse.timeline_manager import TimelineManager
-from mymk.utils.fps import FPS
 from mymk.utils.logger import logger
 from mymk.utils.memory import get_usage, memory_cost, profile
 from mymk.utils.time import Time
