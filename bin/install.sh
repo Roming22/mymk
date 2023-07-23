@@ -51,7 +51,7 @@ parse_args(){
 }
 
 init() {
-    CIRCUITPYTHON_VERSION="8.1.0"
+    CIRCUITPYTHON_VERSION="8.2.0"
     board="sparkfun_pro_micro_rp2040"
     CIRCUITPYTHON_URL="https://downloads.circuitpython.org/bin/$board/en_US/adafruit-circuitpython-$board-en_US-$CIRCUITPYTHON_VERSION.uf2"
     DATE=$(curl -w "%{url_effective}" -I -L -o /dev/null -s -S "https://github.com/adafruit/Adafruit_CircuitPython_Bundle/releases/latest" | sed 's:.*/::')
